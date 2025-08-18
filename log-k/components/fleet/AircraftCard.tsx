@@ -5,23 +5,23 @@ import Link from 'next/link'
 interface Aircraft {
   id: string
   registration: string
-  type: string
+  aircraft_type: string
   manufacturer: string | null
   model: string | null
   year: number | null
   engine_type: string | null
-  is_complex: boolean
-  is_high_performance: boolean
-  is_tailwheel: boolean
-  is_glass_cockpit: boolean
+  complex_aircraft: boolean
+  high_performance: boolean
+  tailwheel: boolean
+  glass_panel: boolean
 }
 
 export default function AircraftCard({ aircraft }: { aircraft: Aircraft }) {
   const features = [
-    { key: 'is_complex', label: 'Complex', value: aircraft.is_complex },
-    { key: 'is_high_performance', label: 'HP', value: aircraft.is_high_performance },
-    { key: 'is_tailwheel', label: 'Tailwheel', value: aircraft.is_tailwheel },
-    { key: 'is_glass_cockpit', label: 'Glass', value: aircraft.is_glass_cockpit },
+    { key: 'complex_aircraft', label: 'Complex', value: aircraft.complex_aircraft },
+    { key: 'high_performance', label: 'HP', value: aircraft.high_performance },
+    { key: 'tailwheel', label: 'Tailwheel', value: aircraft.tailwheel },
+    { key: 'glass_panel', label: 'Glass', value: aircraft.glass_panel },
   ]
 
   return (
@@ -34,7 +34,7 @@ export default function AircraftCard({ aircraft }: { aircraft: Aircraft }) {
             </div>
             <div className="ml-4">
               <h3 className="text-lg font-semibold text-gray-900">{aircraft.registration}</h3>
-              <p className="text-sm text-gray-600">{aircraft.type}</p>
+              <p className="text-sm text-gray-600">{aircraft.aircraft_type}</p>
             </div>
           </div>
           <div className="flex gap-1">
