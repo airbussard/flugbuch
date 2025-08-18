@@ -24,15 +24,15 @@ export interface CSVFlight {
 
 export function exportFlightsToCSV(flights: Flight[]): string {
   const csvData = flights.map(flight => ({
-    Date: flight.date,
+    Date: flight.flight_date,
     'Departure Airport': flight.departure_airport,
     'Arrival Airport': flight.arrival_airport,
-    'Departure Time': flight.departure_time,
-    'Arrival Time': flight.arrival_time,
-    'Aircraft Registration': flight.aircraft_registration,
+    'Departure Time': flight.off_block,
+    'Arrival Time': flight.on_block,
+    'Aircraft Registration': flight.registration,
     'Aircraft Type': flight.aircraft_type,
-    'PIC Name': flight.pic_name,
-    'Flight Time': flight.flight_time,
+    'PIC Time': flight.pic_time,
+    'SIC Time': flight.sic_time,
     'Block Time': flight.block_time,
     'Night Time': flight.night_time,
     'IFR Time': flight.ifr_time,

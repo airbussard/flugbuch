@@ -10,7 +10,7 @@ export default async function FleetPage() {
   const { data: { user } } = await supabase.auth.getUser()
   
   const { data: aircraft } = await supabase
-    .from('aircraft')
+    .from('aircrafts')
     .select('*')
     .eq('user_id', user?.id)
     .eq('deleted', false)

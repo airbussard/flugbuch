@@ -16,11 +16,11 @@ export default async function DashboardPage() {
     .select('*')
     .eq('user_id', user?.id)
     .eq('deleted', false)
-    .order('date', { ascending: false })
+    .order('flight_date', { ascending: false })
     .limit(10)
 
   const { data: aircraft } = await supabase
-    .from('aircraft')
+    .from('aircrafts')
     .select('*')
     .eq('user_id', user?.id)
     .eq('deleted', false)
@@ -32,7 +32,7 @@ export default async function DashboardPage() {
     .eq('deleted', false)
 
   // Calculate statistics
-  const totalFlightTime = flights?.reduce((sum, f) => sum + (f.flight_time || 0), 0) || 0
+  const totalFlightTime = flights?.reduce((sum, f) => sum + (f.block_time || 0), 0) || 0
   const totalFlights = flights?.length || 0
   const totalAircraft = aircraft?.length || 0
   const totalCrew = crew?.length || 0

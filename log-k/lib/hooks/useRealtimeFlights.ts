@@ -19,7 +19,7 @@ export function useRealtimeFlights(userId: string | undefined) {
         .select('*')
         .eq('user_id', userId)
         .eq('deleted', false)
-        .order('date', { ascending: false })
+        .order('flight_date', { ascending: false })
 
       if (!error && data) {
         setFlights(data)

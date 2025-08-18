@@ -11,11 +11,11 @@ export default async function FlightsPage() {
     .select('*')
     .eq('user_id', user?.id)
     .eq('deleted', false)
-    .order('date', { ascending: false })
+    .order('flight_date', { ascending: false })
 
   const { data: aircraft } = await supabase
-    .from('aircraft')
-    .select('id, registration, type')
+    .from('aircrafts')
+    .select('id, registration, aircraft_type')
     .eq('user_id', user?.id)
     .eq('deleted', false)
 

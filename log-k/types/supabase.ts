@@ -13,16 +13,19 @@ export interface Database {
         Row: {
           id: string
           user_id: string
-          date: string
-          departure_airport: string | null
-          arrival_airport: string | null
-          departure_time: string | null
-          arrival_time: string | null
+          flight_date: string
+          departure_airport: string
+          arrival_airport: string
+          off_block: string | null
+          takeoff: string | null
+          landing: string | null
+          on_block: string | null
           aircraft_id: string | null
-          aircraft_type: string | null
-          aircraft_registration: string | null
-          pic_name: string | null
-          flight_time: number | null
+          aircraft_type: string
+          registration: string
+          flight_number: string | null
+          pic_time: number | null
+          sic_time: number | null
           block_time: number | null
           night_time: number | null
           ifr_time: number | null
@@ -42,26 +45,26 @@ export interface Database {
         Insert: Omit<Database['public']['Tables']['flights']['Row'], 'id' | 'created_at' | 'updated_at'>
         Update: Partial<Database['public']['Tables']['flights']['Insert']>
       }
-      aircraft: {
+      aircrafts: {
         Row: {
           id: string
           user_id: string
           registration: string
-          type: string
+          aircraft_type: string
           manufacturer: string | null
           model: string | null
           year: number | null
           engine_type: string | null
-          is_complex: boolean
-          is_high_performance: boolean
-          is_tailwheel: boolean
-          is_glass_cockpit: boolean
+          complex_aircraft: boolean
+          high_performance: boolean
+          tailwheel: boolean
+          glass_panel: boolean
           deleted: boolean
           created_at: string
           updated_at: string
         }
-        Insert: Omit<Database['public']['Tables']['aircraft']['Row'], 'id' | 'created_at' | 'updated_at'>
-        Update: Partial<Database['public']['Tables']['aircraft']['Insert']>
+        Insert: Omit<Database['public']['Tables']['aircrafts']['Row'], 'id' | 'created_at' | 'updated_at'>
+        Update: Partial<Database['public']['Tables']['aircrafts']['Insert']>
       }
       crew_members: {
         Row: {

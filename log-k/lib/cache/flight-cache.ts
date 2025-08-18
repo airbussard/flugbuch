@@ -10,7 +10,7 @@ export const getCachedFlights = unstable_cache(
       .select('*')
       .eq('user_id', userId)
       .eq('deleted', false)
-      .order('date', { ascending: false })
+      .order('flight_date', { ascending: false })
     
     return flights || []
   },
@@ -26,7 +26,7 @@ export const getCachedAircraft = unstable_cache(
     const supabase = await createClient()
     
     const { data: aircraft } = await supabase
-      .from('aircraft')
+      .from('aircrafts')
       .select('*')
       .eq('user_id', userId)
       .eq('deleted', false)
@@ -34,7 +34,7 @@ export const getCachedAircraft = unstable_cache(
     
     return aircraft || []
   },
-  ['aircraft'],
+  ['aircrafts'],
   {
     revalidate: 300, // Cache for 5 minutes
     tags: ['aircraft'],
