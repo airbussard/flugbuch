@@ -1,13 +1,19 @@
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { Database } from '@/types/supabase'
+import { checkSupabaseConfig } from './config-check'
 
 export async function createClient() {
   const cookieStore = await cookies()
+  const { url, anonKey } = checkSupabaseConfig()
+
+  if (!url || !anonKey) {
+    throw new Error('Supabase configuration is missing. Check environment variables.')
+  }
 
   return createServerClient<Database>(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    url,
+    anonKey,
     {
       cookies: {
         getAll() {
