@@ -1,0 +1,3 @@
+Date,Departure Airport,Arrival Airport,Departure Time,Arrival Time,Aircraft Registration,Aircraft Type,PIC Name,Flight Time,Block Time,Night Time,IFR Time,VFR Time,Day Landings,Night Landings,Remarks
+2025-01-15,EDDL,EDDF,08:30,09:45,D-ABCD,A320,Self,1.25,1.5,0,1.25,0,1,0,Training flight
+2025-01-16,EDDF,LFPG,14:00,15:30,D-EFGH,B737,John Doe,1.5,1.75,0,1.5,0,1,0,Commercial flight
