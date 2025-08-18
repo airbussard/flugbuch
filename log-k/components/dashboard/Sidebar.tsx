@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Plane, Home, BookOpen, Users, Settings, BarChart3, LogOut } from 'lucide-react'
+import { Plane, Home, BookOpen, Users, Settings, BarChart3, LogOut, Cloud, Map } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
@@ -13,6 +13,8 @@ const navigation = [
   { name: 'Fleet', href: '/fleet', icon: Plane },
   { name: 'Crew', href: '/crew', icon: Users },
   { name: 'Analytics', href: '/analytics', icon: BarChart3 },
+  { name: 'Weather', href: '/weather', icon: Cloud },
+  { name: 'Planning', href: '/planning', icon: Map },
   { name: 'Settings', href: '/settings', icon: Settings },
 ]
 
@@ -27,11 +29,11 @@ export default function Sidebar() {
   }
 
   return (
-    <div className="flex h-full w-64 flex-col bg-white border-r border-gray-200">
-      <div className="flex h-16 items-center justify-center border-b border-gray-200">
+    <div className="flex h-full w-64 flex-col bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700">
+      <div className="flex h-16 items-center justify-center border-b border-gray-200 dark:border-gray-700">
         <Link href="/dashboard" className="flex items-center space-x-2">
           <Plane className="h-8 w-8 text-purple-600" />
-          <span className="text-xl font-bold text-gray-900">Log-K</span>
+          <span className="text-xl font-bold text-gray-900 dark:text-white">Log-K</span>
         </Link>
       </div>
       
@@ -45,8 +47,8 @@ export default function Sidebar() {
               className={cn(
                 'group flex items-center px-2 py-2 text-sm font-medium rounded-lg',
                 isActive
-                  ? 'bg-purple-100 text-purple-900'
-                  : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
+                  ? 'bg-purple-100 dark:bg-purple-900/20 text-purple-900 dark:text-purple-300'
+                  : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white'
               )}
             >
               <item.icon
@@ -61,12 +63,12 @@ export default function Sidebar() {
         })}
       </nav>
       
-      <div className="border-t border-gray-200 p-4">
+      <div className="border-t border-gray-200 dark:border-gray-700 p-4">
         <button
           onClick={handleLogout}
-          className="group flex w-full items-center px-2 py-2 text-sm font-medium text-gray-700 rounded-lg hover:bg-gray-100 hover:text-gray-900"
+          className="group flex w-full items-center px-2 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white"
         >
-          <LogOut className="mr-3 h-5 w-5 text-gray-400 group-hover:text-gray-500" />
+          <LogOut className="mr-3 h-5 w-5 text-gray-400 dark:text-gray-500 group-hover:text-gray-500 dark:group-hover:text-gray-400" />
           Logout
         </button>
       </div>
