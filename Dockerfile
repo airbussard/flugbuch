@@ -1,11 +1,10 @@
-# FORCE COMPLETE REBUILD - v4
+# Build stage - v5 WORKING
 FROM node:20-alpine AS builder
 
 WORKDIR /app
 
-# CRITICAL: Copy VERSION file first to bust ALL cache layers
-COPY VERSION /tmp/VERSION
-RUN cat /tmp/VERSION && echo "Cache bust timestamp: $(date +%s)"
+# Force rebuild with inline cache bust
+RUN echo "Build v5: $(date +%s)" > /tmp/build.txt
 
 # Install dependencies for sharp (image optimization)
 RUN apk add --no-cache libc6-compat
