@@ -3,6 +3,7 @@ import { BarChart3, Plane, Users, Clock } from 'lucide-react'
 import StatsCard from '@/components/dashboard/StatsCard'
 import FlightChart from '@/components/dashboard/FlightChart'
 import RecentFlights from '@/components/dashboard/RecentFlights'
+import AirportWeatherMap from '@/components/dashboard/AirportWeatherMap'
 
 export default async function DashboardPage() {
   const supabase = await createClient()
@@ -79,6 +80,9 @@ export default async function DashboardPage() {
         <FlightChart flights={flights || []} />
         <RecentFlights flights={flights || []} />
       </div>
+      
+      {/* Airport Weather Map */}
+      <AirportWeatherMap />
     </div>
   )
 }
