@@ -177,6 +177,14 @@ If deployment fails:
 
 ## 🌟 Recent Updates
 
+### Version 0.1.037
+- ✅ Implemented Service Role Key admin access for bypassing RLS
+- ✅ Created comprehensive User Management page
+- ✅ Admin can now see ALL users and their data
+- ✅ Added toggle admin status functionality
+- ✅ User Management button in admin dashboard now functional
+- ✅ Added user statistics (total, admins, active users)
+
 ### Version 0.1.035
 - ✅ Implemented notification system for license/medical expiry warnings
 - ✅ Added landing currency tracking (3 landings in 90 days requirement)

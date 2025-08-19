@@ -122,11 +122,14 @@ export default function AdminDashboard({ stats, recentUsers, recentActivity }: A
           <h2 className="text-lg font-semibold text-gray-900">System Tools</h2>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <button className="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+          <a 
+            href="/admin/users"
+            className="block p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+          >
             <Users className="h-6 w-6 text-purple-600 mb-2" />
             <p className="font-medium">User Management</p>
             <p className="text-sm text-gray-500">Manage user accounts</p>
-          </button>
+          </a>
           <button className="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
             <Database className="h-6 w-6 text-blue-600 mb-2" />
             <p className="font-medium">Database Backup</p>
