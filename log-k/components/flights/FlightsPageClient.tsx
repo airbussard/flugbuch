@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Plus, Download, Upload } from 'lucide-react'
 import Link from 'next/link'
@@ -8,6 +8,7 @@ import FlightsTable from '@/components/flights/FlightsTable'
 import FlightFilters from '@/components/flights/FlightFilters'
 import ImportExportModal from '@/components/flights/ImportExportModal'
 import { useRealtimeFlights } from '@/lib/hooks/useRealtimeFlights'
+import { debug } from '@/lib/debug'
 
 interface FlightsPageClientProps {
   initialFlights: any[]
@@ -25,6 +26,22 @@ export default function FlightsPageClient({
   
   // Use realtime flights if available, otherwise use initial
   const currentFlights = flights.length > 0 ? flights : initialFlights
+  
+  useEffect(() => {
+    debug.info('FlightsPageClient: Mounted', {
+      initialFlightsCount: initialFlights.length,
+      aircraftCount: aircraft.length,
+      userId,
+      usingRealtimeFlights: flights.length > 0
+    })
+  }, [])
+  
+  useEffect(() => {
+    debug.db('FlightsPageClient: Flights updated', {
+      currentCount: currentFlights.length,
+      isRealtime: flights.length > 0
+    })
+  }, [currentFlights])
 
   return (
     <div className="space-y-6">

@@ -3,13 +3,18 @@ import AircraftCard from '@/components/fleet/AircraftCard'
 import { Button } from '@/components/ui/button'
 import { Plus } from 'lucide-react'
 import Link from 'next/link'
+import { debug, logSupabaseQuery, logSupabaseResponse } from '@/lib/debug'
 
 export default async function FleetPage() {
+  debug.info('FleetPage: Starting render')
+  
   const supabase = await createClient()
   
   const { data: { user } } = await supabase.auth.getUser()
+  debug.auth('FleetPage: Auth check', { userId: user?.id, email: user?.email })
   
   if (!user) {
+    debug.warn('FleetPage: No user authenticated')
     return (
       <div className="p-6">
         <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
@@ -19,6 +24,12 @@ export default async function FleetPage() {
     )
   }
   
+  // Log query details
+  logSupabaseQuery('aircrafts', 'select', {
+    user_id: user.id,
+    deleted: false
+  })
+  
   const { data: aircraft, error } = await supabase
     .from('aircrafts')
     .select('*')
@@ -26,7 +37,15 @@ export default async function FleetPage() {
     .eq('deleted', false)
     .order('registration', { ascending: true })
   
+  // Log response
+  logSupabaseResponse('aircrafts', aircraft, error)
+  debug.db('FleetPage: Query complete', {
+    resultCount: aircraft?.length || 0,
+    hasError: !!error
+  })
+  
   if (error) {
+    debug.error('FleetPage: Database error', error)
     return (
       <div className="p-6">
         <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
@@ -34,6 +53,13 @@ export default async function FleetPage() {
         </div>
       </div>
     )
+  }
+
+  // Log successful render
+  if (aircraft && aircraft.length > 0) {
+    debug.success('FleetPage: Rendering aircraft cards', { count: aircraft.length })
+  } else {
+    debug.info('FleetPage: No aircraft found for user', { userId: user.id })
   }
 
   return (
@@ -52,6 +78,7 @@ export default async function FleetPage() {
       </div>
 
       {aircraft && aircraft.length > 0 ? (
+        // Log successful data display
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {aircraft.map((plane) => (
             <AircraftCard key={plane.id} aircraft={plane} />
