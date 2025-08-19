@@ -62,10 +62,10 @@ export default function AdminDashboard({ stats, recentUsers, recentActivity }: A
           </div>
           <div className="space-y-3">
             {recentUsers.map((user) => (
-              <div key={user.user_id} className="flex items-center justify-between py-2 border-b border-gray-100">
+              <div key={user.id} className="flex items-center justify-between py-2 border-b border-gray-100">
                 <div>
                   <p className="font-medium text-gray-900">
-                    {user.first_name} {user.last_name}
+                    {user.first_name || 'Unknown'} {user.last_name || 'User'}
                   </p>
                   <p className="text-sm text-gray-500">
                     {user.email || 'No email'}

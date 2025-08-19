@@ -34,7 +34,7 @@ export default function Sidebar() {
         const { data: profile } = await supabase
           .from('user_profiles')
           .select('is_admin')
-          .eq('user_id', user.id)
+          .eq('id', user.id)  // Primary key is 'id', not 'user_id'
           .single()
         
         if (profile?.is_admin) {

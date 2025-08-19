@@ -1,6 +1,6 @@
 {
   "name": "log-k",
-  "version": "0.1.033",
+  "version": "0.1.036",
   "scripts": {
     "dev": "next dev",
     "build": "next build",

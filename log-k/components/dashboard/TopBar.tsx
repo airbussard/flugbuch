@@ -1,14 +1,32 @@
 'use client'
 
-import { Bell, User, Moon, Sun, Monitor } from 'lucide-react'
+import { User, Moon, Sun, Monitor } from 'lucide-react'
 import { useState } from 'react'
 import { useTheme } from '@/lib/hooks/useTheme'
 import GlobalSearch from '@/components/ui/search'
+import NotificationBell from './NotificationBell'
 
-export default function TopBar({ user }: { user: any }) {
+interface TopBarProps {
+  user: any
+  userProfile?: any
+  recentLandings?: {
+    dayLandings: number
+    nightLandings: number
+    totalLandings: number
+  }
+}
+
+export default function TopBar({ user, userProfile, recentLandings }: TopBarProps) {
   const [showProfile, setShowProfile] = useState(false)
   const [showThemeMenu, setShowThemeMenu] = useState(false)
   const { theme, changeTheme } = useTheme()
+
+  // Default landings if not provided
+  const landingsData = recentLandings || {
+    dayLandings: 0,
+    nightLandings: 0,
+    totalLandings: 0
+  }
 
   return (
     <header className="h-16 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between px-6">
@@ -49,10 +67,11 @@ export default function TopBar({ user }: { user: any }) {
           )}
         </div>
         
-        <button className="relative p-2 text-gray-400 hover:text-gray-600 dark:text-gray-300 dark:hover:text-white">
-          <Bell className="h-6 w-6" />
-          <span className="absolute top-0 right-0 h-2 w-2 bg-red-500 rounded-full"></span>
-        </button>
+        {/* Notification Bell */}
+        <NotificationBell 
+          userProfile={userProfile || {}}
+          recentLandings={landingsData}
+        />
         
         <div className="relative">
           <button
@@ -62,7 +81,11 @@ export default function TopBar({ user }: { user: any }) {
             <div className="h-8 w-8 bg-purple-600 rounded-full flex items-center justify-center">
               <User className="h-5 w-5 text-white" />
             </div>
-            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{user?.email}</span>
+            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+              {userProfile?.first_name && userProfile?.last_name 
+                ? `${userProfile.first_name} ${userProfile.last_name}`
+                : user?.email}
+            </span>
           </button>
           
           {showProfile && (

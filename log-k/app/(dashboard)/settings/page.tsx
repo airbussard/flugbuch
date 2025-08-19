@@ -12,23 +12,24 @@ export default async function SettingsPage() {
     redirect('/login')
   }
   
-  // Fetch user profile
+  // Fetch user profile - using 'id' as primary key which matches auth.users.id
   const { data: userProfile } = await supabase
     .from('user_profiles')
     .select('*')
-    .eq('user_id', user.id)
+    .eq('id', user.id)
     .single()
   
-  // Prepare initial data
+  // Prepare initial data - map actual database fields
   const initialData = {
     firstName: userProfile?.first_name || '',
     lastName: userProfile?.last_name || '',
-    email: user.email || '',
+    email: userProfile?.email || user.email || '',
     licenseNumber: userProfile?.license_number || '',
     complianceMode: userProfile?.compliance_mode || 'EASA',
-    notifications: userProfile?.email_notifications ?? true,
-    darkMode: userProfile?.dark_mode ?? false,
-    language: userProfile?.language || 'en',
+    // These fields don't exist in DB, using defaults
+    notifications: true,
+    darkMode: false, 
+    language: 'en',
     isAdmin: userProfile?.is_admin || false
   }
 

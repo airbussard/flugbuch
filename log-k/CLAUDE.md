@@ -177,6 +177,24 @@ If deployment fails:
 
 ## 🌟 Recent Updates
 
+### Version 0.1.035
+- ✅ Implemented notification system for license/medical expiry warnings
+- ✅ Added landing currency tracking (3 landings in 90 days requirement)
+- ✅ Dark Mode toggle temporarily hidden in settings
+- ✅ NotificationBell component shows expiry dates and warnings
+- ✅ TopBar displays user name instead of email when available
+- ✅ Real-time calculation of regulatory compliance status
+
+### Version 0.1.034
+- ✅ Fixed database queries: user_profiles uses 'id' as primary key (not 'user_id')
+- ✅ Settings now properly loads and displays user data
+- ✅ Admin dashboard visibility fixed for admin users
+- ✅ Corrected all Supabase queries to match actual DB schema
+- ✅ Fixed user profile joins in admin dashboard
+
+### Version 0.1.033  
+- Initial admin system implementation (had DB schema issues)
+
 ### Version 0.1.032
 - ✅ Settings page now loads real user data from database
 - ✅ Added /profile route (redirects to settings)
