@@ -11,8 +11,22 @@ export default async function DashboardPage() {
   // Fetch user data
   const { data: { user } } = await supabase.auth.getUser()
   
-  // Fetch statistics
-  const { data: flights } = await supabase
+  // Fetch user profile for personalization
+  const { data: userProfile } = await supabase
+    .from('user_profiles')
+    .select('first_name, last_name')
+    .eq('user_id', user?.id)
+    .single()
+  
+  // Fetch ALL flights for total statistics
+  const { data: allFlights } = await supabase
+    .from('flights')
+    .select('block_time, flight_date')
+    .eq('user_id', user?.id)
+    .eq('deleted', false)
+  
+  // Fetch recent flights for display
+  const { data: recentFlights } = await supabase
     .from('flights')
     .select('*')
     .eq('user_id', user?.id)
@@ -32,19 +46,47 @@ export default async function DashboardPage() {
     .eq('user_id', user?.id)
     .eq('deleted', false)
 
-  // Calculate statistics
-  const totalFlightTime = flights?.reduce((sum, f) => sum + (f.block_time || 0), 0) || 0
-  const totalFlights = flights?.length || 0
+  // Calculate statistics from ALL flights
+  const totalFlightTime = allFlights?.reduce((sum, f) => sum + (f.block_time || 0), 0) || 0
+  const totalFlights = allFlights?.length || 0
   const totalAircraft = aircraft?.length || 0
   const totalCrew = crew?.length || 0
+  
+  // Calculate trend for last 12 months
+  const twelveMonthsAgo = new Date()
+  twelveMonthsAgo.setMonth(twelveMonthsAgo.getMonth() - 12)
+  
+  const last12MonthsFlights = allFlights?.filter(f => {
+    const flightDate = f.flight_date ? new Date(f.flight_date) : null
+    return flightDate && flightDate >= twelveMonthsAgo
+  }) || []
+  
+  const last12MonthsTime = last12MonthsFlights.reduce((sum, f) => sum + (f.block_time || 0), 0)
+  const monthlyAverage = last12MonthsTime / 12
+  
+  // Calculate previous 12 months for comparison
+  const twentyFourMonthsAgo = new Date()
+  twentyFourMonthsAgo.setMonth(twentyFourMonthsAgo.getMonth() - 24)
+  
+  const previous12MonthsFlights = allFlights?.filter(f => {
+    const flightDate = f.flight_date ? new Date(f.flight_date) : null
+    return flightDate && flightDate >= twentyFourMonthsAgo && flightDate < twelveMonthsAgo
+  }) || []
+  
+  const previous12MonthsTime = previous12MonthsFlights.reduce((sum, f) => sum + (f.block_time || 0), 0)
+  const previousMonthlyAverage = previous12MonthsTime / 12
+  
+  const trendPercentage = previousMonthlyAverage > 0 
+    ? Math.round(((monthlyAverage - previousMonthlyAverage) / previousMonthlyAverage) * 100)
+    : 0
 
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold text-blue-600">✅ BUILD v5-WORKING - {new Date().toISOString()} ✅</h1>
         <h2 className="text-2xl font-bold text-gray-900">Dashboard</h2>
-        <p className="text-gray-600 mt-1">Welcome back to your flight logbook</p>
-        <p className="text-sm text-green-600">Logo is hidden, Sidebar is clean</p>
+        <p className="text-gray-600 mt-1">
+          Welcome back to your flight logbook{userProfile?.first_name ? `, ${userProfile.first_name}` : ''}
+        </p>
       </div>
 
       {/* Stats Grid */}
@@ -53,13 +95,16 @@ export default async function DashboardPage() {
           title="Total Flight Time"
           value={`${Math.floor(totalFlightTime)}:${Math.round((totalFlightTime % 1) * 60).toString().padStart(2, '0')}`}
           icon={<Clock className="h-6 w-6 text-purple-600" />}
-          trend="+12% from last month"
+          trend={trendPercentage !== 0 
+            ? `${trendPercentage > 0 ? '+' : ''}${trendPercentage}% vs. previous 12 months`
+            : "No change from previous year"
+          }
         />
         <StatsCard
           title="Total Flights"
           value={totalFlights.toString()}
           icon={<Plane className="h-6 w-6 text-blue-600" />}
-          trend="This period"
+          trend="All flights in system"
         />
         <StatsCard
           title="Aircraft"
@@ -77,8 +122,8 @@ export default async function DashboardPage() {
 
       {/* Charts and Tables */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <FlightChart flights={flights || []} />
-        <RecentFlights flights={flights || []} />
+        <FlightChart flights={recentFlights || []} />
+        <RecentFlights flights={recentFlights || []} />
       </div>
       
       {/* Airport Weather Map */}

@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import Sidebar from '@/components/dashboard/Sidebar'
 import TopBar from '@/components/dashboard/TopBar'
 import DebugPanel from '@/components/debug/DebugPanel'
+import VersionFooter from '@/components/dashboard/VersionFooter'
 
 export default async function DashboardLayout({
   children,
@@ -25,6 +26,7 @@ export default async function DashboardLayout({
         <main className="flex-1 p-6">
           {children}
         </main>
+        <VersionFooter />
       </div>
       <DebugPanel />
     </div>

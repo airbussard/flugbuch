@@ -42,14 +42,12 @@ export default function Sidebar() {
 
   return (
     <div className="flex h-full w-64 flex-col bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700">
-      {/* Logo temporarily hidden for debugging
       <div className="flex h-16 items-center justify-center border-b border-gray-200 dark:border-gray-700">
         <Link href="/dashboard" className="flex items-center space-x-2">
           <Plane className="h-8 w-8 text-purple-600" />
           <span className="text-xl font-bold text-gray-900 dark:text-white">Log-K</span>
         </Link>
       </div>
-      */}
       <div className="h-16 border-b border-gray-200 dark:border-gray-700" />
       
       <nav className="flex-1 space-y-1 px-2 py-4">
