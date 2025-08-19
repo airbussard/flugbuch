@@ -1,10 +1,11 @@
-# Build stage - v2 (with debug logging)
+# Build stage - v3 (force complete rebuild)
 FROM node:20-alpine AS builder
 
 WORKDIR /app
 
-# Cache buster - force rebuild
-ENV CACHE_BUST=1755596264-clean-build
+# Force rebuild with timestamp - MUST be first to bust all caches
+RUN echo "Build timestamp: $(date +%s)" > /tmp/build-time.txt
+ENV CACHE_BUST=1755596264-clean-build-v2
 
 # Install dependencies for sharp (image optimization)
 RUN apk add --no-cache libc6-compat
