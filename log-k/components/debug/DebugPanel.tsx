@@ -13,8 +13,8 @@ export default function DebugPanel() {
   const supabase = createClient()
 
   useEffect(() => {
-    // Only show in development or when DEBUG_MODE is enabled
-    if (process.env.DEBUG_MODE !== 'true' && process.env.NODE_ENV !== 'development') return
+    // Only show in development or when NEXT_PUBLIC_DEBUG_MODE is enabled
+    if (process.env.NEXT_PUBLIC_DEBUG_MODE !== 'true' && process.env.NODE_ENV !== 'development') return
 
     // Get user info
     supabase.auth.getUser().then(({ data: { user } }) => {
@@ -42,8 +42,8 @@ export default function DebugPanel() {
     }
   }, [])
 
-  // Don't render in production unless DEBUG_MODE is enabled
-  if (process.env.DEBUG_MODE !== 'true' && process.env.NODE_ENV !== 'development') return null
+  // Don't render in production unless NEXT_PUBLIC_DEBUG_MODE is enabled
+  if (process.env.NEXT_PUBLIC_DEBUG_MODE !== 'true' && process.env.NODE_ENV !== 'development') return null
 
   const levelColors: Record<string, string> = {
     AUTH: 'text-cyan-600',
