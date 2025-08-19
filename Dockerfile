@@ -1,7 +1,10 @@
-# Build stage
+# Build stage - v2 (with debug logging)
 FROM node:20-alpine AS builder
 
 WORKDIR /app
+
+# Cache buster - force rebuild
+ENV CACHE_BUST=2024-08-19-debug
 
 # Install dependencies for sharp (image optimization)
 RUN apk add --no-cache libc6-compat
