@@ -9,12 +9,32 @@ export default async function CrewPage() {
   
   const { data: { user } } = await supabase.auth.getUser()
   
-  const { data: crew } = await supabase
+  if (!user) {
+    return (
+      <div className="p-6">
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
+          Please log in to view your crew
+        </div>
+      </div>
+    )
+  }
+  
+  const { data: crew, error } = await supabase
     .from('crew_members')
     .select('*')
-    .eq('user_id', user?.id)
+    .eq('user_id', user.id)
     .eq('deleted', false)
     .order('name', { ascending: true })
+  
+  if (error) {
+    return (
+      <div className="p-6">
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
+          Error loading crew: {error.message}
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="space-y-6">

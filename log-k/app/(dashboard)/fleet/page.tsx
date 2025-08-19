@@ -9,12 +9,32 @@ export default async function FleetPage() {
   
   const { data: { user } } = await supabase.auth.getUser()
   
-  const { data: aircraft } = await supabase
+  if (!user) {
+    return (
+      <div className="p-6">
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
+          Please log in to view your fleet
+        </div>
+      </div>
+    )
+  }
+  
+  const { data: aircraft, error } = await supabase
     .from('aircrafts')
     .select('*')
-    .eq('user_id', user?.id)
+    .eq('user_id', user.id)
     .eq('deleted', false)
     .order('registration', { ascending: true })
+  
+  if (error) {
+    return (
+      <div className="p-6">
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
+          Error loading fleet: {error.message}
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="space-y-6">
