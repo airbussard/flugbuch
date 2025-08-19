@@ -1,11 +1,11 @@
 import { NextResponse } from 'next/server'
 
 export async function GET() {
+  // Simple health check that always returns OK
   return NextResponse.json(
     { 
       status: 'healthy',
-      timestamp: new Date().toISOString(),
-      version: process.env.npm_package_version || '1.0.0'
+      timestamp: new Date().toISOString()
     },
     { status: 200 }
   )
