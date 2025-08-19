@@ -4,7 +4,7 @@ FROM node:20-alpine AS builder
 WORKDIR /app
 
 # Cache buster - force rebuild
-ENV CACHE_BUST=1755594969-force-rebuild
+ENV CACHE_BUST=1755596264-clean-build
 
 # Install dependencies for sharp (image optimization)
 RUN apk add --no-cache libc6-compat
@@ -15,6 +15,9 @@ RUN npm ci
 
 # Copy source code from log-k directory
 COPY log-k/ .
+
+# Clean any existing build caches
+RUN rm -rf .next node_modules/.cache
 
 # Copy environment variables for build
 ARG NEXT_PUBLIC_SUPABASE_URL
