@@ -25,7 +25,6 @@ export default function FlightChart({ flights }: { flights: Flight[] }) {
     } catch (error) {
       console.error('Invalid date in flight:', flight.flight_date)
     }
-    }
     
     return acc
   }, [])
