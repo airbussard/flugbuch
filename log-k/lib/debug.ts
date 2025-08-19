@@ -1,9 +1,9 @@
 /**
- * Debug Logger for Development
- * Only active in development environment
+ * Debug Logger
+ * Active when DEBUG_MODE is set to 'true' or in development environment
  */
 
-const isDev = process.env.NODE_ENV === 'development'
+const isDev = process.env.DEBUG_MODE === 'true' || process.env.NODE_ENV === 'development'
 
 type LogLevel = 'AUTH' | 'DB' | 'QUERY' | 'ERROR' | 'SUCCESS' | 'INFO' | 'WARN'
 
