@@ -2,11 +2,11 @@ import { formatDate, formatTime } from '@/lib/utils'
 
 interface Flight {
   id: string
-  date: string
+  flight_date: string | null
   departure_airport: string | null
   arrival_airport: string | null
   aircraft_registration: string | null
-  flight_time: number | null
+  block_time: number | null
 }
 
 export default function RecentFlights({ flights }: { flights: Flight[] }) {
@@ -29,12 +29,12 @@ export default function RecentFlights({ flights }: { flights: Flight[] }) {
                     {flight.departure_airport} → {flight.arrival_airport}
                   </p>
                   <p className="text-sm text-gray-500">
-                    {formatDate(flight.date)} · {flight.aircraft_registration}
+                    {flight.flight_date ? formatDate(flight.flight_date) : 'No date'} · {flight.aircraft_registration || 'N/A'}
                   </p>
                 </div>
                 <div className="text-right">
                   <p className="text-sm font-medium text-gray-900">
-                    {formatTime(flight.flight_time || 0)}
+                    {formatTime(flight.block_time || 0)}
                   </p>
                 </div>
               </div>
