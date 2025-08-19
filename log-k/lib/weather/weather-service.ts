@@ -36,13 +36,11 @@ export interface WeatherData {
   taf?: TAF
 }
 
-// NOAA Aviation Weather API
-const NOAA_BASE_URL = 'https://aviationweather.gov/api/data'
-
+// Use API routes to avoid CORS issues
 export async function fetchMETAR(icaoCode: string): Promise<METAR | null> {
   try {
     const response = await fetch(
-      `${NOAA_BASE_URL}/metar?ids=${icaoCode}&format=json`
+      `/api/weather/metar?icao=${icaoCode}`
     )
     
     if (!response.ok) return null
@@ -74,7 +72,7 @@ export async function fetchMETAR(icaoCode: string): Promise<METAR | null> {
 export async function fetchTAF(icaoCode: string): Promise<TAF | null> {
   try {
     const response = await fetch(
-      `${NOAA_BASE_URL}/taf?ids=${icaoCode}&format=json`
+      `/api/weather/taf?icao=${icaoCode}`
     )
     
     if (!response.ok) return null
