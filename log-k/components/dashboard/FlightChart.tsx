@@ -4,20 +4,27 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import { format } from 'date-fns'
 
 interface Flight {
-  date: string
-  flight_time: number
+  flight_date: string | null
+  block_time: number | null
 }
 
 export default function FlightChart({ flights }: { flights: Flight[] }) {
   // Group flights by month
   const chartData = flights.reduce((acc: any[], flight) => {
-    const month = format(new Date(flight.date), 'MMM yyyy')
-    const existing = acc.find(item => item.month === month)
+    if (!flight.flight_date) return acc
     
-    if (existing) {
-      existing.hours += flight.flight_time || 0
-    } else {
-      acc.push({ month, hours: flight.flight_time || 0 })
+    try {
+      const month = format(new Date(flight.flight_date), 'MMM yyyy')
+      const existing = acc.find(item => item.month === month)
+      
+      if (existing) {
+        existing.hours += flight.block_time || 0
+      } else {
+        acc.push({ month, hours: flight.block_time || 0 })
+      }
+    } catch (error) {
+      console.error('Invalid date in flight:', flight.flight_date)
+    }
     }
     
     return acc

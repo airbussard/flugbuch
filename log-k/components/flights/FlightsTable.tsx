@@ -8,15 +8,15 @@ import Link from 'next/link'
 
 interface Flight {
   id: string
-  date: string
+  flight_date: string | null
   departure_airport: string | null
   arrival_airport: string | null
-  departure_time: string | null
-  arrival_time: string | null
+  off_block: string | null
+  on_block: string | null
   aircraft_registration: string | null
   aircraft_type: string | null
   pic_name: string | null
-  flight_time: number | null
+  block_time: number | null
   landings_day: number | null
   landings_night: number | null
   remarks: string | null
@@ -93,15 +93,15 @@ export default function FlightsTable({ flights }: { flights: Flight[] }) {
                     />
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {formatDate(flight.date)}
+                    {flight.flight_date ? formatDate(flight.flight_date) : 'N/A'}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                     <span className="font-medium">
                       {flight.departure_airport} → {flight.arrival_airport}
                     </span>
-                    {flight.departure_time && flight.arrival_time && (
+                    {flight.off_block && flight.on_block && (
                       <span className="block text-xs text-gray-500">
-                        {flight.departure_time} - {flight.arrival_time}
+                        {new Date(flight.off_block).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})} - {new Date(flight.on_block).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
                       </span>
                     )}
                   </td>
@@ -115,7 +115,7 @@ export default function FlightsTable({ flights }: { flights: Flight[] }) {
                     {flight.pic_name || 'Self'}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {formatTime(flight.flight_time || 0)}
+                    {formatTime(flight.block_time || 0)}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                     {flight.landings_day || 0} / {flight.landings_night || 0}

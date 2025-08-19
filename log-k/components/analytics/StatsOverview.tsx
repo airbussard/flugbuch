@@ -1,16 +1,16 @@
 import { Clock, Plane, Calendar, TrendingUp } from 'lucide-react'
 
 interface Flight {
-  flight_time: number | null
+  block_time: number | null
   night_time: number | null
   ifr_time: number | null
   landings_day: number | null
   landings_night: number | null
-  date: string
+  flight_date: string | null
 }
 
 export default function StatsOverview({ flights }: { flights: Flight[] }) {
-  const totalHours = flights.reduce((sum, f) => sum + (f.flight_time || 0), 0)
+  const totalHours = flights.reduce((sum, f) => sum + (f.block_time || 0), 0)
   const totalNight = flights.reduce((sum, f) => sum + (f.night_time || 0), 0)
   const totalIFR = flights.reduce((sum, f) => sum + (f.ifr_time || 0), 0)
   const totalLandings = flights.reduce((sum, f) => sum + (f.landings_day || 0) + (f.landings_night || 0), 0)
@@ -18,8 +18,15 @@ export default function StatsOverview({ flights }: { flights: Flight[] }) {
   // Last 30 days
   const thirtyDaysAgo = new Date()
   thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
-  const recentFlights = flights.filter(f => new Date(f.date) >= thirtyDaysAgo)
-  const recentHours = recentFlights.reduce((sum, f) => sum + (f.flight_time || 0), 0)
+  const recentFlights = flights.filter(f => {
+    if (!f.flight_date) return false
+    try {
+      return new Date(f.flight_date) >= thirtyDaysAgo
+    } catch {
+      return false
+    }
+  })
+  const recentHours = recentFlights.reduce((sum, f) => sum + (f.block_time || 0), 0)
 
   const stats = [
     {

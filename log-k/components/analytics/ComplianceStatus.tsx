@@ -1,8 +1,8 @@
 import { CheckCircle, AlertCircle, Clock, Award } from 'lucide-react'
 
 interface Flight {
-  date: string
-  flight_time: number | null
+  flight_date: string | null
+  block_time: number | null
   night_time: number | null
   ifr_time: number | null
   landings_day: number | null
@@ -13,11 +13,18 @@ export default function ComplianceStatus({ flights }: { flights: Flight[] }) {
   // Calculate last 90 days experience
   const ninetyDaysAgo = new Date()
   ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90)
-  const recentFlights = flights.filter(f => new Date(f.date) >= ninetyDaysAgo)
+  const recentFlights = flights.filter(f => {
+    if (!f.flight_date) return false
+    try {
+      return new Date(f.flight_date) >= ninetyDaysAgo
+    } catch {
+      return false
+    }
+  })
   
   const recent90Days = {
     flights: recentFlights.length,
-    hours: recentFlights.reduce((sum, f) => sum + (f.flight_time || 0), 0),
+    hours: recentFlights.reduce((sum, f) => sum + (f.block_time || 0), 0),
     landings: recentFlights.reduce((sum, f) => sum + (f.landings_day || 0) + (f.landings_night || 0), 0),
     nightLandings: recentFlights.reduce((sum, f) => sum + (f.landings_night || 0), 0)
   }
