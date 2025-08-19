@@ -177,7 +177,15 @@ If deployment fails:
 
 ## 🌟 Recent Updates
 
-### Version 0.1.030
+### Version 0.1.032
+- ✅ Settings page now loads real user data from database
+- ✅ Added /profile route (redirects to settings)
+- ✅ Implemented admin system with conditional menu
+- ✅ Created admin dashboard with system statistics
+- ✅ Added CSV export functionality for flights
+- ✅ Fixed empty form fields in settings
+
+### Version 0.1.031
 - ✅ Fixed airport weather map with flight category calculation
 - ✅ Added personalized dashboard greeting
 - ✅ Implemented 12-month trend analysis

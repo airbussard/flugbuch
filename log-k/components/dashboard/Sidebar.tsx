@@ -2,8 +2,8 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { useState } from 'react'
-import { Plane, Home, BookOpen, Users, Settings, BarChart3, LogOut, Cloud, Map } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { Plane, Home, BookOpen, Users, Settings, BarChart3, LogOut, Cloud, Map, Shield } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
@@ -20,10 +20,30 @@ const navigation = [
 ]
 
 export default function Sidebar() {
+  const [isAdmin, setIsAdmin] = useState(false)
   const pathname = usePathname()
   const router = useRouter()
   const [isLoggingOut, setIsLoggingOut] = useState(false)
   const supabase = createClient()
+
+  // Check if user is admin
+  useEffect(() => {
+    const checkAdminStatus = async () => {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (user) {
+        const { data: profile } = await supabase
+          .from('user_profiles')
+          .select('is_admin')
+          .eq('user_id', user.id)
+          .single()
+        
+        if (profile?.is_admin) {
+          setIsAdmin(true)
+        }
+      }
+    }
+    checkAdminStatus()
+  }, [supabase])
 
   const handleLogout = async () => {
     setIsLoggingOut(true)
@@ -74,6 +94,27 @@ export default function Sidebar() {
             </Link>
           )
         })}
+        
+        {/* Admin Menu Item - Only visible for admins */}
+        {isAdmin && (
+          <Link
+            href="/admin"
+            className={cn(
+              'group flex items-center px-2 py-2 text-sm font-medium rounded-lg',
+              pathname === '/admin'
+                ? 'bg-red-100 dark:bg-red-900/20 text-red-900 dark:text-red-300'
+                : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white'
+            )}
+          >
+            <Shield
+              className={cn(
+                'mr-3 h-5 w-5 flex-shrink-0',
+                pathname === '/admin' ? 'text-red-600' : 'text-gray-400 group-hover:text-gray-500'
+              )}
+            />
+            Admin
+          </Link>
+        )}
       </nav>
       
       <div className="border-t border-gray-200 dark:border-gray-700 p-4">
