@@ -50,6 +50,7 @@ export default function AircraftForm({ aircraft, mode }: AircraftFormProps) {
         ...formData,
         user_id: user.id,
         year: formData.year ? parseInt(formData.year) : null,
+        deleted: false,
       }
 
       if (mode === 'edit' && aircraft?.id) {

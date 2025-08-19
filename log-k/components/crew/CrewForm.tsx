@@ -52,6 +52,7 @@ export default function CrewForm({ crewMember, mode }: CrewFormProps) {
         ...formData,
         name: fullName,
         user_id: user.id,
+        deleted: false,
       }
 
       if (mode === 'edit' && crewMember?.id) {
