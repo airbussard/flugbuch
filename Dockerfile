@@ -1,11 +1,11 @@
-# Build stage - v3 (force complete rebuild)
+# FORCE COMPLETE REBUILD - v4
 FROM node:20-alpine AS builder
 
 WORKDIR /app
 
-# Force rebuild with timestamp - MUST be first to bust all caches
-RUN echo "Build timestamp: $(date +%s)" > /tmp/build-time.txt
-ENV CACHE_BUST=1755596264-clean-build-v2
+# CRITICAL: Copy VERSION file first to bust ALL cache layers
+COPY VERSION /tmp/VERSION
+RUN cat /tmp/VERSION && echo "Cache bust timestamp: $(date +%s)"
 
 # Install dependencies for sharp (image optimization)
 RUN apk add --no-cache libc6-compat
@@ -16,9 +16,6 @@ RUN npm ci
 
 # Copy source code from log-k directory
 COPY log-k/ .
-
-# Clean any existing build caches
-RUN rm -rf .next node_modules/.cache
 
 # Copy environment variables for build
 ARG NEXT_PUBLIC_SUPABASE_URL

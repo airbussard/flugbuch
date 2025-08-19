@@ -1,0 +1,6 @@
+BUILD_VERSION=v4-nuclear-cache-bust
+BUILD_TIME=2025-08-19T13:34:00Z
+BUILD_NUMBER=4
+FORCE_REBUILD=true
+
+This file forces CapRover to invalidate Docker cache.

@@ -40,9 +40,10 @@ export default async function DashboardPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold text-red-600">🔴 BUILD v3 - {new Date().toISOString()} 🔴</h1>
+        <h1 className="text-3xl font-bold text-red-600">🔴 BUILD v4-NUCLEAR - 2025-08-19T13:34:00Z 🔴</h1>
         <h2 className="text-2xl font-bold text-gray-900">Dashboard</h2>
         <p className="text-gray-600 mt-1">Welcome back to your flight logbook</p>
+        <p className="text-sm text-green-600">Logo should be hidden in sidebar</p>
       </div>
 
       {/* Stats Grid */}
