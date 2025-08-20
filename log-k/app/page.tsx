@@ -160,12 +160,12 @@ export default function HomePage() {
               description="Essential features for casual pilots"
               features={[
                 { text: "Everything in Free Trial", included: true },
-                { text: "Cloud sync & backup", included: true },
-                { text: "Web dashboard access", included: true },
+                { text: "Extended local storage", included: true },
+                { text: "Web account management", included: true },
                 { text: "CSV import/export", included: true },
                 { text: "Basic analytics", included: true },
                 { text: "Email support", included: true },
-                { text: "Multi-device sync", included: false },
+                { text: "Cloud sync & backup", included: false },
                 { text: "Priority support", included: false }
               ]}
               buttonText="Choose Basic"
@@ -183,12 +183,12 @@ export default function HomePage() {
               popular={true}
               features={[
                 { text: "Everything in Basic", included: true },
+                { text: "Cloud sync & backup", included: true },
+                { text: "Full web dashboard access", included: true },
                 { text: "Unlimited devices", included: true },
                 { text: "Advanced analytics", included: true },
                 { text: "PDF logbook export", included: true },
                 { text: "Weather integration", included: true },
-                { text: "Flight planning tools", included: true },
-                { text: "API access", included: true },
                 { text: "Priority 24/7 support", included: true }
               ]}
               buttonText="Choose Pro"
