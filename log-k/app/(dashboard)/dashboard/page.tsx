@@ -33,6 +33,15 @@ export default async function DashboardPage() {
     .eq('deleted', false)
     .order('flight_date', { ascending: false })
     .limit(10)
+  
+  // Fetch flights for chart (last 12 months)
+  const { data: chartFlights } = await supabase
+    .from('flights')
+    .select('flight_date, block_time')
+    .eq('user_id', user?.id)
+    .eq('deleted', false)
+    .gte('flight_date', twelveMonthsAgo.toISOString().split('T')[0])
+    .order('flight_date', { ascending: true })
 
   const { data: aircraft } = await supabase
     .from('aircrafts')
@@ -122,7 +131,7 @@ export default async function DashboardPage() {
 
       {/* Charts and Tables */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <FlightChart flights={recentFlights || []} />
+        <FlightChart flights={chartFlights || []} />
         <RecentFlights flights={recentFlights || []} />
       </div>
       
