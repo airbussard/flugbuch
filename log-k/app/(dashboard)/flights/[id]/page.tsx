@@ -95,15 +95,14 @@ export default async function FlightDetailPage({ params }: PageProps) {
       </div>
       
       {/* Flight Map */}
-      {flight.departure_icao && flight.arrival_icao && (
+      {flight.departure_airport && flight.arrival_airport && (
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
           <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-            Flight Route
+            Flugroute
           </h2>
           <FlightMap 
-            departureIcao={flight.departure_icao}
-            arrivalIcao={flight.arrival_icao}
-            alternateIcao={flight.alternate_icao}
+            departureIcao={flight.departure_airport}
+            arrivalIcao={flight.arrival_airport}
           />
         </div>
       )}
