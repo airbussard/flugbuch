@@ -4,18 +4,7 @@ import { formatDate, formatTime } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { ArrowLeft, Edit, Trash2, Plane, Calendar, Clock, MapPin, Users } from 'lucide-react'
 import Link from 'next/link'
-import dynamic from 'next/dynamic'
-
-// Dynamically import FlightMap to avoid SSR issues
-const FlightMap = dynamic(
-  () => import('@/components/flights/FlightMap'),
-  { 
-    ssr: false,
-    loading: () => (
-      <div className="h-96 bg-gray-50 dark:bg-gray-900 rounded-lg animate-pulse" />
-    )
-  }
-)
+import FlightMap from '@/components/flights/FlightMap'
 
 interface PageProps {
   params: Promise<{ id: string }>
