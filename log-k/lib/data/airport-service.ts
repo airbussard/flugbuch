@@ -193,6 +193,45 @@ class AirportService {
   private toDeg(rad: number): number {
     return rad * (180 / Math.PI)
   }
+
+  async updateAirport(airport: Airport): Promise<void> {
+    // Update in-memory cache
+    this.airports.set(airport.icao, airport)
+    if (airport.iata && airport.iata !== 'NULL') {
+      this.airports.set(airport.iata, airport)
+    }
+    
+    // The actual CSV update is handled by the API endpoint
+    const response = await fetch('/api/airports/update', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(airport)
+    })
+    
+    if (!response.ok) {
+      throw new Error('Failed to update airport')
+    }
+  }
+
+  async deleteAirport(icao: string): Promise<void> {
+    // Remove from in-memory cache
+    const airport = this.airports.get(icao)
+    if (airport) {
+      this.airports.delete(icao)
+      if (airport.iata) {
+        this.airports.delete(airport.iata)
+      }
+    }
+    
+    // Note: CSV deletion would need a separate endpoint
+  }
+
+  clearCache(): void {
+    this.airports.clear()
+    this.loaded = false
+  }
 }
 
 // Singleton instance

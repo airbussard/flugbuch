@@ -4,7 +4,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import { useState, useEffect } from 'react'
-import { Plane, Home, BookOpen, Users, Settings, BarChart3, LogOut, Cloud, Map, Shield } from 'lucide-react'
+import { Plane, Home, BookOpen, Users, Settings, BarChart3, LogOut, Cloud, Map, Shield, Globe } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
@@ -16,6 +16,7 @@ const navigation = [
   { name: 'Crew', href: '/crew', icon: Users },
   { name: 'Analytics', href: '/analytics', icon: BarChart3 },
   { name: 'Weather', href: '/weather', icon: Cloud },
+  { name: 'Airports', href: '/airports', icon: Globe },
   { name: 'Planning', href: '/planning', icon: Map },
   { name: 'Settings', href: '/settings', icon: Settings },
 ]
