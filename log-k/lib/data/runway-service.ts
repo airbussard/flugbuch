@@ -51,14 +51,20 @@ class RunwayService {
     if (this.loaded) return
 
     try {
-      const fs = await import('fs/promises')
-      const path = await import('path')
-      
-      const csvPath = path.join(process.cwd(), 'public', 'runway.csv')
-      const text = await fs.readFile(csvPath, 'utf-8')
-      this.parseAndStoreRunways(text)
-      this.loaded = true
-      console.log(`Loaded runways for ${this.runways.size} airports`)
+      // Only import fs/promises on server-side
+      if (typeof window === 'undefined') {
+        const fs = await import('fs/promises')
+        const path = await import('path')
+        
+        const csvPath = path.join(process.cwd(), 'public', 'runway.csv')
+        const text = await fs.readFile(csvPath, 'utf-8')
+        this.parseAndStoreRunways(text)
+        this.loaded = true
+        console.log(`Loaded runways for ${this.runways.size} airports`)
+      } else {
+        // Should not happen in client, but handle gracefully
+        throw new Error('Cannot use file system in browser')
+      }
     } catch (error) {
       console.error('Failed to load runways from file:', error)
       this.loaded = true

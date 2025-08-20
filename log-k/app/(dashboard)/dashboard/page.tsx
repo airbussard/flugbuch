@@ -25,6 +25,10 @@ export default async function DashboardPage() {
     .eq('user_id', user?.id)
     .eq('deleted', false)
   
+  // Calculate date for 12 months ago
+  const twelveMonthsAgo = new Date()
+  twelveMonthsAgo.setMonth(twelveMonthsAgo.getMonth() - 12)
+  
   // Fetch recent flights for display
   const { data: recentFlights } = await supabase
     .from('flights')
@@ -62,9 +66,6 @@ export default async function DashboardPage() {
   const totalCrew = crew?.length || 0
   
   // Calculate trend for last 12 months
-  const twelveMonthsAgo = new Date()
-  twelveMonthsAgo.setMonth(twelveMonthsAgo.getMonth() - 12)
-  
   const last12MonthsFlights = allFlights?.filter(f => {
     const flightDate = f.flight_date ? new Date(f.flight_date) : null
     return flightDate && flightDate >= twelveMonthsAgo
