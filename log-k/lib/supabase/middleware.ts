@@ -41,6 +41,7 @@ export async function updateSession(request: NextRequest) {
     '/analytics',
     '/planning',
     '/weather',
+    '/airports',
     '/settings'
   ]
   

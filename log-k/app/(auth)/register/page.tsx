@@ -45,7 +45,22 @@ export default function RegisterPage() {
         }
       })
 
-      if (authError) throw authError
+      if (authError) {
+        // Spezifische Fehlerbehandlung für verschiedene Fehlertypen
+        if (authError.message.includes('already registered') || 
+            authError.message.includes('already exists')) {
+          setError('Diese E-Mail-Adresse ist bereits registriert. Bitte melden Sie sich an.')
+        } else if (authError.message.includes('weak') || 
+                   authError.message.includes('at least 6 characters')) {
+          setError('Das Passwort muss mindestens 6 Zeichen lang sein.')
+        } else if (authError.message.includes('invalid')) {
+          setError('Bitte geben Sie eine gültige E-Mail-Adresse ein.')
+        } else {
+          setError(authError.message || 'Ein Fehler ist bei der Registrierung aufgetreten.')
+        }
+        setLoading(false)
+        return
+      }
 
       // Create user profile
       if (authData.user) {
@@ -65,11 +80,13 @@ export default function RegisterPage() {
       }
 
       setSuccess(true)
+      // Kurze Verzögerung für Session-Etablierung
       setTimeout(() => {
+        router.refresh()
         router.push('/dashboard')
-      }, 2000)
+      }, 1500)
     } catch (error: any) {
-      setError(error.message || 'An error occurred during registration')
+      setError(error.message || 'Ein Fehler ist bei der Registrierung aufgetreten.')
     } finally {
       setLoading(false)
     }
@@ -102,7 +119,7 @@ export default function RegisterPage() {
         {success && (
           <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg flex items-center">
             <CheckCircle className="h-5 w-5 mr-2" />
-            <span className="text-sm">Registration successful! Redirecting...</span>
+            <span className="text-sm">Registrierung erfolgreich! Sie werden weitergeleitet...</span>
           </div>
         )}
 

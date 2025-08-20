@@ -26,11 +26,25 @@ export default function LoginPage() {
         password,
       })
 
-      if (error) throw error
-
-      router.push('/dashboard')
+      if (error) {
+        // Spezifische Fehlermeldungen auf Deutsch
+        if (error.message.includes('Invalid login credentials')) {
+          setError('Ungültige Anmeldedaten. Bitte überprüfen Sie Ihre E-Mail und Ihr Passwort.')
+        } else if (error.message.includes('Email not confirmed')) {
+          setError('Bitte bestätigen Sie zuerst Ihre E-Mail-Adresse.')
+        } else {
+          setError(error.message || 'Ein Fehler ist beim Anmelden aufgetreten.')
+        }
+      } else {
+        // Erfolgreiche Anmeldung - Session refresh und Weiterleitung
+        router.refresh()
+        // Kleine Verzögerung für Session-Etablierung
+        setTimeout(() => {
+          router.push('/dashboard')
+        }, 100)
+      }
     } catch (error: any) {
-      setError(error.message || 'An error occurred during login')
+      setError(error.message || 'Ein Fehler ist beim Anmelden aufgetreten.')
     } finally {
       setLoading(false)
     }
