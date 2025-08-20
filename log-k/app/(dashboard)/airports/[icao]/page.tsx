@@ -31,8 +31,8 @@ export default async function AirportDetailPage({ params }: PageProps) {
   
   const isAdmin = profile?.is_admin || false
   
-  // Load airport data
-  await airportService.loadAirports()
+  // Load airport data using server-side method
+  await airportService.loadAirportsFromFile()
   const airport = await airportService.getAirport(icao.toUpperCase())
   
   if (!airport) {

@@ -15,67 +15,95 @@ class AirportService {
   private airports: Map<string, Airport> = new Map()
   private loaded = false
 
+  // Server-side loading method (for SSR pages and API routes)
+  async loadAirportsFromFile(): Promise<void> {
+    if (this.loaded) return
+
+    try {
+      // Dynamic import to avoid client-side errors
+      const fs = await import('fs/promises')
+      const path = await import('path')
+      
+      const csvPath = path.join(process.cwd(), 'public', 'airports.csv')
+      const text = await fs.readFile(csvPath, 'utf-8')
+      this.parseAndStoreAirports(text)
+      this.loaded = true
+      console.log(`Loaded ${this.airports.size} airports from file`)
+    } catch (error) {
+      console.error('Failed to load airports from file:', error)
+      this.loadFallbackAirports()
+      this.loaded = true
+    }
+  }
+
+  // Client-side loading method (for browser)
   async loadAirports(): Promise<void> {
     if (this.loaded) return
+
+    // If we're on the server, use file system
+    if (typeof window === 'undefined') {
+      return this.loadAirportsFromFile()
+    }
 
     try {
       const response = await fetch('/airports.csv')
       const text = await response.text()
-      
-      // Parse CSV
-      const lines = text.split('\n')
-      const headers = this.parseCSVLine(lines[0])
-      
-      // Find column indices
-      const icaoIdx = headers.indexOf('ICAO')
-      const iataIdx = headers.indexOf('IATA')
-      const nameIdx = headers.indexOf('name')
-      const typeIdx = headers.indexOf('type')
-      const latIdx = headers.indexOf('lat')
-      const lonIdx = headers.indexOf('lon')
-      const altIdx = headers.indexOf('alt')
-      const timezoneIdx = headers.indexOf('timezone')
-      const countryIdx = headers.indexOf('country')
-      const municipalityIdx = headers.indexOf('municipality')
-
-      // Parse each airport
-      for (let i = 1; i < lines.length; i++) {
-        if (!lines[i].trim()) continue
-        
-        const fields = this.parseCSVLine(lines[i])
-        const icao = this.cleanField(fields[icaoIdx])
-        
-        if (icao && icao !== 'NULL') {
-          const airport: Airport = {
-            icao,
-            iata: this.cleanField(fields[iataIdx]) || null,
-            name: this.cleanField(fields[nameIdx]) || 'Unknown',
-            type: this.cleanField(fields[typeIdx]) || 'unknown',
-            lat: parseFloat(this.cleanField(fields[latIdx]) || '0'),
-            lon: parseFloat(this.cleanField(fields[lonIdx]) || '0'),
-            alt: parseInt(this.cleanField(fields[altIdx]) || '0'),
-            timezone: this.cleanField(fields[timezoneIdx]) || 'UTC',
-            country: this.cleanField(fields[countryIdx]) || '',
-            municipality: this.cleanField(fields[municipalityIdx]) || ''
-          }
-          
-          // Store by ICAO code
-          this.airports.set(icao, airport)
-          
-          // Also store by IATA if available
-          if (airport.iata && airport.iata !== 'NULL') {
-            this.airports.set(airport.iata, airport)
-          }
-        }
-      }
-      
+      this.parseAndStoreAirports(text)
       this.loaded = true
-      console.log(`Loaded ${this.airports.size} airports`)
+      console.log(`Loaded ${this.airports.size} airports from fetch`)
     } catch (error) {
       console.error('Failed to load airports:', error)
-      // Fallback to some major airports
       this.loadFallbackAirports()
       this.loaded = true
+    }
+  }
+
+  private parseAndStoreAirports(text: string): void {
+    // Parse CSV
+    const lines = text.split('\n')
+    const headers = this.parseCSVLine(lines[0])
+    
+    // Find column indices
+    const icaoIdx = headers.indexOf('ICAO')
+    const iataIdx = headers.indexOf('IATA')
+    const nameIdx = headers.indexOf('name')
+    const typeIdx = headers.indexOf('type')
+    const latIdx = headers.indexOf('lat')
+    const lonIdx = headers.indexOf('lon')
+    const altIdx = headers.indexOf('alt')
+    const timezoneIdx = headers.indexOf('timezone')
+    const countryIdx = headers.indexOf('country')
+    const municipalityIdx = headers.indexOf('municipality')
+
+    // Parse each airport
+    for (let i = 1; i < lines.length; i++) {
+      if (!lines[i].trim()) continue
+      
+      const fields = this.parseCSVLine(lines[i])
+      const icao = this.cleanField(fields[icaoIdx])
+      
+      if (icao && icao !== 'NULL') {
+        const airport: Airport = {
+          icao,
+          iata: this.cleanField(fields[iataIdx]) || null,
+          name: this.cleanField(fields[nameIdx]) || 'Unknown',
+          type: this.cleanField(fields[typeIdx]) || 'unknown',
+          lat: parseFloat(this.cleanField(fields[latIdx]) || '0'),
+          lon: parseFloat(this.cleanField(fields[lonIdx]) || '0'),
+          alt: parseInt(this.cleanField(fields[altIdx]) || '0'),
+          timezone: this.cleanField(fields[timezoneIdx]) || 'UTC',
+          country: this.cleanField(fields[countryIdx]) || '',
+          municipality: this.cleanField(fields[municipalityIdx]) || ''
+        }
+        
+        // Store by ICAO code
+        this.airports.set(icao, airport)
+        
+        // Also store by IATA if available
+        if (airport.iata && airport.iata !== 'NULL') {
+          this.airports.set(airport.iata, airport)
+        }
+      }
     }
   }
 

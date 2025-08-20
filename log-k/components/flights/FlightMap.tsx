@@ -63,6 +63,9 @@ export default function FlightMap({ departureIcao, arrivalIcao, alternateIcao }:
     const loadAirports = async () => {
       setLoading(true)
       
+      // Ensure airports are loaded first
+      await airportService.loadAirports()
+      
       const [dep, arr, alt] = await Promise.all([
         airportService.getAirport(departureIcao),
         airportService.getAirport(arrivalIcao),
