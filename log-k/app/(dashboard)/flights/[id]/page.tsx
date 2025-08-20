@@ -4,6 +4,18 @@ import { formatDate, formatTime } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { ArrowLeft, Edit, Trash2, Plane, Calendar, Clock, MapPin, Users } from 'lucide-react'
 import Link from 'next/link'
+import dynamic from 'next/dynamic'
+
+// Dynamically import FlightMap to avoid SSR issues
+const FlightMap = dynamic(
+  () => import('@/components/flights/FlightMap'),
+  { 
+    ssr: false,
+    loading: () => (
+      <div className="h-96 bg-gray-50 dark:bg-gray-900 rounded-lg animate-pulse" />
+    )
+  }
+)
 
 interface PageProps {
   params: Promise<{ id: string }>
@@ -92,6 +104,20 @@ export default async function FlightDetailPage({ params }: PageProps) {
           </form>
         </div>
       </div>
+      
+      {/* Flight Map */}
+      {flight.departure_icao && flight.arrival_icao && (
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+            Flight Route
+          </h2>
+          <FlightMap 
+            departureIcao={flight.departure_icao}
+            arrivalIcao={flight.arrival_icao}
+            alternateIcao={flight.alternate_icao}
+          />
+        </div>
+      )}
       
       {/* Flight Overview Card */}
       <div className="bg-white rounded-lg shadow p-6">
