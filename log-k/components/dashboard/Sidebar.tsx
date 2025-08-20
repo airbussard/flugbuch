@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import { useState, useEffect } from 'react'
 import { Plane, Home, BookOpen, Users, Settings, BarChart3, LogOut, Cloud, Map, Shield } from 'lucide-react'
@@ -63,9 +64,15 @@ export default function Sidebar() {
   return (
     <div className="flex h-full w-64 flex-col bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700">
       <div className="flex h-16 items-center justify-center border-b border-gray-200 dark:border-gray-700">
-        <Link href="/dashboard" className="flex items-center space-x-2">
-          <Plane className="h-8 w-8 text-purple-600" />
-          <span className="text-xl font-bold text-gray-900 dark:text-white">Log-K</span>
+        <Link href="/dashboard" className="flex items-center space-x-3">
+          <Image 
+            src="/logo.png" 
+            alt="Log-K Logo" 
+            width={40} 
+            height={40}
+            className="rounded-lg"
+          />
+          <span className="text-xl font-bold bg-gradient-to-r from-blue-600 to-violet-600 bg-clip-text text-transparent">Log-K</span>
         </Link>
       </div>
       <div className="h-16 border-b border-gray-200 dark:border-gray-700" />

@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import Image from 'next/image'
 import { Plane, Shield, Cloud, BarChart3, Users, Globe, Check, Star, Zap, Lock, Smartphone, FileText } from 'lucide-react'
 
 export default function HomePage() {
@@ -7,17 +8,21 @@ export default function HomePage() {
       {/* Navigation */}
       <nav className="container mx-auto px-6 py-4 border-b border-gray-100">
         <div className="flex justify-between items-center">
-          <div className="flex items-center space-x-2">
-            <div className="p-2 bg-gradient-to-br from-sky-500 to-blue-600 rounded-lg">
-              <Plane className="h-6 w-6 text-white" />
-            </div>
-            <span className="text-2xl font-bold text-gray-900">Log-K</span>
-          </div>
+          <Link href="/" className="flex items-center space-x-3">
+            <Image 
+              src="/logo.png" 
+              alt="Log-K Logo" 
+              width={48} 
+              height={48}
+              className="rounded-lg"
+            />
+            <span className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-violet-600 bg-clip-text text-transparent">Log-K</span>
+          </Link>
           <div className="flex items-center space-x-6">
             <Link href="/login" className="text-gray-600 hover:text-gray-900 transition font-medium">
               Login
             </Link>
-            <Link href="/register" className="bg-sky-500 text-white px-5 py-2.5 rounded-lg hover:bg-sky-600 transition font-medium shadow-sm">
+            <Link href="/register" className="bg-gradient-to-r from-blue-500 to-violet-500 text-white px-5 py-2.5 rounded-lg hover:from-blue-600 hover:to-violet-600 transition font-medium shadow-sm">
               Start Free Trial
             </Link>
           </div>
@@ -27,13 +32,13 @@ export default function HomePage() {
       {/* Hero Section */}
       <div className="container mx-auto px-6 pt-16 pb-20">
         <div className="text-center max-w-4xl mx-auto">
-          <div className="inline-flex items-center bg-sky-50 text-sky-700 px-3 py-1 rounded-full text-sm font-medium mb-6">
+          <div className="inline-flex items-center bg-gradient-to-r from-blue-50 to-violet-50 text-violet-700 px-3 py-1 rounded-full text-sm font-medium mb-6 border border-violet-200">
             <Star className="h-4 w-4 mr-1" />
             4 Weeks Free Trial - No Credit Card Required
           </div>
           <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-6 leading-tight">
             Professional Digital<br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-sky-500 to-blue-600">
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-violet-600">
               Pilot Logbook
             </span>
           </h1>
@@ -41,7 +46,7 @@ export default function HomePage() {
             EASA & FAA compliant flight logging with real-time sync, advanced analytics, and seamless multi-device access
           </p>
           <div className="flex justify-center space-x-4">
-            <Link href="/register" className="bg-sky-500 text-white px-8 py-3 rounded-lg text-lg font-semibold hover:bg-sky-600 transition shadow-md">
+            <Link href="/register" className="bg-gradient-to-r from-blue-500 to-violet-500 text-white px-8 py-3 rounded-lg text-lg font-semibold hover:from-blue-600 hover:to-violet-600 transition shadow-md">
               Start 4-Week Free Trial
             </Link>
             <Link href="#pricing" className="border-2 border-gray-300 text-gray-700 px-8 py-3 rounded-lg text-lg font-semibold hover:border-gray-400 hover:bg-gray-50 transition">
@@ -86,32 +91,32 @@ export default function HomePage() {
           </p>
           <div className="grid md:grid-cols-3 gap-8">
             <FeatureCard
-              icon={<Shield className="h-12 w-12 text-sky-500" />}
+              icon={<Shield className="h-12 w-12 text-violet-500" />}
               title="EASA & FAA Compliant"
               description="Fully compliant with international aviation regulations for professional pilots"
             />
             <FeatureCard
-              icon={<Cloud className="h-12 w-12 text-sky-500" />}
+              icon={<Cloud className="h-12 w-12 text-blue-500" />}
               title="Cloud Sync"
               description="Access your logbook from any device with real-time synchronization"
             />
             <FeatureCard
-              icon={<BarChart3 className="h-12 w-12 text-sky-500" />}
+              icon={<BarChart3 className="h-12 w-12 text-violet-500" />}
               title="Advanced Analytics"
               description="Track your progress with detailed statistics and visualizations"
             />
             <FeatureCard
-              icon={<Users className="h-12 w-12 text-sky-500" />}
+              icon={<Users className="h-12 w-12 text-blue-500" />}
               title="Crew Management"
               description="Manage crew assignments and collaborate with your team"
             />
             <FeatureCard
-              icon={<Globe className="h-12 w-12 text-sky-500" />}
+              icon={<Globe className="h-12 w-12 text-violet-500" />}
               title="Weather Integration"
               description="Real-time METAR/TAF data and route weather planning"
             />
             <FeatureCard
-              icon={<Plane className="h-12 w-12 text-sky-500" />}
+              icon={<Plane className="h-12 w-12 text-blue-500" />}
               title="Fleet Tracking"
               description="Manage multiple aircraft with detailed performance tracking"
             />
@@ -193,7 +198,7 @@ export default function HomePage() {
               ]}
               buttonText="Choose Pro"
               buttonHref="/register"
-              buttonStyle="bg-sky-500 text-white hover:bg-sky-600 shadow-lg"
+              buttonStyle="bg-gradient-to-r from-blue-500 to-violet-500 text-white hover:from-blue-600 hover:to-violet-600 shadow-lg"
             />
           </div>
 
@@ -261,7 +266,7 @@ export default function HomePage() {
       </div>
 
       {/* CTA Section */}
-      <div className="bg-gradient-to-br from-sky-500 to-blue-600 py-20">
+      <div className="bg-gradient-to-br from-blue-500 to-violet-600 py-20">
         <div className="container mx-auto px-6 text-center">
           <h2 className="text-3xl font-bold text-white mb-4">
             Ready to Take Your Logbook Digital?
@@ -269,10 +274,10 @@ export default function HomePage() {
           <p className="text-xl text-sky-100 mb-8 max-w-2xl mx-auto">
             Join thousands of professional pilots who trust Log-K with their flight records
           </p>
-          <Link href="/register" className="bg-white text-sky-600 px-8 py-3 rounded-lg text-lg font-semibold hover:bg-sky-50 transition shadow-lg inline-block">
+          <Link href="/register" className="bg-white text-violet-600 px-8 py-3 rounded-lg text-lg font-semibold hover:bg-violet-50 transition shadow-lg inline-block">
             Start Your 4-Week Free Trial
           </Link>
-          <p className="text-sky-100 mt-4 text-sm">
+          <p className="text-violet-100 mt-4 text-sm">
             No credit card required • Cancel anytime
           </p>
         </div>
@@ -284,10 +289,14 @@ export default function HomePage() {
           <div className="grid md:grid-cols-4 gap-8 mb-8">
             <div>
               <div className="flex items-center space-x-2 mb-4">
-                <div className="p-2 bg-gradient-to-br from-sky-500 to-blue-600 rounded-lg">
-                  <Plane className="h-5 w-5 text-white" />
-                </div>
-                <span className="text-xl font-bold">Log-K</span>
+                <Image 
+                  src="/logo.png" 
+                  alt="Log-K Logo" 
+                  width={40} 
+                  height={40}
+                  className="rounded-lg"
+                />
+                <span className="text-xl font-bold bg-gradient-to-r from-blue-400 to-violet-400 bg-clip-text text-transparent">Log-K</span>
               </div>
               <p className="text-gray-400 text-sm">
                 Professional pilot logbook trusted by aviators worldwide.

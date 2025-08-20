@@ -2,9 +2,10 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
-import { Plane, Mail, Lock, User, AlertCircle, CheckCircle } from 'lucide-react'
+import { Mail, Lock, User, AlertCircle, CheckCircle } from 'lucide-react'
 
 export default function RegisterPage() {
   const [formData, setFormData] = useState({
@@ -77,11 +78,17 @@ export default function RegisterPage() {
   return (
     <div className="bg-white rounded-2xl shadow-xl p-8">
       <div className="text-center mb-8">
-        <div className="inline-flex items-center justify-center w-16 h-16 bg-purple-100 rounded-full mb-4">
-          <Plane className="h-8 w-8 text-purple-600" />
+        <div className="inline-flex items-center justify-center mb-4">
+          <Image 
+            src="/logo.png" 
+            alt="Log-K Logo" 
+            width={80} 
+            height={80}
+            className="rounded-lg"
+          />
         </div>
-        <h1 className="text-2xl font-bold text-gray-900">Create Account</h1>
-        <p className="text-gray-600 mt-2">Start your 30-day free trial</p>
+        <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-violet-600 bg-clip-text text-transparent">Create Account</h1>
+        <p className="text-gray-600 mt-2">Start your 4-week free trial</p>
       </div>
 
       <form onSubmit={handleRegister} className="space-y-4">

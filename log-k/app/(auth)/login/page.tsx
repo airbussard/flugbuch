@@ -2,9 +2,10 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
-import { Plane, Mail, Lock, AlertCircle } from 'lucide-react'
+import { Mail, Lock, AlertCircle } from 'lucide-react'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
@@ -38,10 +39,16 @@ export default function LoginPage() {
   return (
     <div className="bg-white rounded-2xl shadow-xl p-8">
       <div className="text-center mb-8">
-        <div className="inline-flex items-center justify-center w-16 h-16 bg-purple-100 rounded-full mb-4">
-          <Plane className="h-8 w-8 text-purple-600" />
+        <div className="inline-flex items-center justify-center mb-4">
+          <Image 
+            src="/logo.png" 
+            alt="Log-K Logo" 
+            width={80} 
+            height={80}
+            className="rounded-lg"
+          />
         </div>
-        <h1 className="text-2xl font-bold text-gray-900">Welcome Back</h1>
+        <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-violet-600 bg-clip-text text-transparent">Welcome Back</h1>
         <p className="text-gray-600 mt-2">Sign in to your Log-K account</p>
       </div>
 
