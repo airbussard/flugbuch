@@ -32,10 +32,10 @@ const flightSchema = z.object({
   vfr_time: z.number().min(0).optional(),
   multi_pilot_time: z.number().min(0).optional(),
   cross_country_time: z.number().min(0).optional(),
-  dual_given_time: z.number().min(0).optional(),
-  dual_received_time: z.number().min(0).optional(),
-  landings_day: z.number().min(0).optional(),
-  landings_night: z.number().min(0).optional(),
+  dual_given_time: z.number().min(0).optional().or(z.nan().transform(() => undefined)),
+  dual_received_time: z.number().min(0).optional().or(z.nan().transform(() => undefined)),
+  landings_day: z.number().min(0).optional().or(z.nan().transform(() => undefined)),
+  landings_night: z.number().min(0).optional().or(z.nan().transform(() => undefined)),
   remarks: z.string().optional()
 })
 
@@ -65,8 +65,10 @@ export default function FlightForm({ onSubmit, loading = false, defaultValues }:
     resolver: zodResolver(flightSchema),
     defaultValues: {
       ...defaultValues,
-      landings_day: 1,
-      landings_night: 0
+      landings_day: defaultValues?.landings_day ?? 1,
+      landings_night: defaultValues?.landings_night ?? 0,
+      dual_given_time: defaultValues?.dual_given_time ?? undefined,
+      dual_received_time: defaultValues?.dual_received_time ?? undefined
     }
   })
 
