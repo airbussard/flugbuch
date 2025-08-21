@@ -7,6 +7,7 @@ import AirportMap from '@/components/airports/AirportMap'
 import AirportWeather from '@/components/airports/AirportWeather'
 import AirportFrequencies from '@/components/airports/AirportFrequencies'
 import AirportRunways from '@/components/airports/AirportRunways'
+import AirportPIREPs from '@/components/airports/AirportPIREPs'
 import { Button } from '@/components/ui/button'
 import { ArrowLeft, Edit } from 'lucide-react'
 
@@ -74,14 +75,17 @@ export default async function AirportDetailPage({ params }: PageProps) {
         <AirportMap airport={airport} />
       </div>
       
+      {/* Runways Section - Moved before Weather */}
+      <AirportRunways icao={airport.icao} />
+      
       {/* Weather Section */}
       <AirportWeather icao={airport.icao} />
       
       {/* Frequencies Section */}
       <AirportFrequencies icao={airport.icao} />
       
-      {/* Runways Section */}
-      <AirportRunways icao={airport.icao} />
+      {/* PIREPs Section */}
+      <AirportPIREPs icao={airport.icao} />
     </div>
   )
 }

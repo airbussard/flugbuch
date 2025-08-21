@@ -130,15 +130,18 @@ export default function AdminDashboard({ stats, recentUsers, recentActivity }: A
             <p className="font-medium">User Management</p>
             <p className="text-sm text-gray-500">Manage user accounts</p>
           </a>
+          <a 
+            href="/admin/pireps"
+            className="block p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+          >
+            <Shield className="h-6 w-6 text-orange-600 mb-2" />
+            <p className="font-medium">PIREP Moderation</p>
+            <p className="text-sm text-gray-500">Review pilot reports</p>
+          </a>
           <button className="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
             <Database className="h-6 w-6 text-blue-600 mb-2" />
             <p className="font-medium">Database Backup</p>
             <p className="text-sm text-gray-500">Export system data</p>
-          </button>
-          <button className="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
-            <Activity className="h-6 w-6 text-green-600 mb-2" />
-            <p className="font-medium">System Logs</p>
-            <p className="text-sm text-gray-500">View activity logs</p>
           </button>
         </div>
       </div>
