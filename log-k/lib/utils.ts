@@ -23,11 +23,8 @@ export function formatDate(date: string | Date | null | undefined): string {
   }
 }
 
-export function formatTime(hours: number): string {
-  const h = Math.floor(hours)
-  const m = Math.round((hours - h) * 60)
-  return `${h}:${m.toString().padStart(2, '0')}`
-}
+// Re-export time formatting from centralized module
+export { formatMinutesToTime as formatTime } from './utils/time'
 
 export function calculateBlockTime(departure: string, arrival: string): number {
   const dep = new Date(departure)

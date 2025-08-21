@@ -3,6 +3,7 @@
 import { Plane, Calendar, Gauge, Settings, Navigation, Clock } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
+import { formatMinutesToTime } from '@/lib/utils/time'
 
 interface Aircraft {
   id: string
@@ -37,11 +38,6 @@ export default function AircraftDetail({
   aircraft: Aircraft
   stats: Stats 
 }) {
-  const formatHours = (minutes: number) => {
-    const hours = Math.floor(minutes / 60)
-    const mins = minutes % 60
-    return `${hours}:${mins.toString().padStart(2, '0')}`
-  }
   
   const getClassBadgeColor = (aircraftClass: string | null) => {
     switch (aircraftClass) {
@@ -152,7 +148,7 @@ export default function AircraftDetail({
           
           <div className="bg-gray-50 dark:bg-gray-900 rounded-lg p-3">
             <div className="text-2xl font-bold text-gray-900 dark:text-white">
-              {formatHours(stats.totalBlockTime)}
+              {formatMinutesToTime(stats.totalBlockTime)}
             </div>
             <div className="text-xs text-gray-600 dark:text-gray-400">
               Block Time
@@ -170,7 +166,7 @@ export default function AircraftDetail({
           
           <div className="bg-gray-50 dark:bg-gray-900 rounded-lg p-3">
             <div className="text-2xl font-bold text-gray-900 dark:text-white">
-              {formatHours(stats.totalNightTime)}
+              {formatMinutesToTime(stats.totalNightTime)}
             </div>
             <div className="text-xs text-gray-600 dark:text-gray-400">
               Night Time
@@ -179,7 +175,7 @@ export default function AircraftDetail({
           
           <div className="bg-gray-50 dark:bg-gray-900 rounded-lg p-3">
             <div className="text-2xl font-bold text-gray-900 dark:text-white">
-              {formatHours(stats.totalPicTime)}
+              {formatMinutesToTime(stats.totalPicTime)}
             </div>
             <div className="text-xs text-gray-600 dark:text-gray-400">
               PIC Time
@@ -188,7 +184,7 @@ export default function AircraftDetail({
           
           <div className="bg-gray-50 dark:bg-gray-900 rounded-lg p-3">
             <div className="text-2xl font-bold text-gray-900 dark:text-white">
-              {formatHours(stats.totalSicTime)}
+              {formatMinutesToTime(stats.totalSicTime)}
             </div>
             <div className="text-xs text-gray-600 dark:text-gray-400">
               SIC Time
@@ -197,7 +193,7 @@ export default function AircraftDetail({
           
           <div className="bg-gray-50 dark:bg-gray-900 rounded-lg p-3">
             <div className="text-2xl font-bold text-gray-900 dark:text-white">
-              {formatHours(stats.totalIfrTime)}
+              {formatMinutesToTime(stats.totalIfrTime)}
             </div>
             <div className="text-xs text-gray-600 dark:text-gray-400">
               IFR Time
@@ -206,7 +202,7 @@ export default function AircraftDetail({
           
           <div className="bg-gray-50 dark:bg-gray-900 rounded-lg p-3">
             <div className="text-2xl font-bold text-gray-900 dark:text-white">
-              {formatHours(stats.totalVfrTime)}
+              {formatMinutesToTime(stats.totalVfrTime)}
             </div>
             <div className="text-xs text-gray-600 dark:text-gray-400">
               VFR Time

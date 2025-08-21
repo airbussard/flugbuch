@@ -1,4 +1,5 @@
 import { Clock, Plane, Calendar, TrendingUp } from 'lucide-react'
+import { formatMinutesToTime } from '@/lib/utils/time'
 
 interface Flight {
   block_time: number | null
@@ -10,7 +11,8 @@ interface Flight {
 }
 
 export default function StatsOverview({ flights }: { flights: Flight[] }) {
-  const totalHours = flights.reduce((sum, f) => sum + (f.block_time || 0), 0)
+  // All times are stored in minutes in the database
+  const totalMinutes = flights.reduce((sum, f) => sum + (f.block_time || 0), 0)
   const totalNight = flights.reduce((sum, f) => sum + (f.night_time || 0), 0)
   const totalIFR = flights.reduce((sum, f) => sum + (f.ifr_time || 0), 0)
   const totalLandings = flights.reduce((sum, f) => sum + (f.landings_day || 0) + (f.landings_night || 0), 0)
@@ -26,12 +28,12 @@ export default function StatsOverview({ flights }: { flights: Flight[] }) {
       return false
     }
   })
-  const recentHours = recentFlights.reduce((sum, f) => sum + (f.block_time || 0), 0)
+  const recentMinutes = recentFlights.reduce((sum, f) => sum + (f.block_time || 0), 0)
 
   const stats = [
     {
       title: 'Total Flight Time',
-      value: `${Math.floor(totalHours)}:${Math.round((totalHours % 1) * 60).toString().padStart(2, '0')}`,
+      value: formatMinutesToTime(totalMinutes),
       icon: Clock,
       color: 'text-purple-600',
       bgColor: 'bg-purple-100'
@@ -52,7 +54,7 @@ export default function StatsOverview({ flights }: { flights: Flight[] }) {
     },
     {
       title: 'Last 30 Days',
-      value: `${Math.floor(recentHours)}:${Math.round((recentHours % 1) * 60).toString().padStart(2, '0')}`,
+      value: formatMinutesToTime(recentMinutes),
       icon: TrendingUp,
       color: 'text-orange-600',
       bgColor: 'bg-orange-100'
