@@ -11,20 +11,31 @@ import { CrewAssignment } from '@/components/flights/CrewSelector'
 export default function NewFlightPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [success, setSuccess] = useState<string | null>(null)
   const router = useRouter()
   const supabase = createClient()
 
   const handleSubmit = async (data: any) => {
     setLoading(true)
     setError(null)
+    setSuccess(null)
     
-    const { data: { user } } = await supabase.auth.getUser()
-    
-    if (!user) {
-      setError('Sie müssen angemeldet sein')
-      setLoading(false)
-      return
-    }
+    try {
+      // Validate required fields
+      if (!data.flight_date || !data.departure_airport || !data.arrival_airport || 
+          !data.off_block || !data.on_block || !data.registration || !data.aircraft_type) {
+        setError('Please fill in all required fields (marked with *)')
+        setLoading(false)
+        return
+      }
+      
+      const { data: { user } } = await supabase.auth.getUser()
+      
+      if (!user) {
+        setError('You must be logged in to save a flight')
+        setLoading(false)
+        return
+      }
 
     // Extract crew assignments from data
     const crewAssignments: CrewAssignment[] = data.crew_assignments || []
@@ -52,7 +63,14 @@ export default function NewFlightPage() {
 
     if (flightError || !insertedFlight) {
       console.error('Error creating flight:', flightError)
-      setError('Fehler beim Speichern des Fluges')
+      const errorMessage = flightError?.message || 'Failed to save flight'
+      if (errorMessage.includes('duplicate')) {
+        setError('A flight with these details already exists')
+      } else if (errorMessage.includes('invalid')) {
+        setError('Please check all required fields are filled correctly')
+      } else {
+        setError(`Error saving flight: ${errorMessage}`)
+      }
       setLoading(false)
       return
     }
@@ -77,10 +95,17 @@ export default function NewFlightPage() {
       }
     }
 
-    router.push('/flights')
-    router.refresh()
-    
-    setLoading(false)
+      setSuccess('Flight saved successfully! Redirecting...')
+      setTimeout(() => {
+        router.push('/flights')
+        router.refresh()
+      }, 1500)
+    } catch (err: any) {
+      console.error('Unexpected error:', err)
+      setError(err.message || 'An unexpected error occurred. Please try again.')
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -88,16 +113,22 @@ export default function NewFlightPage() {
       <div className="mb-6">
         <Link href="/flights" className="inline-flex items-center text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">
           <ArrowLeft className="h-4 w-4 mr-2" />
-          Zurück zu Flügen
+          Back to Flights
         </Link>
       </div>
       
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">Neuen Flug hinzufügen</h1>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">Add New Flight</h1>
         
         {error && (
           <div className="mb-4 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 rounded-lg">
-            {error}
+            <strong>Error:</strong> {error}
+          </div>
+        )}
+        
+        {success && (
+          <div className="mb-4 p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 text-green-700 dark:text-green-400 rounded-lg">
+            {success}
           </div>
         )}
         

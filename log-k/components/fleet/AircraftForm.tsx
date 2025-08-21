@@ -43,7 +43,7 @@ export default function AircraftForm({ aircraft, mode }: AircraftFormProps) {
       const { data: { user } } = await supabase.auth.getUser()
       
       if (!user) {
-        setError('Sie müssen angemeldet sein')
+        setError('You must be logged in')
         return
       }
 
@@ -74,14 +74,14 @@ export default function AircraftForm({ aircraft, mode }: AircraftFormProps) {
       router.refresh()
     } catch (err: any) {
       console.error('Error saving aircraft:', err)
-      setError(err.message || 'Fehler beim Speichern des Flugzeugs')
+      setError(err.message || 'Error saving aircraft')
     } finally {
       setLoading(false)
     }
   }
 
   const handleDelete = async () => {
-    if (!confirm('Sind Sie sicher, dass Sie dieses Flugzeug löschen möchten?')) return
+    if (!confirm('Are you sure you want to delete this aircraft?')) return
     
     setLoading(true)
     try {
@@ -96,7 +96,7 @@ export default function AircraftForm({ aircraft, mode }: AircraftFormProps) {
       router.refresh()
     } catch (err: any) {
       console.error('Error deleting aircraft:', err)
-      setError(err.message || 'Fehler beim Löschen des Flugzeugs')
+      setError(err.message || 'Error deleting aircraft')
     } finally {
       setLoading(false)
     }
@@ -107,7 +107,7 @@ export default function AircraftForm({ aircraft, mode }: AircraftFormProps) {
       <div className="mb-6">
         <Link href="/fleet" className="inline-flex items-center text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">
           <ArrowLeft className="h-4 w-4 mr-2" />
-          Zurück zur Flotte
+          Back to Fleet
         </Link>
       </div>
 
@@ -115,7 +115,7 @@ export default function AircraftForm({ aircraft, mode }: AircraftFormProps) {
         <div className="flex items-center mb-6">
           <Plane className="h-6 w-6 text-violet-500 mr-3" />
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-            {mode === 'create' ? 'Neues Flugzeug hinzufügen' : 'Flugzeug bearbeiten'}
+            {mode === 'create' ? 'Add New Aircraft' : 'Edit Aircraft'}
           </h2>
         </div>
 
@@ -128,10 +128,10 @@ export default function AircraftForm({ aircraft, mode }: AircraftFormProps) {
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Basic Information */}
           <div className="space-y-4">
-            <h3 className="text-lg font-medium text-gray-900 dark:text-white">Grundinformationen</h3>
+            <h3 className="text-lg font-medium text-gray-900 dark:text-white">Basic Information</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="registration">Kennzeichen *</Label>
+                <Label htmlFor="registration">Registration *</Label>
                 <Input
                   id="registration"
                   value={formData.registration}
@@ -143,7 +143,7 @@ export default function AircraftForm({ aircraft, mode }: AircraftFormProps) {
               </div>
 
               <div>
-                <Label htmlFor="aircraft_type">Flugzeugtyp *</Label>
+                <Label htmlFor="aircraft_type">Aircraft Type *</Label>
                 <Input
                   id="aircraft_type"
                   value={formData.aircraft_type}
@@ -154,7 +154,7 @@ export default function AircraftForm({ aircraft, mode }: AircraftFormProps) {
               </div>
 
               <div>
-                <Label htmlFor="serial_number">Seriennummer</Label>
+                <Label htmlFor="serial_number">Serial Number</Label>
                 <Input
                   id="serial_number"
                   value={formData.serial_number}
@@ -164,7 +164,7 @@ export default function AircraftForm({ aircraft, mode }: AircraftFormProps) {
               </div>
 
               <div>
-                <Label htmlFor="engine_type">Triebwerkstyp</Label>
+                <Label htmlFor="engine_type">Engine Type</Label>
                 <Input
                   id="engine_type"
                   value={formData.engine_type}
@@ -174,7 +174,7 @@ export default function AircraftForm({ aircraft, mode }: AircraftFormProps) {
               </div>
 
               <div>
-                <Label htmlFor="first_flight">Erstflug</Label>
+                <Label htmlFor="first_flight">First Flight</Label>
                 <Input
                   id="first_flight"
                   type="date"
@@ -187,10 +187,10 @@ export default function AircraftForm({ aircraft, mode }: AircraftFormProps) {
 
           {/* Aircraft Classification */}
           <div className="space-y-4">
-            <h3 className="text-lg font-medium text-gray-900 dark:text-white">Flugzeugklassifizierung</h3>
+            <h3 className="text-lg font-medium text-gray-900 dark:text-white">Aircraft Classification</h3>
             
             <div>
-              <Label htmlFor="aircraft_class">Flugzeugklasse</Label>
+              <Label htmlFor="aircraft_class">Aircraft Class</Label>
               <select
                 id="aircraft_class"
                 value={formData.aircraft_class}
@@ -199,7 +199,7 @@ export default function AircraftForm({ aircraft, mode }: AircraftFormProps) {
                          bg-white dark:bg-gray-900 text-gray-900 dark:text-white
                          focus:ring-2 focus:ring-violet-500 focus:border-violet-500"
               >
-                <option value="">Nicht spezifiziert</option>
+                <option value="">Not specified</option>
                 <option value="SEP">SEP - Single Engine Piston</option>
                 <option value="MEP">MEP - Multi Engine Piston</option>
                 <option value="SET">SET - Single Engine Turbine</option>
@@ -208,9 +208,9 @@ export default function AircraftForm({ aircraft, mode }: AircraftFormProps) {
             </div>
 
             <div>
-              <Label>Standard Flugregeln</Label>
+              <Label>Default Flight Rules</Label>
               <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">
-                Diese werden bei Flügen mit diesem Flugzeug vorausgewählt
+                These will be pre-selected for flights with this aircraft
               </p>
               <div className="flex space-x-4">
                 <label className="flex items-center">
@@ -239,9 +239,9 @@ export default function AircraftForm({ aircraft, mode }: AircraftFormProps) {
 
           {/* Aircraft Characteristics */}
           <div className="space-y-4">
-            <h3 className="text-lg font-medium text-gray-900 dark:text-white">Flugzeugeigenschaften</h3>
+            <h3 className="text-lg font-medium text-gray-900 dark:text-white">Aircraft Characteristics</h3>
             <p className="text-sm text-gray-500 dark:text-gray-400">
-              Wählen Sie zutreffende Eigenschaften für die regulatorische Compliance
+              Select applicable characteristics for regulatory compliance
             </p>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <label className="flex items-center space-x-2">
@@ -271,7 +271,7 @@ export default function AircraftForm({ aircraft, mode }: AircraftFormProps) {
                   onChange={(e) => setFormData({ ...formData, tailwheel: e.target.checked })}
                   className="rounded text-violet-600 focus:ring-violet-500"
                 />
-                <span className="text-sm">Spornrad</span>
+                <span className="text-sm">Tailwheel</span>
               </label>
 
               <label className="flex items-center space-x-2">
@@ -295,7 +295,7 @@ export default function AircraftForm({ aircraft, mode }: AircraftFormProps) {
                   onClick={handleDelete}
                   disabled={loading}
                 >
-                  Flugzeug löschen
+                  Delete Aircraft
                 </Button>
               )}
             </div>
@@ -307,11 +307,11 @@ export default function AircraftForm({ aircraft, mode }: AircraftFormProps) {
                 onClick={() => router.back()}
                 disabled={loading}
               >
-                Abbrechen
+                Cancel
               </Button>
               <Button type="submit" disabled={loading}>
                 <Save className="h-4 w-4 mr-2" />
-                {loading ? 'Speichern...' : 'Flugzeug speichern'}
+                {loading ? 'Saving...' : 'Save Aircraft'}
               </Button>
             </div>
           </div>

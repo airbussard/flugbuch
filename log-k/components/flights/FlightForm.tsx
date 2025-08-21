@@ -13,16 +13,16 @@ import CrewSelector, { CrewAssignment } from './CrewSelector'
 import AircraftSelector from './AircraftSelector'
 
 const flightSchema = z.object({
-  flight_date: z.string().min(1, 'Datum ist erforderlich'),
-  departure_airport: z.string().min(3, 'Abflughafen ist erforderlich').max(4),
-  arrival_airport: z.string().min(3, 'Ankunftshafen ist erforderlich').max(4),
-  off_block: z.string().min(1, 'Off Block Zeit ist erforderlich'),
-  on_block: z.string().min(1, 'On Block Zeit ist erforderlich'),
+  flight_date: z.string().min(1, 'Date is required'),
+  departure_airport: z.string().min(3, 'Departure airport is required').max(4),
+  arrival_airport: z.string().min(3, 'Arrival airport is required').max(4),
+  off_block: z.string().min(1, 'Off Block time is required'),
+  on_block: z.string().min(1, 'On Block time is required'),
   takeoff: z.string().optional(),
   landing: z.string().optional(),
   aircraft_id: z.string().nullable(),
-  registration: z.string().min(1, 'Registration ist erforderlich'),
-  aircraft_type: z.string().min(1, 'Flugzeugtyp ist erforderlich'),
+  registration: z.string().min(1, 'Registration is required'),
+  aircraft_type: z.string().min(1, 'Aircraft type is required'),
   flight_number: z.string().optional(),
   block_time: z.number().min(0).optional(),
   pic_time: z.number().min(0).optional(),
@@ -186,12 +186,12 @@ export default function FlightForm({ onSubmit, loading = false, defaultValues }:
       <div className="space-y-4">
         <div className="flex items-center mb-2">
           <Calendar className="h-5 w-5 text-violet-500 mr-2" />
-          <h3 className="text-lg font-medium text-gray-900 dark:text-white">Datum & Route</h3>
+          <h3 className="text-lg font-medium text-gray-900 dark:text-white">Date & Route</h3>
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
-            <Label htmlFor="flight_date">Datum *</Label>
+            <Label htmlFor="flight_date">Date *</Label>
             <Input
               id="flight_date"
               type="date"
@@ -202,7 +202,7 @@ export default function FlightForm({ onSubmit, loading = false, defaultValues }:
           </div>
           
           <div>
-            <Label htmlFor="departure_airport">Abflughafen (ICAO) *</Label>
+            <Label htmlFor="departure_airport">Departure Airport (ICAO) *</Label>
             <Input
               id="departure_airport"
               placeholder="EDDF"
@@ -215,7 +215,7 @@ export default function FlightForm({ onSubmit, loading = false, defaultValues }:
           </div>
           
           <div>
-            <Label htmlFor="arrival_airport">Ankunftshafen (ICAO) *</Label>
+            <Label htmlFor="arrival_airport">Arrival Airport (ICAO) *</Label>
             <Input
               id="arrival_airport"
               placeholder="EDDM"
@@ -233,7 +233,7 @@ export default function FlightForm({ onSubmit, loading = false, defaultValues }:
       <div className="space-y-4">
         <div className="flex items-center mb-2">
           <Clock className="h-5 w-5 text-violet-500 mr-2" />
-          <h3 className="text-lg font-medium text-gray-900 dark:text-white">Zeiten</h3>
+          <h3 className="text-lg font-medium text-gray-900 dark:text-white">Times</h3>
         </div>
         
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -311,7 +311,7 @@ export default function FlightForm({ onSubmit, loading = false, defaultValues }:
       <div className="space-y-4">
         <div className="flex items-center mb-2">
           <Plane className="h-5 w-5 text-violet-500 mr-2" />
-          <h3 className="text-lg font-medium text-gray-900 dark:text-white">Flugzeug</h3>
+          <h3 className="text-lg font-medium text-gray-900 dark:text-white">Aircraft</h3>
         </div>
         
         <AircraftSelector
@@ -320,7 +320,7 @@ export default function FlightForm({ onSubmit, loading = false, defaultValues }:
         />
         
         <div>
-          <Label htmlFor="flight_number">Flugnummer</Label>
+          <Label htmlFor="flight_number">Flight Number</Label>
           <Input
             id="flight_number"
             placeholder="LH123"
@@ -344,7 +344,7 @@ export default function FlightForm({ onSubmit, loading = false, defaultValues }:
 
       {/* Flight Conditions */}
       <div className="space-y-4">
-        <h3 className="text-lg font-medium text-gray-900 dark:text-white">Flugbedingungen</h3>
+        <h3 className="text-lg font-medium text-gray-900 dark:text-white">Flight Conditions</h3>
         
         <div className="flex space-x-4">
           <label className="flex items-center">
@@ -371,7 +371,7 @@ export default function FlightForm({ onSubmit, loading = false, defaultValues }:
         
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <div>
-            <Label htmlFor="landings_day">Landungen Tag</Label>
+            <Label htmlFor="landings_day">Day Landings</Label>
             <Input
               id="landings_day"
               type="number"
@@ -381,7 +381,7 @@ export default function FlightForm({ onSubmit, loading = false, defaultValues }:
           </div>
           
           <div>
-            <Label htmlFor="landings_night">Landungen Nacht</Label>
+            <Label htmlFor="landings_night">Night Landings</Label>
             <Input
               id="landings_night"
               type="number"
@@ -396,7 +396,7 @@ export default function FlightForm({ onSubmit, loading = false, defaultValues }:
               id="dual_given_time"
               type="number"
               step="0.1"
-              placeholder="Stunden"
+              placeholder="Hours"
               {...register('dual_given_time', { valueAsNumber: true })}
             />
           </div>
@@ -407,7 +407,7 @@ export default function FlightForm({ onSubmit, loading = false, defaultValues }:
               id="dual_received_time"
               type="number"
               step="0.1"
-              placeholder="Stunden"
+              placeholder="Hours"
               {...register('dual_received_time', { valueAsNumber: true })}
             />
           </div>
@@ -416,7 +416,7 @@ export default function FlightForm({ onSubmit, loading = false, defaultValues }:
 
       {/* Remarks */}
       <div>
-        <Label htmlFor="remarks">Bemerkungen</Label>
+        <Label htmlFor="remarks">Remarks</Label>
         <textarea
           id="remarks"
           {...register('remarks')}
@@ -424,18 +424,18 @@ export default function FlightForm({ onSubmit, loading = false, defaultValues }:
                    bg-white dark:bg-gray-800 text-gray-900 dark:text-white
                    focus:outline-none focus:ring-2 focus:ring-violet-500"
           rows={3}
-          placeholder="Zusätzliche Notizen..."
+          placeholder="Additional notes..."
         />
       </div>
 
       {/* Submit */}
       <div className="flex justify-end gap-4">
         <Button type="button" variant="outline">
-          Abbrechen
+          Cancel
         </Button>
         <Button type="submit" disabled={loading}>
           {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-          {loading ? 'Speichern...' : 'Flug speichern'}
+          {loading ? 'Saving...' : 'Save Flight'}
         </Button>
       </div>
     </form>

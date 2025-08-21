@@ -95,7 +95,7 @@ export default function AircraftSelector({
   return (
     <div className="relative">
       <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-        Flugzeug *
+        Aircraft *
       </label>
       
       {/* Selected Aircraft Display */}
@@ -123,7 +123,7 @@ export default function AircraftSelector({
             </div>
           ) : (
             <span className="text-gray-500 dark:text-gray-400">
-              Flugzeug auswählen...
+              Select aircraft...
             </span>
           )}
         </div>
@@ -146,7 +146,7 @@ export default function AircraftSelector({
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
               <input
                 type="text"
-                placeholder="Suche Registration oder Typ..."
+                placeholder="Search registration or type..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md
@@ -161,7 +161,7 @@ export default function AircraftSelector({
           <div className="max-h-60 overflow-y-auto">
             {loading ? (
               <div className="p-4 text-center text-gray-500 dark:text-gray-400">
-                Lade Flugzeuge...
+                Loading aircraft...
               </div>
             ) : filteredAircraft.length > 0 ? (
               filteredAircraft.map(plane => (
@@ -207,14 +207,14 @@ export default function AircraftSelector({
             ) : (
               <div className="p-4 text-center">
                 <p className="text-gray-500 dark:text-gray-400 mb-3">
-                  {searchTerm ? 'Kein Flugzeug gefunden' : 'Keine Flugzeuge in der Flotte'}
+                  {searchTerm ? 'No aircraft found' : 'No aircraft in fleet'}
                 </p>
                 <a
                   href="/fleet/new"
                   className="inline-flex items-center text-sm text-violet-600 hover:text-violet-700 dark:text-violet-400"
                 >
                   <Plus className="h-4 w-4 mr-1" />
-                  Flugzeug hinzufügen
+                  Add aircraft
                 </a>
               </div>
             )}
@@ -228,7 +228,7 @@ export default function AircraftSelector({
                 className="flex items-center justify-center text-sm text-violet-600 hover:text-violet-700 dark:text-violet-400"
               >
                 <Plus className="h-4 w-4 mr-1" />
-                Neues Flugzeug zur Flotte hinzufügen
+                Add new aircraft to fleet
               </a>
             </div>
           )}
