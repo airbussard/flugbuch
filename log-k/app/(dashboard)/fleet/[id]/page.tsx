@@ -34,14 +34,31 @@ export default async function AircraftPage({ params }: { params: Promise<{ id: s
     notFound()
   }
   
-  // Get flights with this aircraft
+  // Get flights with this aircraft - search by registration which is more reliable
+  // Many flights might not have aircraft_id but will have registration
+  console.log('🔍 Searching for flights with aircraft:', {
+    aircraftId: id,
+    registration: aircraft.registration,
+    userId: user.id
+  })
+  
   const { data: flights, error: flightsError } = await supabase
     .from('flights')
     .select('*')
-    .eq('aircraft_id', id)
+    .eq('registration', aircraft.registration)
     .eq('user_id', user.id)
     .eq('deleted', false)
     .order('flight_date', { ascending: false })
+  
+  if (flightsError) {
+    console.error('❌ Error fetching flights:', flightsError)
+  }
+  
+  console.log('✈️ Flights found:', {
+    count: flights?.length || 0,
+    registration: aircraft.registration,
+    error: flightsError
+  })
   
   // Calculate statistics
   const stats = {
@@ -54,6 +71,8 @@ export default async function AircraftPage({ params }: { params: Promise<{ id: s
     totalIfrTime: flights?.reduce((acc, f) => acc + (f.ifr_time || 0), 0) || 0,
     totalVfrTime: flights?.reduce((acc, f) => acc + (f.vfr_time || 0), 0) || 0,
   }
+  
+  console.log('📊 Statistics calculated:', stats)
   
   return (
     <div className="space-y-6">
