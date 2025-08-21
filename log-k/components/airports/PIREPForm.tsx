@@ -136,28 +136,40 @@ export default function PIREPForm({ icao, onSuccess, onCancel }: PIREPFormProps)
           value={formData.title}
           onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
           maxLength={200}
-          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-violet-500 focus:border-transparent"
+          className={`w-full px-3 py-2 border rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-violet-500 focus:border-transparent ${
+            formData.title.trim().length === 0 ? 'border-red-300 dark:border-red-600' : 'border-gray-300 dark:border-gray-600'
+          }`}
           placeholder="Brief summary of your report"
         />
-        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-          {formData.title.length}/200 characters
+        <p className={`text-xs mt-1 ${formData.title.trim().length === 0 ? 'text-red-500 dark:text-red-400' : 'text-gray-500 dark:text-gray-400'}`}>
+          {formData.title.length}/200 characters {formData.title.trim().length === 0 && '(required)'}
         </p>
       </div>
 
       {/* Content */}
       <div>
         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-          Report Content <span className="text-red-500">*</span>
+          Report Content <span className="text-red-500">*</span> <span className="text-xs text-gray-500">(min. 50 characters)</span>
         </label>
         <textarea
           value={formData.content}
           onChange={(e) => setFormData(prev => ({ ...prev, content: e.target.value }))}
           rows={6}
-          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-violet-500 focus:border-transparent resize-none"
+          className={`w-full px-3 py-2 border rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-violet-500 focus:border-transparent resize-none ${
+            formData.content.trim().length > 0 && formData.content.trim().length < 50 ? 'border-yellow-300 dark:border-yellow-600' : 
+            formData.content.trim().length === 0 ? 'border-red-300 dark:border-red-600' : 'border-gray-300 dark:border-gray-600'
+          }`}
           placeholder="Share your experience, observations, or important information about this airport (minimum 50 characters)"
         />
-        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-          {formData.content.length}/5000 characters (minimum 50)
+        <p className={`text-xs mt-1 ${
+          formData.content.trim().length < 50 ? 'text-red-500 dark:text-red-400 font-medium' : 'text-gray-500 dark:text-gray-400'
+        }`}>
+          {formData.content.length}/5000 characters 
+          {formData.content.trim().length < 50 && (
+            <span className="ml-1">
+              (⚠️ {50 - formData.content.trim().length} more characters needed)
+            </span>
+          )}
         </p>
       </div>
 
@@ -235,8 +247,14 @@ export default function PIREPForm({ icao, onSuccess, onCancel }: PIREPFormProps)
         </Button>
         <Button
           type="submit"
-          disabled={submitting || !formData.title || !formData.content || formData.content.length < 50}
-          className="bg-violet-600 hover:bg-violet-700"
+          disabled={submitting || !formData.title.trim() || !formData.content.trim() || formData.content.trim().length < 50}
+          className="bg-violet-600 hover:bg-violet-700 disabled:opacity-50 disabled:cursor-not-allowed"
+          title={
+            !formData.title.trim() ? "Title is required" :
+            !formData.content.trim() ? "Content is required" :
+            formData.content.trim().length < 50 ? `Content must be at least 50 characters (currently ${formData.content.trim().length})` :
+            "Submit your PIREP"
+          }
         >
           {submitting ? (
             <>
