@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { airportService } from '@/lib/data/airport-service'
 import fs from 'fs/promises'
 import path from 'path'
 import Papa from 'papaparse'
@@ -74,7 +75,14 @@ export async function POST(request: NextRequest) {
     // Write updated CSV
     await fs.writeFile(csvPath, newCsv, 'utf-8')
     
-    return NextResponse.json({ success: true })
+    // Clear the airport service cache for this airport
+    // This ensures the next request gets fresh data
+    airportService.clearAirport(airportData.icao)
+    
+    return NextResponse.json({ 
+      success: true,
+      airport: updatedAirport 
+    })
   } catch (error) {
     console.error('Error updating airport:', error)
     return NextResponse.json(

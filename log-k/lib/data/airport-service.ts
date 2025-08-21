@@ -234,6 +234,26 @@ class AirportService {
     return rad * (180 / Math.PI)
   }
 
+  clearCache(): void {
+    this.airports.clear()
+    this.loaded = false
+  }
+  
+  clearAirport(icao: string): void {
+    const airport = this.airports.get(icao)
+    if (airport) {
+      this.airports.delete(icao)
+      if (airport.iata) {
+        this.airports.delete(airport.iata)
+      }
+    }
+  }
+  
+  async reloadFromFile(): Promise<void> {
+    this.clearCache()
+    await this.loadAirports()
+  }
+
   async updateAirport(airport: Airport): Promise<void> {
     // Update in-memory cache
     this.airports.set(airport.icao, airport)
@@ -266,11 +286,6 @@ class AirportService {
     }
     
     // Note: CSV deletion would need a separate endpoint
-  }
-
-  clearCache(): void {
-    this.airports.clear()
-    this.loaded = false
   }
 }
 

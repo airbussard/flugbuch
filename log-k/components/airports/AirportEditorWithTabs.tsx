@@ -40,7 +40,7 @@ export default function AirportEditorWithTabs({ icao }: AirportEditorProps) {
   })
 
   // Form state for runway editing
-  const [editingRunway, setEditingRunway] = useState<Runway | null>(null)
+  const [editingRunwayIndex, setEditingRunwayIndex] = useState<number | null>(null)
   const [newRunway, setNewRunway] = useState<Partial<Runway>>({
     ident: '',
     length_ft: 0,
@@ -50,7 +50,7 @@ export default function AirportEditorWithTabs({ icao }: AirportEditorProps) {
   })
 
   // Form state for frequency editing
-  const [editingFrequency, setEditingFrequency] = useState<Frequency | null>(null)
+  const [editingFrequencyIndex, setEditingFrequencyIndex] = useState<number | null>(null)
   const [newFrequency, setNewFrequency] = useState<Partial<Frequency>>({
     frequency: '',
     type: '',
@@ -151,7 +151,11 @@ export default function AirportEditorWithTabs({ icao }: AirportEditorProps) {
       }
       
       setMessage({ type: 'success', text: 'Airport saved successfully' })
-      await airportService.loadAirports()
+      // Clear cache and reload to ensure we have the latest data
+      airportService.clearAirport(formData.icao)
+      await airportService.reloadFromFile()
+      // Reload the airport data to show updated information
+      await loadAirportData(formData.icao)
     } catch (error) {
       setMessage({ type: 'error', text: 'Failed to save airport' })
     } finally {
@@ -213,16 +217,29 @@ export default function AirportEditorWithTabs({ icao }: AirportEditorProps) {
     }
   }
 
-  const handleAddRunway = () => {
+  const handleAddOrUpdateRunway = () => {
     if (newRunway.ident && airport) {
-      setRunways([...runways, {
+      const runwayData = {
         icao: airport.icao,
         ident: newRunway.ident,
         length_ft: newRunway.length_ft || 0,
         width_ft: newRunway.width_ft || 0,
         surface: newRunway.surface || '',
         ils: newRunway.ils || false
-      }])
+      }
+      
+      if (editingRunwayIndex !== null) {
+        // Update existing runway
+        const updatedRunways = [...runways]
+        updatedRunways[editingRunwayIndex] = runwayData
+        setRunways(updatedRunways)
+        setEditingRunwayIndex(null)
+      } else {
+        // Add new runway
+        setRunways([...runways, runwayData])
+      }
+      
+      // Reset form
       setNewRunway({
         ident: '',
         length_ft: 0,
@@ -232,19 +249,59 @@ export default function AirportEditorWithTabs({ icao }: AirportEditorProps) {
       })
     }
   }
+  
+  const handleEditRunway = (index: number) => {
+    const runway = runways[index]
+    setNewRunway({
+      ident: runway.ident,
+      length_ft: runway.length_ft,
+      width_ft: runway.width_ft,
+      surface: runway.surface,
+      ils: runway.ils
+    })
+    setEditingRunwayIndex(index)
+  }
+  
+  const handleCancelEditRunway = () => {
+    setNewRunway({
+      ident: '',
+      length_ft: 0,
+      width_ft: 0,
+      surface: '',
+      ils: false
+    })
+    setEditingRunwayIndex(null)
+  }
 
   const handleDeleteRunway = (index: number) => {
     setRunways(runways.filter((_, i) => i !== index))
+    // If we were editing this runway, cancel edit mode
+    if (editingRunwayIndex === index) {
+      handleCancelEditRunway()
+    }
   }
 
-  const handleAddFrequency = () => {
+  const handleAddOrUpdateFrequency = () => {
     if (newFrequency.frequency && newFrequency.type && airport) {
-      setFrequencies([...frequencies, {
+      const frequencyData = {
         icao: airport.icao,
         frequency: newFrequency.frequency,
         type: newFrequency.type,
         description: newFrequency.description || ''
-      }])
+      }
+      
+      if (editingFrequencyIndex !== null) {
+        // Update existing frequency
+        const updatedFrequencies = [...frequencies]
+        updatedFrequencies[editingFrequencyIndex] = frequencyData
+        setFrequencies(updatedFrequencies)
+        setEditingFrequencyIndex(null)
+      } else {
+        // Add new frequency
+        setFrequencies([...frequencies, frequencyData])
+      }
+      
+      // Reset form
       setNewFrequency({
         frequency: '',
         type: '',
@@ -252,9 +309,32 @@ export default function AirportEditorWithTabs({ icao }: AirportEditorProps) {
       })
     }
   }
+  
+  const handleEditFrequency = (index: number) => {
+    const frequency = frequencies[index]
+    setNewFrequency({
+      frequency: frequency.frequency,
+      type: frequency.type,
+      description: frequency.description || ''
+    })
+    setEditingFrequencyIndex(index)
+  }
+  
+  const handleCancelEditFrequency = () => {
+    setNewFrequency({
+      frequency: '',
+      type: '',
+      description: ''
+    })
+    setEditingFrequencyIndex(null)
+  }
 
   const handleDeleteFrequency = (index: number) => {
     setFrequencies(frequencies.filter((_, i) => i !== index))
+    // If we were editing this frequency, cancel edit mode
+    if (editingFrequencyIndex === index) {
+      handleCancelEditFrequency()
+    }
   }
 
   const frequencyTypes = [
@@ -503,7 +583,9 @@ export default function AirportEditorWithTabs({ icao }: AirportEditorProps) {
                 {/* Existing Runways */}
                 <div className="space-y-2 mb-6">
                   {runways.map((runway, index) => (
-                    <div key={index} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                    <div key={index} className={`flex items-center justify-between p-3 rounded-lg ${
+                      editingRunwayIndex === index ? 'bg-violet-50 dark:bg-violet-900/20 border-2 border-violet-300 dark:border-violet-700' : 'bg-gray-50 dark:bg-gray-900'
+                    }`}>
                       <div className="flex items-center space-x-4">
                         <span className="font-semibold">{runway.ident}</span>
                         <span className="text-sm text-gray-600 dark:text-gray-400">
@@ -518,20 +600,30 @@ export default function AirportEditorWithTabs({ icao }: AirportEditorProps) {
                           </span>
                         )}
                       </div>
-                      <button
-                        onClick={() => handleDeleteRunway(index)}
-                        className="text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </button>
+                      <div className="flex items-center space-x-2">
+                        <button
+                          onClick={() => handleEditRunway(index)}
+                          className="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
+                          title="Edit runway"
+                        >
+                          <Edit2 className="h-4 w-4" />
+                        </button>
+                        <button
+                          onClick={() => handleDeleteRunway(index)}
+                          className="text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
+                          title="Delete runway"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </div>
                     </div>
                   ))}
                 </div>
 
-                {/* Add New Runway */}
+                {/* Add/Edit Runway Form */}
                 <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
                   <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-3">
-                    Add New Runway
+                    {editingRunwayIndex !== null ? 'Edit Runway' : 'Add New Runway'}
                   </h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                     <input
@@ -574,10 +666,27 @@ export default function AirportEditorWithTabs({ icao }: AirportEditorProps) {
                       />
                       <span className="text-sm">ILS Available</span>
                     </label>
-                    <Button onClick={handleAddRunway} size="sm">
-                      <Plus className="h-4 w-4 mr-1" />
-                      Add Runway
-                    </Button>
+                    <div className="flex gap-2">
+                      <Button onClick={handleAddOrUpdateRunway} size="sm">
+                        {editingRunwayIndex !== null ? (
+                          <>
+                            <Save className="h-4 w-4 mr-1" />
+                            Update Runway
+                          </>
+                        ) : (
+                          <>
+                            <Plus className="h-4 w-4 mr-1" />
+                            Add Runway
+                          </>
+                        )}
+                      </Button>
+                      {editingRunwayIndex !== null && (
+                        <Button onClick={handleCancelEditRunway} size="sm" variant="outline">
+                          <X className="h-4 w-4 mr-1" />
+                          Cancel
+                        </Button>
+                      )}
+                    </div>
                   </div>
                 </div>
                 
@@ -600,9 +709,11 @@ export default function AirportEditorWithTabs({ icao }: AirportEditorProps) {
                 {/* Existing Frequencies */}
                 <div className="space-y-2 mb-6">
                   {frequencies.map((freq, index) => (
-                    <div key={index} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                    <div key={index} className={`flex items-center justify-between p-3 rounded-lg ${
+                      editingFrequencyIndex === index ? 'bg-violet-50 dark:bg-violet-900/20 border-2 border-violet-300 dark:border-violet-700' : 'bg-gray-50 dark:bg-gray-900'
+                    }`}>
                       <div className="flex items-center space-x-4">
-                        <span className="font-semibold">{freq.frequency} MHz</span>
+                        <span className="font-semibold">{freq.frequency}</span>
                         <span className="px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-xs rounded">
                           {freq.type}
                         </span>
@@ -612,20 +723,30 @@ export default function AirportEditorWithTabs({ icao }: AirportEditorProps) {
                           </span>
                         )}
                       </div>
-                      <button
-                        onClick={() => handleDeleteFrequency(index)}
-                        className="text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </button>
+                      <div className="flex items-center space-x-2">
+                        <button
+                          onClick={() => handleEditFrequency(index)}
+                          className="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
+                          title="Edit frequency"
+                        >
+                          <Edit2 className="h-4 w-4" />
+                        </button>
+                        <button
+                          onClick={() => handleDeleteFrequency(index)}
+                          className="text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
+                          title="Delete frequency"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </div>
                     </div>
                   ))}
                 </div>
 
-                {/* Add New Frequency */}
+                {/* Add/Edit Frequency Form */}
                 <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
                   <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-3">
-                    Add New Frequency
+                    {editingFrequencyIndex !== null ? 'Edit Frequency' : 'Add New Frequency'}
                   </h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                     <input
@@ -652,10 +773,27 @@ export default function AirportEditorWithTabs({ icao }: AirportEditorProps) {
                       onChange={(e) => setNewFrequency({ ...newFrequency, description: e.target.value })}
                       className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-500 dark:bg-gray-700 dark:text-white"
                     />
-                    <Button onClick={handleAddFrequency} size="sm">
-                      <Plus className="h-4 w-4 mr-1" />
-                      Add Frequency
-                    </Button>
+                    <div className="flex gap-2">
+                      <Button onClick={handleAddOrUpdateFrequency} size="sm">
+                        {editingFrequencyIndex !== null ? (
+                          <>
+                            <Save className="h-4 w-4 mr-1" />
+                            Update Frequency
+                          </>
+                        ) : (
+                          <>
+                            <Plus className="h-4 w-4 mr-1" />
+                            Add Frequency
+                          </>
+                        )}
+                      </Button>
+                      {editingFrequencyIndex !== null && (
+                        <Button onClick={handleCancelEditFrequency} size="sm" variant="outline">
+                          <X className="h-4 w-4 mr-1" />
+                          Cancel
+                        </Button>
+                      )}
+                    </div>
                   </div>
                 </div>
                 
