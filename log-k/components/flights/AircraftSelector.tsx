@@ -8,9 +8,10 @@ interface Aircraft {
   id: string
   registration: string
   aircraft_type: string
-  manufacturer?: string | null
-  model?: string | null
+  serial_number?: string | null
   engine_type?: string | null
+  aircraft_class?: 'SEP' | 'MEP' | 'SET' | 'MET' | null
+  default_condition?: 'VFR' | 'IFR' | null
   complex_aircraft?: boolean
   high_performance?: boolean
   tailwheel?: boolean
@@ -71,8 +72,7 @@ export default function AircraftSelector({
     return (
       plane.registration.toLowerCase().includes(search) ||
       plane.aircraft_type.toLowerCase().includes(search) ||
-      plane.manufacturer?.toLowerCase().includes(search) ||
-      plane.model?.toLowerCase().includes(search)
+      plane.serial_number?.toLowerCase().includes(search)
     )
   })
 
@@ -182,9 +182,9 @@ export default function AircraftSelector({
                           {plane.aircraft_type}
                         </span>
                       </div>
-                      {plane.manufacturer && (
+                      {plane.aircraft_class && (
                         <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                          {plane.manufacturer} {plane.model}
+                          {plane.aircraft_class} • {plane.default_condition || 'VFR'}
                         </p>
                       )}
                     </div>

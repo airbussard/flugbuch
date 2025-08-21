@@ -48,10 +48,10 @@ export async function GET(request: NextRequest) {
     // Search Aircraft
     const { data: aircraft } = await supabase
       .from('aircrafts')
-      .select('id, registration, aircraft_type, manufacturer, model')
+      .select('id, registration, aircraft_type, serial_number, aircraft_class')
       .eq('user_id', user.id)
       .eq('deleted', false)
-      .or(`registration.ilike.%${searchTerm}%,aircraft_type.ilike.%${searchTerm}%,manufacturer.ilike.%${searchTerm}%,model.ilike.%${searchTerm}%`)
+      .or(`registration.ilike.%${searchTerm}%,aircraft_type.ilike.%${searchTerm}%,serial_number.ilike.%${searchTerm}%`)
       .order('registration')
       .limit(10)
 
@@ -61,7 +61,7 @@ export async function GET(request: NextRequest) {
           type: 'aircraft',
           id: plane.id,
           title: plane.registration,
-          subtitle: `${plane.aircraft_type}${plane.manufacturer ? ` • ${plane.manufacturer}` : ''}`,
+          subtitle: `${plane.aircraft_type}${plane.aircraft_class ? ` • ${plane.aircraft_class}` : ''}`,
           url: `/fleet/${plane.id}`
         })
       })
@@ -70,10 +70,10 @@ export async function GET(request: NextRequest) {
     // Search Crew
     const { data: crew } = await supabase
       .from('crew_members')
-      .select('id, name, email, rank, airline')
+      .select('id, name, email, role')
       .eq('user_id', user.id)
       .eq('deleted', false)
-      .or(`name.ilike.%${searchTerm}%,email.ilike.%${searchTerm}%,rank.ilike.%${searchTerm}%,airline.ilike.%${searchTerm}%`)
+      .or(`name.ilike.%${searchTerm}%,email.ilike.%${searchTerm}%,role.ilike.%${searchTerm}%`)
       .order('name')
       .limit(10)
 
@@ -83,7 +83,7 @@ export async function GET(request: NextRequest) {
           type: 'crew',
           id: member.id,
           title: member.name,
-          subtitle: [member.rank, member.airline].filter(Boolean).join(' • ') || member.email || '',
+          subtitle: member.role || member.email || '',
           url: `/crew/${member.id}`
         })
       })

@@ -6,9 +6,8 @@ import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { ArrowLeft, Save } from 'lucide-react'
+import { ArrowLeft, Save, Plane } from 'lucide-react'
 import Link from 'next/link'
-import { debug, logSupabaseQuery, logSupabaseResponse } from '@/lib/debug'
 
 interface AircraftFormProps {
   aircraft?: any
@@ -24,10 +23,11 @@ export default function AircraftForm({ aircraft, mode }: AircraftFormProps) {
   const [formData, setFormData] = useState({
     registration: aircraft?.registration || '',
     aircraft_type: aircraft?.aircraft_type || '',
-    manufacturer: aircraft?.manufacturer || '',
-    model: aircraft?.model || '',
-    year: aircraft?.year || '',
+    serial_number: aircraft?.serial_number || '',
     engine_type: aircraft?.engine_type || '',
+    first_flight: aircraft?.first_flight || '',
+    aircraft_class: aircraft?.aircraft_class || '',
+    default_condition: aircraft?.default_condition || 'VFR',
     complex_aircraft: aircraft?.complex_aircraft || false,
     high_performance: aircraft?.high_performance || false,
     tailwheel: aircraft?.tailwheel || false,
@@ -43,14 +43,15 @@ export default function AircraftForm({ aircraft, mode }: AircraftFormProps) {
       const { data: { user } } = await supabase.auth.getUser()
       
       if (!user) {
-        setError('You must be logged in')
+        setError('Sie müssen angemeldet sein')
         return
       }
 
       const aircraftData = {
         ...formData,
         user_id: user.id,
-        year: formData.year ? parseInt(formData.year) : null,
+        aircraft_class: formData.aircraft_class || null,
+        first_flight: formData.first_flight || null,
         deleted: false,
       }
 
@@ -73,14 +74,14 @@ export default function AircraftForm({ aircraft, mode }: AircraftFormProps) {
       router.refresh()
     } catch (err: any) {
       console.error('Error saving aircraft:', err)
-      setError(err.message || 'Failed to save aircraft')
+      setError(err.message || 'Fehler beim Speichern des Flugzeugs')
     } finally {
       setLoading(false)
     }
   }
 
   const handleDelete = async () => {
-    if (!confirm('Are you sure you want to delete this aircraft?')) return
+    if (!confirm('Sind Sie sicher, dass Sie dieses Flugzeug löschen möchten?')) return
     
     setLoading(true)
     try {
@@ -95,7 +96,7 @@ export default function AircraftForm({ aircraft, mode }: AircraftFormProps) {
       router.refresh()
     } catch (err: any) {
       console.error('Error deleting aircraft:', err)
-      setError(err.message || 'Failed to delete aircraft')
+      setError(err.message || 'Fehler beim Löschen des Flugzeugs')
     } finally {
       setLoading(false)
     }
@@ -104,98 +105,151 @@ export default function AircraftForm({ aircraft, mode }: AircraftFormProps) {
   return (
     <div className="max-w-2xl mx-auto">
       <div className="mb-6">
-        <Link href="/fleet" className="inline-flex items-center text-gray-600 hover:text-gray-900">
+        <Link href="/fleet" className="inline-flex items-center text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">
           <ArrowLeft className="h-4 w-4 mr-2" />
-          Back to Fleet
+          Zurück zur Flotte
         </Link>
       </div>
 
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
-          {mode === 'create' ? 'Add New Aircraft' : 'Edit Aircraft'}
-        </h2>
+        <div className="flex items-center mb-6">
+          <Plane className="h-6 w-6 text-violet-500 mr-3" />
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+            {mode === 'create' ? 'Neues Flugzeug hinzufügen' : 'Flugzeug bearbeiten'}
+          </h2>
+        </div>
 
         {error && (
-          <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
+          <div className="mb-4 p-3 bg-red-100 dark:bg-red-900/20 border border-red-400 dark:border-red-800 text-red-700 dark:text-red-400 rounded">
             {error}
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="registration">Registration *</Label>
-              <Input
-                id="registration"
-                value={formData.registration}
-                onChange={(e) => setFormData({ ...formData, registration: e.target.value })}
-                required
-                placeholder="D-ABCD"
-              />
-            </div>
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Basic Information */}
+          <div className="space-y-4">
+            <h3 className="text-lg font-medium text-gray-900 dark:text-white">Grundinformationen</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="registration">Kennzeichen *</Label>
+                <Input
+                  id="registration"
+                  value={formData.registration}
+                  onChange={(e) => setFormData({ ...formData, registration: e.target.value.toUpperCase() })}
+                  required
+                  placeholder="D-ABCD"
+                  className="uppercase"
+                />
+              </div>
 
-            <div>
-              <Label htmlFor="aircraft_type">Aircraft Type *</Label>
-              <Input
-                id="aircraft_type"
-                value={formData.aircraft_type}
-                onChange={(e) => setFormData({ ...formData, aircraft_type: e.target.value })}
-                required
-                placeholder="Cessna 172"
-              />
-            </div>
+              <div>
+                <Label htmlFor="aircraft_type">Flugzeugtyp *</Label>
+                <Input
+                  id="aircraft_type"
+                  value={formData.aircraft_type}
+                  onChange={(e) => setFormData({ ...formData, aircraft_type: e.target.value })}
+                  required
+                  placeholder="Cessna 172"
+                />
+              </div>
 
-            <div>
-              <Label htmlFor="manufacturer">Manufacturer</Label>
-              <Input
-                id="manufacturer"
-                value={formData.manufacturer}
-                onChange={(e) => setFormData({ ...formData, manufacturer: e.target.value })}
-                placeholder="Cessna"
-              />
-            </div>
+              <div>
+                <Label htmlFor="serial_number">Seriennummer</Label>
+                <Input
+                  id="serial_number"
+                  value={formData.serial_number}
+                  onChange={(e) => setFormData({ ...formData, serial_number: e.target.value })}
+                  placeholder="17281234"
+                />
+              </div>
 
-            <div>
-              <Label htmlFor="model">Model</Label>
-              <Input
-                id="model"
-                value={formData.model}
-                onChange={(e) => setFormData({ ...formData, model: e.target.value })}
-                placeholder="172S"
-              />
-            </div>
+              <div>
+                <Label htmlFor="engine_type">Triebwerkstyp</Label>
+                <Input
+                  id="engine_type"
+                  value={formData.engine_type}
+                  onChange={(e) => setFormData({ ...formData, engine_type: e.target.value })}
+                  placeholder="Piston"
+                />
+              </div>
 
-            <div>
-              <Label htmlFor="year">Year</Label>
-              <Input
-                id="year"
-                type="number"
-                value={formData.year}
-                onChange={(e) => setFormData({ ...formData, year: e.target.value })}
-                placeholder="2020"
-              />
-            </div>
-
-            <div>
-              <Label htmlFor="engine_type">Engine Type</Label>
-              <Input
-                id="engine_type"
-                value={formData.engine_type}
-                onChange={(e) => setFormData({ ...formData, engine_type: e.target.value })}
-                placeholder="Piston"
-              />
+              <div>
+                <Label htmlFor="first_flight">Erstflug</Label>
+                <Input
+                  id="first_flight"
+                  type="date"
+                  value={formData.first_flight}
+                  onChange={(e) => setFormData({ ...formData, first_flight: e.target.value })}
+                />
+              </div>
             </div>
           </div>
 
-          <div className="space-y-2">
-            <h3 className="font-semibold text-gray-900 dark:text-white">Aircraft Characteristics</h3>
+          {/* Aircraft Classification */}
+          <div className="space-y-4">
+            <h3 className="text-lg font-medium text-gray-900 dark:text-white">Flugzeugklassifizierung</h3>
+            
+            <div>
+              <Label htmlFor="aircraft_class">Flugzeugklasse</Label>
+              <select
+                id="aircraft_class"
+                value={formData.aircraft_class}
+                onChange={(e) => setFormData({ ...formData, aircraft_class: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md 
+                         bg-white dark:bg-gray-900 text-gray-900 dark:text-white
+                         focus:ring-2 focus:ring-violet-500 focus:border-violet-500"
+              >
+                <option value="">Nicht spezifiziert</option>
+                <option value="SEP">SEP - Single Engine Piston</option>
+                <option value="MEP">MEP - Multi Engine Piston</option>
+                <option value="SET">SET - Single Engine Turbine</option>
+                <option value="MET">MET - Multi Engine Turbine</option>
+              </select>
+            </div>
+
+            <div>
+              <Label>Standard Flugregeln</Label>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">
+                Diese werden bei Flügen mit diesem Flugzeug vorausgewählt
+              </p>
+              <div className="flex space-x-4">
+                <label className="flex items-center">
+                  <input
+                    type="radio"
+                    value="VFR"
+                    checked={formData.default_condition === 'VFR'}
+                    onChange={() => setFormData({ ...formData, default_condition: 'VFR' })}
+                    className="mr-2"
+                  />
+                  VFR - Visual Flight Rules
+                </label>
+                <label className="flex items-center">
+                  <input
+                    type="radio"
+                    value="IFR"
+                    checked={formData.default_condition === 'IFR'}
+                    onChange={() => setFormData({ ...formData, default_condition: 'IFR' })}
+                    className="mr-2"
+                  />
+                  IFR - Instrument Flight Rules
+                </label>
+              </div>
+            </div>
+          </div>
+
+          {/* Aircraft Characteristics */}
+          <div className="space-y-4">
+            <h3 className="text-lg font-medium text-gray-900 dark:text-white">Flugzeugeigenschaften</h3>
+            <p className="text-sm text-gray-500 dark:text-gray-400">
+              Wählen Sie zutreffende Eigenschaften für die regulatorische Compliance
+            </p>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <label className="flex items-center space-x-2">
                 <input
                   type="checkbox"
                   checked={formData.complex_aircraft}
                   onChange={(e) => setFormData({ ...formData, complex_aircraft: e.target.checked })}
-                  className="rounded"
+                  className="rounded text-violet-600 focus:ring-violet-500"
                 />
                 <span className="text-sm">Complex</span>
               </label>
@@ -205,7 +259,7 @@ export default function AircraftForm({ aircraft, mode }: AircraftFormProps) {
                   type="checkbox"
                   checked={formData.high_performance}
                   onChange={(e) => setFormData({ ...formData, high_performance: e.target.checked })}
-                  className="rounded"
+                  className="rounded text-violet-600 focus:ring-violet-500"
                 />
                 <span className="text-sm">High Performance</span>
               </label>
@@ -215,9 +269,9 @@ export default function AircraftForm({ aircraft, mode }: AircraftFormProps) {
                   type="checkbox"
                   checked={formData.tailwheel}
                   onChange={(e) => setFormData({ ...formData, tailwheel: e.target.checked })}
-                  className="rounded"
+                  className="rounded text-violet-600 focus:ring-violet-500"
                 />
-                <span className="text-sm">Tailwheel</span>
+                <span className="text-sm">Spornrad</span>
               </label>
 
               <label className="flex items-center space-x-2">
@@ -225,7 +279,7 @@ export default function AircraftForm({ aircraft, mode }: AircraftFormProps) {
                   type="checkbox"
                   checked={formData.glass_panel}
                   onChange={(e) => setFormData({ ...formData, glass_panel: e.target.checked })}
-                  className="rounded"
+                  className="rounded text-violet-600 focus:ring-violet-500"
                 />
                 <span className="text-sm">Glass Panel</span>
               </label>
@@ -241,7 +295,7 @@ export default function AircraftForm({ aircraft, mode }: AircraftFormProps) {
                   onClick={handleDelete}
                   disabled={loading}
                 >
-                  Delete Aircraft
+                  Flugzeug löschen
                 </Button>
               )}
             </div>
@@ -253,11 +307,11 @@ export default function AircraftForm({ aircraft, mode }: AircraftFormProps) {
                 onClick={() => router.back()}
                 disabled={loading}
               >
-                Cancel
+                Abbrechen
               </Button>
               <Button type="submit" disabled={loading}>
                 <Save className="h-4 w-4 mr-2" />
-                {loading ? 'Saving...' : 'Save Aircraft'}
+                {loading ? 'Speichern...' : 'Flugzeug speichern'}
               </Button>
             </div>
           </div>

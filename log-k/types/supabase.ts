@@ -65,14 +65,19 @@ export interface Database {
           user_id: string
           registration: string
           aircraft_type: string
-          manufacturer: string | null
-          model: string | null
-          year: number | null
+          serial_number: string | null
           engine_type: string | null
+          first_flight: string | null
+          aircraft_class: 'SEP' | 'MEP' | 'SET' | 'MET' | null
+          default_condition: 'VFR' | 'IFR' | null
           complex_aircraft: boolean
           high_performance: boolean
           tailwheel: boolean
           glass_panel: boolean
+          economy_seats: number | null
+          premium_economy_seats: number | null
+          business_seats: number | null
+          first_class_seats: number | null
           deleted: boolean
           created_at: string
           updated_at: string
