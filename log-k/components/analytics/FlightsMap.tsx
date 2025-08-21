@@ -82,8 +82,14 @@ export default function FlightsMap({ flights }: FlightsMapProps) {
     const loadAirportData = async () => {
       setLoading(true)
       
-      // Load airport data
-      await airportService.loadAirportsFromFile()
+      // Debug logging
+      console.group('🗺️ FlightsMap Debug')
+      console.log('Total flights received:', flights.length)
+      console.log('Filtered flights (after year filter):', filteredFlights.length)
+      
+      // Load airport data - use loadAirports() instead of loadAirportsFromFile()
+      await airportService.loadAirports()
+      console.log('Airports loaded from service:', airportService.airports?.size || 0)
       
       // Get unique airport codes
       const airportCodes = new Set<string>()
@@ -91,6 +97,11 @@ export default function FlightsMap({ flights }: FlightsMapProps) {
         if (flight.departure_airport) airportCodes.add(flight.departure_airport)
         if (flight.arrival_airport) airportCodes.add(flight.arrival_airport)
       })
+      console.log('Unique airport codes needed:', airportCodes.size)
+      
+      // Track missing airports and dropped flights
+      const missingAirports: any[] = []
+      const droppedFlights: any[] = []
       
       // Fetch coordinates for each flight
       const routes = await Promise.all(
@@ -100,16 +111,63 @@ export default function FlightsMap({ flights }: FlightsMapProps) {
             flight.arrival_airport ? airportService.getAirport(flight.arrival_airport) : null
           ])
           
+          // Track missing airports
+          if (flight.departure_airport && !departure) {
+            missingAirports.push({
+              flightId: flight.id,
+              flightDate: flight.flight_date,
+              airport: flight.departure_airport,
+              type: 'departure'
+            })
+          }
+          if (flight.arrival_airport && !arrival) {
+            missingAirports.push({
+              flightId: flight.id,
+              flightDate: flight.flight_date,
+              airport: flight.arrival_airport,
+              type: 'arrival'
+            })
+          }
+          
+          // Track dropped flights
+          if (!departure || !arrival) {
+            droppedFlights.push({
+              flightId: flight.id,
+              date: flight.flight_date,
+              departure: flight.departure_airport,
+              arrival: flight.arrival_airport,
+              hasDeparture: !!departure,
+              hasArrival: !!arrival,
+              registration: flight.registration
+            })
+          }
+          
           return { flight, departure, arrival }
         })
       )
       
-      setFlightRoutes(routes.filter(r => r.departure && r.arrival))
+      const validRoutes = routes.filter(r => r.departure && r.arrival)
+      
+      console.log('Routes processed:', routes.length)
+      console.log('Valid routes (with both airports):', validRoutes.length)
+      console.log('Dropped flights:', droppedFlights.length)
+      
+      if (missingAirports.length > 0) {
+        console.warn('Missing airports in database:', missingAirports)
+      }
+      
+      if (droppedFlights.length > 0) {
+        console.warn('Dropped flights (missing airport data):', droppedFlights)
+      }
+      
+      console.groupEnd()
+      
+      setFlightRoutes(validRoutes)
       setLoading(false)
     }
     
     loadAirportData()
-  }, [filteredFlights])
+  }, [filteredFlights, flights.length])
 
   // Calculate center of map based on all airports
   const getMapCenter = (): [number, number] => {

@@ -12,7 +12,7 @@ export interface Airport {
 }
 
 class AirportService {
-  private airports: Map<string, Airport> = new Map()
+  public airports: Map<string, Airport> = new Map()
   private loaded = false
 
   // Server-side loading method (for SSR pages and API routes)
@@ -168,7 +168,14 @@ class AirportService {
     }
     
     const upperCode = code.toUpperCase()
-    return this.airports.get(upperCode) || null
+    const airport = this.airports.get(upperCode)
+    
+    // Debug logging for missing airports
+    if (!airport && code) {
+      console.debug(`❌ Airport not found: ${code}`)
+    }
+    
+    return airport || null
   }
 
   async searchAirports(query: string, limit = 10): Promise<Airport[]> {
