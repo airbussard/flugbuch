@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
-import AirportEditor from '@/components/airports/AirportEditor'
+import AirportEditorWithTabs from '@/components/airports/AirportEditorWithTabs'
 
 interface PageProps {
   searchParams: Promise<{ icao?: string }>
@@ -38,7 +38,7 @@ export default async function AirportEditorPage({ searchParams }: PageProps) {
         </p>
       </div>
       
-      <AirportEditor icao={params.icao} />
+      <AirportEditorWithTabs icao={params.icao} />
     </div>
   )
 }

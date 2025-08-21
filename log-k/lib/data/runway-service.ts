@@ -8,15 +8,20 @@ export interface RunwayDirection {
 }
 
 export interface Runway {
+  icao: string
   ident: string
-  length: number // in feet
-  width: number // in feet
+  length_ft: number // in feet
+  width_ft: number // in feet
   surface: string
-  lighted: boolean
-  inUse: boolean
+  ils: boolean
+  // Legacy fields for compatibility
+  length?: number // deprecated
+  width?: number // deprecated
+  lighted?: boolean
+  inUse?: boolean
   slope?: number
-  left: RunwayDirection
-  right: RunwayDirection
+  left?: RunwayDirection
+  right?: RunwayDirection
 }
 
 export interface AirportRunways {
@@ -129,11 +134,19 @@ class RunwayService {
       const airport = this.cleanField(fields[airportIdx])
       
       if (airport) {
+        const lengthFt = parseInt(this.cleanField(fields[lengthIdx]) || '0')
+        const widthFt = parseInt(this.cleanField(fields[widthIdx]) || '0')
+        
         const runway: Runway = {
+          icao: airport,
           ident: this.cleanField(fields[identIdx]),
-          length: parseInt(this.cleanField(fields[lengthIdx]) || '0'),
-          width: parseInt(this.cleanField(fields[widthIdx]) || '0'),
+          length_ft: lengthFt,
+          width_ft: widthFt,
           surface: this.formatSurface(this.cleanField(fields[surfaceIdx])),
+          ils: false, // Default value, not in CSV
+          // Legacy fields for compatibility
+          length: lengthFt,
+          width: widthFt,
           lighted: this.cleanField(fields[lightedIdx]) === '1',
           inUse: this.cleanField(fields[inuseIdx]) === '1',
           slope: parseFloat(this.cleanField(fields[slopeIdx]) || '0') || undefined,
@@ -200,9 +213,11 @@ class RunwayService {
     return this.runways.get(icao.toUpperCase()) || []
   }
 
-  async updateRunway(icao: string, runways: Runway[]): Promise<void> {
+  async updateRunways(icao: string, runways: Runway[]): Promise<void> {
     this.runways.set(icao.toUpperCase(), runways)
-    // Note: Actual CSV update would need to be handled by an API endpoint
+    // In a real implementation, this would persist to a database or file
+    // For now, updates are only in memory and will be lost on restart
+    console.log(`Updated ${runways.length} runways for ${icao}`)
   }
 
   clearCache(): void {

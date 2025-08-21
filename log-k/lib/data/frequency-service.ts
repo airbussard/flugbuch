@@ -1,7 +1,9 @@
 export interface Frequency {
+  icao: string
   type: string
   frequency: string // Formatted as "118.450 MHz"
-  raw: string // Raw frequency value
+  description?: string // Optional description
+  raw?: string // Raw frequency value (optional for new entries)
 }
 
 export interface AirportFrequencies {
@@ -90,6 +92,7 @@ class FrequencyService {
       
       if (airport && type && rawFreq) {
         const frequency: Frequency = {
+          icao: airport,
           type,
           frequency: this.formatFrequency(rawFreq),
           raw: rawFreq
@@ -147,6 +150,14 @@ class FrequencyService {
   clearCache(): void {
     this.frequencies.clear()
     this.loaded = false
+  }
+
+  // Update frequencies for an airport
+  async updateFrequencies(icao: string, frequencies: Frequency[]): Promise<void> {
+    this.frequencies.set(icao.toUpperCase(), frequencies)
+    // In a real implementation, this would persist to a database or file
+    // For now, updates are only in memory and will be lost on restart
+    console.log(`Updated ${frequencies.length} frequencies for ${icao}`)
   }
 
   // Get frequency types for dropdown

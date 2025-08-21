@@ -92,18 +92,18 @@ export default function AirportRunways({ icao }: AirportRunwaysProps) {
               <div>
                 <p className="text-xs text-gray-500 dark:text-gray-400">Länge</p>
                 <p className="font-medium text-gray-900 dark:text-white">
-                  {runway.length.toLocaleString()} ft
+                  {(runway.length_ft || runway.length || 0).toLocaleString()} ft
                   <span className="text-xs text-gray-500 dark:text-gray-400 ml-1">
-                    ({runwayService.feetToMeters(runway.length)}m)
+                    ({runwayService.feetToMeters(runway.length_ft || runway.length || 0)}m)
                   </span>
                 </p>
               </div>
               <div>
                 <p className="text-xs text-gray-500 dark:text-gray-400">Breite</p>
                 <p className="font-medium text-gray-900 dark:text-white">
-                  {runway.width} ft
+                  {(runway.width_ft || runway.width || 0)} ft
                   <span className="text-xs text-gray-500 dark:text-gray-400 ml-1">
-                    ({runwayService.feetToMeters(runway.width)}m)
+                    ({runwayService.feetToMeters(runway.width_ft || runway.width || 0)}m)
                   </span>
                 </p>
               </div>
@@ -131,24 +131,24 @@ export default function AirportRunways({ icao }: AirportRunwaysProps) {
                 <div className="flex items-center gap-2 mb-2">
                   <Navigation className="h-4 w-4 text-blue-500" />
                   <span className="font-semibold text-gray-900 dark:text-white">
-                    {runway.left.ident}
+                    {runway.left?.ident || 'N/A'}
                   </span>
                   <span className="text-sm text-gray-600 dark:text-gray-400">
-                    {runway.left.heading}°
+                    {runway.left?.heading || 0}°
                   </span>
                 </div>
                 <div className="text-xs space-y-1">
-                  {runway.left.elevation && (
+                  {runway.left?.elevation && (
                     <p className="text-gray-600 dark:text-gray-400">
                       Elevation: {runway.left.elevation} ft
                     </p>
                   )}
-                  {runway.left.displaced_threshold && runway.left.displaced_threshold > 0 && (
+                  {runway.left?.displaced_threshold && runway.left.displaced_threshold > 0 && (
                     <p className="text-orange-600 dark:text-orange-400">
                       Versetzte Schwelle: {runway.left.displaced_threshold} ft
                     </p>
                   )}
-                  {runway.left.lat && runway.left.lon && (
+                  {runway.left?.lat && runway.left?.lon && (
                     <p className="text-gray-600 dark:text-gray-400">
                       {runway.left.lat.toFixed(4)}°, {runway.left.lon.toFixed(4)}°
                     </p>
@@ -161,24 +161,24 @@ export default function AirportRunways({ icao }: AirportRunwaysProps) {
                 <div className="flex items-center gap-2 mb-2">
                   <Navigation className="h-4 w-4 text-blue-500" />
                   <span className="font-semibold text-gray-900 dark:text-white">
-                    {runway.right.ident}
+                    {runway.right?.ident || 'N/A'}
                   </span>
                   <span className="text-sm text-gray-600 dark:text-gray-400">
-                    {runway.right.heading}°
+                    {runway.right?.heading || 0}°
                   </span>
                 </div>
                 <div className="text-xs space-y-1">
-                  {runway.right.elevation && (
+                  {runway.right?.elevation && (
                     <p className="text-gray-600 dark:text-gray-400">
                       Elevation: {runway.right.elevation} ft
                     </p>
                   )}
-                  {runway.right.displaced_threshold && runway.right.displaced_threshold > 0 && (
+                  {runway.right?.displaced_threshold && runway.right.displaced_threshold > 0 && (
                     <p className="text-orange-600 dark:text-orange-400">
                       Versetzte Schwelle: {runway.right.displaced_threshold} ft
                     </p>
                   )}
-                  {runway.right.lat && runway.right.lon && (
+                  {runway.right?.lat && runway.right?.lon && (
                     <p className="text-gray-600 dark:text-gray-400">
                       {runway.right.lat.toFixed(4)}°, {runway.right.lon.toFixed(4)}°
                     </p>
