@@ -1,25 +1,66 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
-import { Mail, Lock, User, AlertCircle, CheckCircle } from 'lucide-react'
+import { Mail, Lock, User, AlertCircle, CheckCircle, AtSign, Loader2 } from 'lucide-react'
 
 export default function RegisterPage() {
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
     email: '',
+    username: '',
     password: '',
     confirmPassword: '',
   })
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [checkingUsername, setCheckingUsername] = useState(false)
+  const [usernameStatus, setUsernameStatus] = useState<{
+    available?: boolean
+    error?: string
+    suggestions?: string[]
+  }>({})
+  const [usernameDebounce, setUsernameDebounce] = useState<NodeJS.Timeout | null>(null)
   const router = useRouter()
   const supabase = createClient()
+  
+  // Check username availability with debounce
+  useEffect(() => {
+    if (formData.username.length < 3) {
+      setUsernameStatus({})
+      return
+    }
+    
+    // Clear previous timeout
+    if (usernameDebounce) {
+      clearTimeout(usernameDebounce)
+    }
+    
+    // Set new timeout
+    const timeout = setTimeout(async () => {
+      setCheckingUsername(true)
+      try {
+        const response = await fetch(`/api/users/check-username?username=${encodeURIComponent(formData.username)}`)
+        const data = await response.json()
+        setUsernameStatus(data)
+      } catch (error) {
+        console.error('Error checking username:', error)
+      } finally {
+        setCheckingUsername(false)
+      }
+    }, 500) // 500ms debounce
+    
+    setUsernameDebounce(timeout)
+    
+    return () => {
+      if (timeout) clearTimeout(timeout)
+    }
+  }, [formData.username])
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -28,6 +69,19 @@ export default function RegisterPage() {
 
     if (formData.password !== formData.confirmPassword) {
       setError('Passwords do not match')
+      setLoading(false)
+      return
+    }
+    
+    // Validate username
+    if (!formData.username || formData.username.length < 3) {
+      setError('Username must be at least 3 characters long')
+      setLoading(false)
+      return
+    }
+    
+    if (usernameStatus.available === false) {
+      setError('Username is not available. Please choose another one.')
       setLoading(false)
       return
     }
@@ -62,16 +116,17 @@ export default function RegisterPage() {
         return
       }
 
-      // Create user profile
+      // Create user profile with username
       if (authData.user) {
         const { error: profileError } = await supabase
           .from('user_profiles')
           .insert([
             {
-              user_id: authData.user.id,
+              id: authData.user.id, // Using 'id' as primary key, not 'user_id'
               first_name: formData.firstName,
               last_name: formData.lastName,
               email: formData.email,
+              username: formData.username.toLowerCase(), // Store in lowercase for consistency
               compliance_mode: 'EASA',
             }
           ])
@@ -177,6 +232,64 @@ export default function RegisterPage() {
               placeholder="pilot@example.com"
             />
           </div>
+        </div>
+
+        <div>
+          <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-2">
+            Username <span className="text-xs text-gray-500">(for PIREPs and public display)</span>
+          </label>
+          <div className="relative">
+            <AtSign className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+            <input
+              id="username"
+              type="text"
+              value={formData.username}
+              onChange={(e) => setFormData({ ...formData, username: e.target.value.replace(/[^a-zA-Z0-9_]/g, '') })}
+              required
+              minLength={3}
+              maxLength={30}
+              className={`w-full pl-10 pr-10 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent ${
+                usernameStatus.available === false ? 'border-red-300' : 
+                usernameStatus.available === true ? 'border-green-300' : 'border-gray-300'
+              }`}
+              placeholder="pilot123"
+            />
+            {checkingUsername && (
+              <Loader2 className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 animate-spin" />
+            )}
+            {!checkingUsername && usernameStatus.available === true && formData.username.length >= 3 && (
+              <CheckCircle className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-green-500" />
+            )}
+            {!checkingUsername && usernameStatus.available === false && (
+              <AlertCircle className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-red-500" />
+            )}
+          </div>
+          {formData.username.length > 0 && formData.username.length < 3 && (
+            <p className="text-xs text-red-600 mt-1">Username must be at least 3 characters</p>
+          )}
+          {usernameStatus.error && (
+            <p className="text-xs text-red-600 mt-1">{usernameStatus.error}</p>
+          )}
+          {usernameStatus.available === true && formData.username.length >= 3 && (
+            <p className="text-xs text-green-600 mt-1">Username is available!</p>
+          )}
+          {usernameStatus.suggestions && usernameStatus.suggestions.length > 0 && (
+            <div className="mt-2">
+              <p className="text-xs text-gray-600">Try one of these:</p>
+              <div className="flex flex-wrap gap-1 mt-1">
+                {usernameStatus.suggestions.map((suggestion) => (
+                  <button
+                    key={suggestion}
+                    type="button"
+                    onClick={() => setFormData({ ...formData, username: suggestion })}
+                    className="text-xs px-2 py-1 bg-purple-100 text-purple-700 rounded hover:bg-purple-200 transition"
+                  >
+                    @{suggestion}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
 
         <div>

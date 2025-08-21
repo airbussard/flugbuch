@@ -14,16 +14,25 @@ export async function POST(request: NextRequest) {
       )
     }
     
-    // Get user profile for author name
+    // Get user profile for username
     const { data: profile } = await supabase
       .from('user_profiles')
-      .select('first_name, last_name')
+      .select('username')
       .eq('id', user.id)
       .single()
     
-    const authorName = profile 
-      ? `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || 'Anonymous Pilot'
-      : 'Anonymous Pilot'
+    // Check if user has a username
+    if (!profile?.username) {
+      return NextResponse.json(
+        { 
+          error: 'You must set a username before submitting PIREPs',
+          requiresUsername: true 
+        },
+        { status: 400 }
+      )
+    }
+    
+    const authorName = `@${profile.username}`
     
     // Parse request body
     const body = await request.json()

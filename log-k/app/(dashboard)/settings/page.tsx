@@ -24,6 +24,7 @@ export default async function SettingsPage() {
     firstName: userProfile?.first_name || '',
     lastName: userProfile?.last_name || '',
     email: userProfile?.email || user.email || '',
+    username: userProfile?.username || '',
     licenseNumber: userProfile?.license_number || '',
     complianceMode: userProfile?.compliance_mode || 'EASA',
     // These fields don't exist in DB, using defaults

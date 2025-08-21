@@ -214,7 +214,7 @@ export default function AirportPIREPs({ icao }: AirportPIREPsProps) {
                 <div className="flex flex-wrap gap-3 text-xs text-gray-600 dark:text-gray-400 mb-3">
                   <div className="flex items-center">
                     <User className="h-3 w-3 mr-1" />
-                    {pirep.author_name}
+                    <span className="font-medium">{pirep.author_name}</span>
                   </div>
                   <div className="flex items-center">
                     <Calendar className="h-3 w-3 mr-1" />

@@ -67,6 +67,12 @@ export default function PIREPForm({ icao, onSuccess, onCancel }: PIREPFormProps)
       const data = await response.json()
       
       if (!response.ok) {
+        // Check if the error is because the user needs to set a username
+        if (data.requiresUsername) {
+          // Redirect to settings page with a message
+          window.location.href = '/settings?message=username_required'
+          return
+        }
         throw new Error(data.error || 'Failed to submit PIREP')
       }
       
