@@ -45,6 +45,20 @@ export interface Database {
         Insert: Omit<Database['public']['Tables']['flights']['Row'], 'id' | 'created_at' | 'updated_at'>
         Update: Partial<Database['public']['Tables']['flights']['Insert']>
       }
+      flight_roles: {
+        Row: {
+          id: string
+          flight_id: string
+          crew_member_id: string
+          role_name: string
+          user_id: string
+          deleted: boolean
+          deleted_at: string | null
+          created_at: string
+        }
+        Insert: Omit<Database['public']['Tables']['flight_roles']['Row'], 'id' | 'created_at'>
+        Update: Partial<Database['public']['Tables']['flight_roles']['Insert']>
+      }
       aircrafts: {
         Row: {
           id: string
