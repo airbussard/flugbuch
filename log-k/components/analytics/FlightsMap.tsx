@@ -1,0 +1,298 @@
+'use client'
+
+import { useEffect, useState } from 'react'
+import dynamic from 'next/dynamic'
+import { airportService, type Airport } from '@/lib/data/airport-service'
+import { Loader2, MapPin, Plane, Calendar } from 'lucide-react'
+import YearFilter from './YearFilter'
+
+// Dynamically import Leaflet components to avoid SSR issues
+const MapContainer = dynamic(
+  () => import('react-leaflet').then(mod => mod.MapContainer),
+  { ssr: false }
+)
+const TileLayer = dynamic(
+  () => import('react-leaflet').then(mod => mod.TileLayer),
+  { ssr: false }
+)
+const Marker = dynamic(
+  () => import('react-leaflet').then(mod => mod.Marker),
+  { ssr: false }
+)
+const Popup = dynamic(
+  () => import('react-leaflet').then(mod => mod.Popup),
+  { ssr: false }
+)
+const Polyline = dynamic(
+  () => import('react-leaflet').then(mod => mod.Polyline),
+  { ssr: false }
+)
+
+// Import Leaflet CSS
+import 'leaflet/dist/leaflet.css'
+
+// Fix for default markers in production build
+import L from 'leaflet'
+import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png'
+import markerIcon from 'leaflet/dist/images/marker-icon.png'
+import markerShadow from 'leaflet/dist/images/marker-shadow.png'
+
+if (typeof window !== 'undefined') {
+  delete (L.Icon.Default.prototype as any)._getIconUrl
+  L.Icon.Default.mergeOptions({
+    iconUrl: markerIcon.src,
+    iconRetinaUrl: markerIcon2x.src,
+    shadowUrl: markerShadow.src,
+  })
+}
+
+interface Flight {
+  id: string
+  flight_date: string
+  departure_airport: string
+  arrival_airport: string
+  registration: string
+  aircraft_type: string
+  block_time: number | null
+}
+
+interface FlightsMapProps {
+  flights: Flight[]
+}
+
+export default function FlightsMap({ flights }: FlightsMapProps) {
+  const [loading, setLoading] = useState(true)
+  const [selectedYear, setSelectedYear] = useState<number | null>(null)
+  const [flightRoutes, setFlightRoutes] = useState<Array<{
+    flight: Flight
+    departure: Airport | null
+    arrival: Airport | null
+  }>>([])
+
+  // Get unique years from flights
+  const years = Array.from(new Set(flights.map(f => new Date(f.flight_date).getFullYear())))
+    .sort((a, b) => b - a)
+
+  // Filter flights by selected year
+  const filteredFlights = selectedYear 
+    ? flights.filter(f => new Date(f.flight_date).getFullYear() === selectedYear)
+    : flights
+
+  useEffect(() => {
+    const loadAirportData = async () => {
+      setLoading(true)
+      
+      // Load airport data
+      await airportService.loadAirportsFromFile()
+      
+      // Get unique airport codes
+      const airportCodes = new Set<string>()
+      filteredFlights.forEach(flight => {
+        if (flight.departure_airport) airportCodes.add(flight.departure_airport)
+        if (flight.arrival_airport) airportCodes.add(flight.arrival_airport)
+      })
+      
+      // Fetch coordinates for each flight
+      const routes = await Promise.all(
+        filteredFlights.map(async (flight) => {
+          const [departure, arrival] = await Promise.all([
+            flight.departure_airport ? airportService.getAirport(flight.departure_airport) : null,
+            flight.arrival_airport ? airportService.getAirport(flight.arrival_airport) : null
+          ])
+          
+          return { flight, departure, arrival }
+        })
+      )
+      
+      setFlightRoutes(routes.filter(r => r.departure && r.arrival))
+      setLoading(false)
+    }
+    
+    loadAirportData()
+  }, [filteredFlights])
+
+  // Calculate center of map based on all airports
+  const getMapCenter = (): [number, number] => {
+    if (flightRoutes.length === 0) return [50, 10] // Default to Europe
+    
+    const lats: number[] = []
+    const lngs: number[] = []
+    
+    flightRoutes.forEach(({ departure, arrival }) => {
+      if (departure) {
+        lats.push(departure.lat)
+        lngs.push(departure.lon)
+      }
+      if (arrival) {
+        lats.push(arrival.lat)
+        lngs.push(arrival.lon)
+      }
+    })
+    
+    const avgLat = lats.reduce((a, b) => a + b, 0) / lats.length
+    const avgLng = lngs.reduce((a, b) => a + b, 0) / lngs.length
+    
+    return [avgLat, avgLng]
+  }
+
+  const getLineColor = (flightDate: string) => {
+    const currentYear = new Date().getFullYear()
+    const flightYear = new Date(flightDate).getFullYear()
+    
+    if (flightYear === currentYear) return '#8b5cf6' // Violet for current year
+    if (flightYear === currentYear - 1) return '#3b82f6' // Blue for last year
+    return '#6b7280' // Gray for older flights
+  }
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    })
+  }
+
+  const formatTime = (minutes: number | null) => {
+    if (!minutes) return '-'
+    const hours = Math.floor(minutes / 60)
+    const mins = minutes % 60
+    return `${hours}:${mins.toString().padStart(2, '0')}`
+  }
+
+  if (loading) {
+    return (
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-8">
+        <div className="flex items-center justify-center">
+          <Loader2 className="h-8 w-8 animate-spin text-violet-600" />
+          <span className="ml-2 text-gray-600 dark:text-gray-400">Loading flight routes...</span>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="bg-white dark:bg-gray-800 rounded-lg shadow">
+      <div className="p-6 border-b dark:border-gray-700">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+              Flight Routes Map
+            </h2>
+            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+              {flightRoutes.length} routes displayed
+            </p>
+          </div>
+          
+          <YearFilter
+            years={years}
+            selectedYear={selectedYear}
+            onYearChange={setSelectedYear}
+          />
+        </div>
+      </div>
+      
+      <div className="h-[500px] relative">
+        {typeof window !== 'undefined' && flightRoutes.length > 0 && (
+          <MapContainer
+            center={getMapCenter()}
+            zoom={4}
+            className="h-full w-full"
+            scrollWheelZoom={true}
+          >
+            <TileLayer
+              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            />
+            
+            {/* Draw flight routes */}
+            {flightRoutes.map(({ flight, departure, arrival }) => {
+              if (!departure || !arrival) return null
+              
+              return (
+                <Polyline
+                  key={flight.id}
+                  positions={[
+                    [departure.lat, departure.lon],
+                    [arrival.lat, arrival.lon]
+                  ]}
+                  color={getLineColor(flight.flight_date)}
+                  weight={2}
+                  opacity={0.7}
+                >
+                  <Popup>
+                    <div className="p-2">
+                      <div className="font-semibold text-sm mb-1">
+                        {flight.departure_airport} → {flight.arrival_airport}
+                      </div>
+                      <div className="text-xs space-y-1">
+                        <div className="flex items-center">
+                          <Calendar className="h-3 w-3 mr-1" />
+                          {formatDate(flight.flight_date)}
+                        </div>
+                        <div className="flex items-center">
+                          <Plane className="h-3 w-3 mr-1" />
+                          {flight.registration} ({flight.aircraft_type})
+                        </div>
+                        <div>Block Time: {formatTime(flight.block_time)}</div>
+                      </div>
+                    </div>
+                  </Popup>
+                </Polyline>
+              )
+            })}
+            
+            {/* Add markers for unique airports */}
+            {Array.from(new Set(flightRoutes.flatMap(r => [r.departure, r.arrival])))
+              .filter(Boolean)
+              .map((airport) => {
+                if (!airport) return null
+                return (
+                  <Marker
+                    key={airport.icao}
+                    position={[airport.lat, airport.lon]}
+                  >
+                    <Popup>
+                      <div className="p-2">
+                        <div className="font-semibold">{airport.icao}</div>
+                        <div className="text-sm">{airport.name}</div>
+                        <div className="text-xs text-gray-600">{airport.municipality}, {airport.country}</div>
+                      </div>
+                    </Popup>
+                  </Marker>
+                )
+              })}
+          </MapContainer>
+        )}
+        
+        {flightRoutes.length === 0 && !loading && (
+          <div className="flex items-center justify-center h-full bg-gray-50 dark:bg-gray-900">
+            <div className="text-center">
+              <MapPin className="h-12 w-12 text-gray-400 mx-auto mb-3" />
+              <p className="text-gray-500 dark:text-gray-400">
+                No flight routes to display
+              </p>
+            </div>
+          </div>
+        )}
+      </div>
+      
+      {/* Legend */}
+      <div className="p-4 border-t dark:border-gray-700">
+        <div className="flex items-center gap-6 text-sm">
+          <div className="flex items-center">
+            <div className="w-4 h-1 bg-violet-600 mr-2"></div>
+            <span className="text-gray-600 dark:text-gray-400">Current Year</span>
+          </div>
+          <div className="flex items-center">
+            <div className="w-4 h-1 bg-blue-600 mr-2"></div>
+            <span className="text-gray-600 dark:text-gray-400">Last Year</span>
+          </div>
+          <div className="flex items-center">
+            <div className="w-4 h-1 bg-gray-600 mr-2"></div>
+            <span className="text-gray-600 dark:text-gray-400">Older</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}

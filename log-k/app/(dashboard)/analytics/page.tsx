@@ -3,6 +3,7 @@ import StatsOverview from '@/components/analytics/StatsOverview'
 import FlightsByMonth from '@/components/analytics/FlightsByMonth'
 import AircraftUsage from '@/components/analytics/AircraftUsage'
 import ComplianceStatus from '@/components/analytics/ComplianceStatus'
+import FlightsMap from '@/components/analytics/FlightsMap'
 
 export default async function AnalyticsPage() {
   try {
@@ -37,6 +38,8 @@ export default async function AnalyticsPage() {
       </div>
 
       <StatsOverview flights={flights || []} />
+      
+      <FlightsMap flights={flights || []} />
       
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <FlightsByMonth flights={flights || []} />

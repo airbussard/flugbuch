@@ -46,7 +46,7 @@ export default function CrewTable({ crew }: { crew: CrewMember[] }) {
               </tr>
             ) : (
               crew.map((member) => (
-                <tr key={member.id} className="hover:bg-gray-50">
+                <tr key={member.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
                       <div className="h-10 w-10 flex-shrink-0">
@@ -55,7 +55,9 @@ export default function CrewTable({ crew }: { crew: CrewMember[] }) {
                         </div>
                       </div>
                       <div className="ml-4">
-                        <div className="text-sm font-medium text-gray-900">{member.name}</div>
+                        <Link href={`/crew/${member.id}`} className="text-sm font-medium text-gray-900 dark:text-white hover:text-violet-600 dark:hover:text-violet-400">
+                          {member.name}
+                        </Link>
                       </div>
                     </div>
                   </td>

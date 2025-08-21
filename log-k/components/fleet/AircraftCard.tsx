@@ -39,12 +39,12 @@ export default function AircraftCard({ aircraft }: { aircraft: Aircraft }) {
     <div className="bg-white dark:bg-gray-800 rounded-lg shadow hover:shadow-lg transition-shadow">
       <div className="p-6">
         <div className="flex justify-between items-start mb-4">
-          <div className="flex items-center">
+          <Link href={`/fleet/${aircraft.id}`} className="flex items-center hover:opacity-80 transition-opacity">
             <div className="p-3 bg-violet-100 dark:bg-violet-900 rounded-lg">
               <Plane className="h-6 w-6 text-violet-600 dark:text-violet-400" />
             </div>
             <div className="ml-4">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white hover:text-violet-600 dark:hover:text-violet-400">
                 {aircraft.registration}
               </h3>
               <p className="text-sm text-gray-600 dark:text-gray-400">
@@ -63,7 +63,7 @@ export default function AircraftCard({ aircraft }: { aircraft: Aircraft }) {
                 )}
               </div>
             </div>
-          </div>
+          </Link>
           <div className="flex gap-1">
             <Link href={`/fleet/${aircraft.id}/edit`}>
               <Button size="icon" variant="ghost">
