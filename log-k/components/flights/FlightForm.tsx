@@ -24,6 +24,7 @@ const flightSchema = z.object({
   registration: z.string().min(1, 'Registration ist erforderlich'),
   aircraft_type: z.string().min(1, 'Flugzeugtyp ist erforderlich'),
   flight_number: z.string().optional(),
+  block_time: z.number().min(0).optional(),
   pic_time: z.number().min(0).optional(),
   sic_time: z.number().min(0).optional(),
   night_time: z.number().min(0).optional(),
