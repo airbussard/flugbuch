@@ -98,7 +98,7 @@ export default function SharedFlightsList({
                     
                     <div className="flex items-center">
                       <Clock className="h-3 w-3 mr-1" />
-                      {formatTime(flight.block_time)}
+                      {formatTime((flight.block_time || 0) * 60)}
                     </div>
                   </div>
                 </div>

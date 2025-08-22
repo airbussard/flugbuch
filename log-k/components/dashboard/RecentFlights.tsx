@@ -34,7 +34,7 @@ export default function RecentFlights({ flights }: { flights: Flight[] }) {
                 </div>
                 <div className="text-right">
                   <p className="text-sm font-medium text-gray-900">
-                    {formatTime(flight.block_time || 0)}
+                    {formatTime((flight.block_time || 0) * 60)}
                   </p>
                 </div>
               </div>

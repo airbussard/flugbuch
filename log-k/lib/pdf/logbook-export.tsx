@@ -132,7 +132,7 @@ export const LogbookPDF: React.FC<LogbookPDFProps> = ({
               <Text style={styles.tableCell}>{flight.aircraft_registration}</Text>
               <Text style={styles.tableCell}>{flight.aircraft_type}</Text>
               <Text style={styles.tableCell}>{flight.pic_name || 'Self'}</Text>
-              <Text style={styles.tableCellSmall}>{formatTime(flight.flight_time || 0)}</Text>
+              <Text style={styles.tableCellSmall}>{formatTime((flight.flight_time || 0) * 60)}</Text>
               <Text style={styles.tableCellSmall}>
                 {flight.landings_day || 0}/{flight.landings_night || 0}
               </Text>

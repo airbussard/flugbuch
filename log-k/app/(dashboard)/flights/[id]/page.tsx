@@ -127,7 +127,7 @@ export default async function FlightDetailPage({ params }: PageProps) {
           </div>
           <div className="text-right">
             <p className="text-2xl font-bold text-gray-900">
-              {formatTime(flight.block_time || 0)}
+              {formatTime((flight.block_time || 0) * 60)}
             </p>
             <p className="text-sm text-gray-600">Block Time</p>
           </div>
@@ -183,19 +183,19 @@ export default async function FlightDetailPage({ params }: PageProps) {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <div className="border rounded-lg p-3">
             <p className="text-sm text-gray-600">PIC Time</p>
-            <p className="text-xl font-bold text-gray-900">{formatTime(flight.pic_time || 0)}</p>
+            <p className="text-xl font-bold text-gray-900">{formatTime((flight.pic_time || 0) * 60)}</p>
           </div>
           <div className="border rounded-lg p-3">
             <p className="text-sm text-gray-600">SIC Time</p>
-            <p className="text-xl font-bold text-gray-900">{formatTime(flight.sic_time || 0)}</p>
+            <p className="text-xl font-bold text-gray-900">{formatTime((flight.sic_time || 0) * 60)}</p>
           </div>
           <div className="border rounded-lg p-3">
             <p className="text-sm text-gray-600">Night Time</p>
-            <p className="text-xl font-bold text-gray-900">{formatTime(flight.night_time || 0)}</p>
+            <p className="text-xl font-bold text-gray-900">{formatTime((flight.night_time || 0) * 60)}</p>
           </div>
           <div className="border rounded-lg p-3">
             <p className="text-sm text-gray-600">IFR Time</p>
-            <p className="text-xl font-bold text-gray-900">{formatTime(flight.ifr_time || 0)}</p>
+            <p className="text-xl font-bold text-gray-900">{formatTime((flight.ifr_time || 0) * 60)}</p>
           </div>
         </div>
         
@@ -203,19 +203,19 @@ export default async function FlightDetailPage({ params }: PageProps) {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
           <div className="border rounded-lg p-3">
             <p className="text-sm text-gray-600">VFR Time</p>
-            <p className="text-xl font-bold text-gray-900">{formatTime(flight.vfr_time || 0)}</p>
+            <p className="text-xl font-bold text-gray-900">{formatTime((flight.vfr_time || 0) * 60)}</p>
           </div>
           <div className="border rounded-lg p-3">
             <p className="text-sm text-gray-600">Cross Country</p>
-            <p className="text-xl font-bold text-gray-900">{formatTime(flight.cross_country_time || 0)}</p>
+            <p className="text-xl font-bold text-gray-900">{formatTime((flight.cross_country_time || 0) * 60)}</p>
           </div>
           <div className="border rounded-lg p-3">
             <p className="text-sm text-gray-600">Multi-Pilot</p>
-            <p className="text-xl font-bold text-gray-900">{formatTime(flight.multi_pilot_time || 0)}</p>
+            <p className="text-xl font-bold text-gray-900">{formatTime((flight.multi_pilot_time || 0) * 60)}</p>
           </div>
           <div className="border rounded-lg p-3">
             <p className="text-sm text-gray-600">Dual Given</p>
-            <p className="text-xl font-bold text-gray-900">{formatTime(flight.dual_given_time || 0)}</p>
+            <p className="text-xl font-bold text-gray-900">{formatTime((flight.dual_given_time || 0) * 60)}</p>
           </div>
         </div>
       </div>

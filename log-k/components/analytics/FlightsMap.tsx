@@ -291,7 +291,7 @@ export default function FlightsMap({ flights }: FlightsMapProps) {
                           <Plane className="h-3 w-3 mr-1" />
                           {flight.registration} ({flight.aircraft_type})
                         </div>
-                        <div>Block Time: {formatTime(flight.block_time)}</div>
+                        <div>Block Time: {formatTime((flight.block_time || 0) * 60)}</div>
                       </div>
                     </div>
                   </Popup>

@@ -116,7 +116,7 @@ export default function FlightsTable({ flights }: { flights: Flight[] }) {
                     {flight.pic_name || 'Self'}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {formatTime(flight.block_time || 0)}
+                    {formatTime((flight.block_time || 0) * 60)}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                     {flight.landings_day || 0} / {flight.landings_night || 0}

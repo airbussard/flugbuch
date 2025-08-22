@@ -91,7 +91,7 @@ export default function AircraftFlightsList({
                       
                       <div className="flex items-center">
                         <Clock className="h-3 w-3 mr-1" />
-                        {formatTime(flight.block_time)}
+                        {formatTime((flight.block_time || 0) * 60)}
                       </div>
                       
                       {landings && (
@@ -104,7 +104,7 @@ export default function AircraftFlightsList({
                       {(flight.pic_time || flight.sic_time) && (
                         <div className="flex items-center">
                           <Users className="h-3 w-3 mr-1" />
-                          {flight.pic_time ? `PIC ${formatTime(flight.pic_time)}` : `SIC ${formatTime(flight.sic_time)}`}
+                          {flight.pic_time ? `PIC ${formatTime((flight.pic_time || 0) * 60)}` : `SIC ${formatTime((flight.sic_time || 0) * 60)}`}
                         </div>
                       )}
                     </div>
