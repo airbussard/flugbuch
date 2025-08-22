@@ -10,6 +10,9 @@ import { createClient } from '@/lib/supabase/client'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { MAJOR_AIRPORTS } from '@/lib/data/major-airports'
 import { useTranslation } from '@/lib/i18n/hooks'
+import DeleteAccountModal from './DeleteAccountModal'
+import { getUserSubscriptionStatusClient } from '@/lib/subscription/service'
+import type { SubscriptionStatus } from '@/lib/subscription/types'
 
 interface SettingsFormProps {
   initialData: {
@@ -42,6 +45,8 @@ export default function SettingsForm({ initialData, userId }: SettingsFormProps)
   const [usernameDebounce, setUsernameDebounce] = useState<NodeJS.Timeout | null>(null)
   const [tempUsername, setTempUsername] = useState(initialData.username)
   const [showUsernameAlert, setShowUsernameAlert] = useState(false)
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const [subscriptionStatus, setSubscriptionStatus] = useState<SubscriptionStatus | null>(null)
   const router = useRouter()
   const searchParams = useSearchParams()
   const supabase = createClient()
@@ -52,6 +57,15 @@ export default function SettingsForm({ initialData, userId }: SettingsFormProps)
       setShowUsernameAlert(true)
     }
   }, [searchParams, initialData.username])
+
+  // Load subscription status
+  useEffect(() => {
+    const loadSubscriptionStatus = async () => {
+      const status = await getUserSubscriptionStatusClient(userId)
+      setSubscriptionStatus(status)
+    }
+    loadSubscriptionStatus()
+  }, [userId])
   
   // Check username availability with debounce (only if user doesn't have one yet)
   useEffect(() => {
@@ -531,6 +545,46 @@ export default function SettingsForm({ initialData, userId }: SettingsFormProps)
           {isSaving ? 'Saving...' : 'Save Changes'}
         </Button>
       </div>
+
+      {/* Danger Zone - Account Deletion */}
+      <div className="mt-12 bg-red-50 border border-red-200 rounded-lg shadow p-6">
+        <div className="flex items-center mb-6">
+          <span className="text-red-600">
+            <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+          </span>
+          <h2 className="text-lg font-semibold text-red-900 ml-2">Danger Zone</h2>
+        </div>
+        
+        <div className="space-y-4">
+          <div>
+            <h3 className="font-medium text-red-900">Delete Account</h3>
+            <p className="text-sm text-red-700 mt-1">
+              Once you delete your account, there is no going back. All your data will be permanently deleted.
+            </p>
+          </div>
+          
+          <Button
+            variant="outline"
+            className="border-red-300 text-red-600 hover:bg-red-50"
+            onClick={() => setShowDeleteModal(true)}
+          >
+            Delete Account
+          </Button>
+        </div>
+      </div>
+
+      {/* Delete Account Modal */}
+      {showDeleteModal && (
+        <DeleteAccountModal
+          isOpen={showDeleteModal}
+          onClose={() => setShowDeleteModal(false)}
+          userId={userId}
+          hasActiveSubscription={subscriptionStatus?.isActive || false}
+          subscriptionSource={subscriptionStatus?.source}
+        />
+      )}
     </div>
   )
 }
