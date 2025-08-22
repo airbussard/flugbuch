@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useCookieConsent, CookieConsent } from '@/providers/CookieConsentProvider'
+import { useCookieConsentOptional, CookieConsent } from '@/providers/CookieConsentProvider'
 import { X, Shield, Settings, BarChart3, Megaphone, Check } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 
@@ -65,6 +65,13 @@ const categories: CookieCategory[] = [
 ]
 
 export default function CookieSettings() {
+  const consentContext = useCookieConsentOptional()
+  
+  // Return null if provider is not available
+  if (!consentContext) {
+    return null
+  }
+  
   const { 
     showSettings, 
     consent, 
@@ -72,7 +79,7 @@ export default function CookieSettings() {
     closeSettings,
     acceptAll,
     acceptNecessaryOnly 
-  } = useCookieConsent()
+  } = consentContext
   
   const [localConsent, setLocalConsent] = useState(consent)
   const [expandedCategories, setExpandedCategories] = useState<string[]>([])

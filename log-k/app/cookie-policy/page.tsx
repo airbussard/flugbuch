@@ -1,11 +1,7 @@
-import { Metadata } from 'next'
+'use client'
+
 import { Cookie, Shield, Settings, BarChart3, Megaphone, ChevronLeft } from 'lucide-react'
 import Link from 'next/link'
-
-export const metadata: Metadata = {
-  title: 'Cookie-Richtlinie - Log-K',
-  description: 'Informationen über die Verwendung von Cookies auf unserer Website',
-}
 
 export default function CookiePolicyPage() {
   return (

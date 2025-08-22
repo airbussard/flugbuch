@@ -5,6 +5,8 @@ import AircraftUsage from '@/components/analytics/AircraftUsage'
 import ComplianceStatus from '@/components/analytics/ComplianceStatus'
 import FlightsMap from '@/components/analytics/FlightsMap'
 
+export const dynamic = 'force-dynamic'
+
 export default async function AnalyticsPage() {
   try {
     const supabase = await createClient()

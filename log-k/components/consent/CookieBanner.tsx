@@ -1,17 +1,24 @@
 'use client'
 
-import { useCookieConsent } from '@/providers/CookieConsentProvider'
+import { useCookieConsentOptional } from '@/providers/CookieConsentProvider'
 import { Cookie, Settings, X } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 
 export default function CookieBanner() {
+  const consent = useCookieConsentOptional()
+  
+  // Return null if provider is not available
+  if (!consent) {
+    return null
+  }
+  
   const { 
     showBanner, 
     acceptAll, 
     acceptNecessaryOnly, 
     openSettings,
     closeBanner 
-  } = useCookieConsent()
+  } = consent
 
   return (
     <AnimatePresence>

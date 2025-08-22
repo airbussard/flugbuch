@@ -2,10 +2,12 @@
 
 import Link from 'next/link'
 import { Cookie } from 'lucide-react'
-import { useCookieConsent } from '@/providers/CookieConsentProvider'
+import { useCookieConsentOptional } from '@/providers/CookieConsentProvider'
 
 export default function Footer() {
-  const { openSettings } = useCookieConsent()
+  // Use optional hook that returns null if provider is not available
+  const consent = useCookieConsentOptional()
+  const openSettings = consent?.openSettings || null
 
   return (
     <footer className="bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800">
@@ -67,13 +69,23 @@ export default function Footer() {
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
               Datenschutz
             </h3>
-            <button
-              onClick={openSettings}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors text-sm font-medium"
-            >
-              <Cookie className="h-4 w-4" />
-              Cookie-Einstellungen
-            </button>
+            {openSettings ? (
+              <button
+                onClick={openSettings}
+                className="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors text-sm font-medium"
+              >
+                <Cookie className="h-4 w-4" />
+                Cookie-Einstellungen
+              </button>
+            ) : (
+              <button
+                disabled
+                className="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-600 rounded-lg cursor-not-allowed text-sm font-medium opacity-50"
+              >
+                <Cookie className="h-4 w-4" />
+                Cookie-Einstellungen
+              </button>
+            )}
             <p className="mt-4 text-xs text-gray-500 dark:text-gray-500">
               Wir respektieren Ihre Privatsphäre und geben Ihnen die volle Kontrolle über Ihre Daten.
             </p>
