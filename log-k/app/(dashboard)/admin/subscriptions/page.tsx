@@ -41,19 +41,10 @@ export default async function SubscriptionsPage() {
   // Use admin client to get all subscriptions with user data
   const adminSupabase = createAdminClient()
   
-  // Fetch all subscriptions with user profiles
+  // Fetch all subscriptions first
   const { data: subscriptions, error: subscriptionsError } = await adminSupabase
     .from('user_subscriptions')
-    .select(`
-      *,
-      user_profiles!user_subscriptions_user_id_fkey (
-        id,
-        first_name,
-        last_name,
-        email,
-        username
-      )
-    `)
+    .select('*')
     .order('created_at', { ascending: false })
   
   if (subscriptionsError) {
@@ -63,28 +54,38 @@ export default async function SubscriptionsPage() {
   // Also fetch active trials from user_trial_status table
   const { data: trialStatus, error: trialError } = await adminSupabase
     .from('user_trial_status')
-    .select(`
-      *,
-      user_profiles:user_id (
-        id,
-        first_name,
-        last_name,
-        email,
-        username
-      )
-    `)
+    .select('*')
     .eq('trial_status', 'active_trial')
   
   if (trialError) {
     console.error('Error fetching trial status:', trialError)
   }
   
+  // Fetch user profiles for all unique user IDs
+  const allUserIds = new Set<string>()
+  subscriptions?.forEach(s => allUserIds.add(s.user_id))
+  trialStatus?.forEach(t => allUserIds.add(t.user_id))
+  
+  // Only fetch profiles if there are user IDs
+  let userProfilesMap = new Map()
+  if (allUserIds.size > 0) {
+    const { data: userProfiles } = await adminSupabase
+      .from('user_profiles')
+      .select('id, first_name, last_name, email, username')
+      .in('id', Array.from(allUserIds))
+    
+    // Create a map for easy lookup
+    userProfilesMap = new Map(
+      userProfiles?.map(profile => [profile.id, profile]) || []
+    )
+  }
+  
   // Debug logging
   console.log('Subscriptions fetched:', subscriptions?.length || 0)
   console.log('Trial status fetched:', trialStatus?.length || 0)
-  console.log('Trial data:', trialStatus)
+  console.log('User profiles fetched:', userProfilesMap.size)
   
-  // Convert trial status to subscription format
+  // Convert trial status to subscription format with user profiles
   const trialSubscriptions = trialStatus?.map(trial => ({
     id: `trial_${trial.user_id}`, // Use user_id as unique identifier
     user_id: trial.user_id,
@@ -100,7 +101,7 @@ export default async function SubscriptionsPage() {
     notes: 'Trial from user_trial_status table',
     created_at: trial.trial_started || new Date().toISOString(), // Use trial_started as created_at
     updated_at: trial.trial_started || new Date().toISOString(), // Use trial_started as updated_at
-    user_profiles: trial.user_profiles || {
+    user_profiles: userProfilesMap.get(trial.user_id) || {
       id: trial.user_id,
       email: trial.email || 'Unknown',
       first_name: null,
@@ -109,9 +110,21 @@ export default async function SubscriptionsPage() {
     }
   })) || []
   
+  // Add user profiles to subscriptions
+  const subscriptionsWithProfiles = subscriptions?.map(sub => ({
+    ...sub,
+    user_profiles: userProfilesMap.get(sub.user_id) || {
+      id: sub.user_id,
+      email: 'Unknown',
+      first_name: null,
+      last_name: null,
+      username: null
+    }
+  })) || []
+  
   // Merge subscriptions, removing duplicates (trial status takes priority)
   const userIdsWithTrials = new Set(trialSubscriptions.map(t => t.user_id))
-  const regularSubscriptions = subscriptions?.filter(s => !userIdsWithTrials.has(s.user_id)) || []
+  const regularSubscriptions = subscriptionsWithProfiles.filter(s => !userIdsWithTrials.has(s.user_id))
   const allSubscriptions = [...regularSubscriptions, ...trialSubscriptions]
     .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
   
