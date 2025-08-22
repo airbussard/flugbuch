@@ -42,7 +42,7 @@ export default async function SubscriptionsPage() {
   const adminSupabase = createAdminClient()
   
   // Fetch all subscriptions with user profiles
-  const { data: subscriptions } = await adminSupabase
+  const { data: subscriptions, error: subscriptionsError } = await adminSupabase
     .from('user_subscriptions')
     .select(`
       *,
@@ -56,8 +56,12 @@ export default async function SubscriptionsPage() {
     `)
     .order('created_at', { ascending: false })
   
+  if (subscriptionsError) {
+    console.error('Error fetching subscriptions:', subscriptionsError)
+  }
+  
   // Also fetch active trials from user_trial_status table
-  const { data: trialStatus } = await adminSupabase
+  const { data: trialStatus, error: trialError } = await adminSupabase
     .from('user_trial_status')
     .select(`
       *,
@@ -71,23 +75,38 @@ export default async function SubscriptionsPage() {
     `)
     .eq('trial_status', 'active_trial')
   
+  if (trialError) {
+    console.error('Error fetching trial status:', trialError)
+  }
+  
+  // Debug logging
+  console.log('Subscriptions fetched:', subscriptions?.length || 0)
+  console.log('Trial status fetched:', trialStatus?.length || 0)
+  console.log('Trial data:', trialStatus)
+  
   // Convert trial status to subscription format
   const trialSubscriptions = trialStatus?.map(trial => ({
-    id: `trial_${trial.id}`, // Prefix to avoid ID conflicts
+    id: `trial_${trial.user_id}`, // Use user_id as unique identifier
     user_id: trial.user_id,
     subscription_tier: 'trial' as const,
     subscription_source: 'trial' as const,
-    activated_at: trial.trial_started || trial.created_at,
-    valid_until: trial.trial_ends,
+    activated_at: trial.trial_started || new Date().toISOString(),
+    valid_until: trial.trial_ends || new Date(Date.now() + 28 * 24 * 60 * 60 * 1000).toISOString(), // Default to 28 days if not set
     apple_transaction_id: null,
     apple_original_transaction_id: null,
     stripe_subscription_id: null,
     stripe_customer_id: null,
     promo_code: null,
     notes: 'Trial from user_trial_status table',
-    created_at: trial.created_at,
-    updated_at: trial.updated_at || trial.created_at,
-    user_profiles: trial.user_profiles
+    created_at: trial.trial_started || new Date().toISOString(), // Use trial_started as created_at
+    updated_at: trial.trial_started || new Date().toISOString(), // Use trial_started as updated_at
+    user_profiles: trial.user_profiles || {
+      id: trial.user_id,
+      email: trial.email || 'Unknown',
+      first_name: null,
+      last_name: null,
+      username: null
+    }
   })) || []
   
   // Merge subscriptions, removing duplicates (trial status takes priority)
@@ -136,6 +155,28 @@ export default async function SubscriptionsPage() {
       admin: allSubscriptions.filter(s => s.subscription_source === 'admin').length,
       trial: allSubscriptions.filter(s => s.subscription_source === 'trial').length,
     }
+  }
+  
+  // Show errors if any
+  if (subscriptionsError || trialError) {
+    return (
+      <div className="max-w-6xl mx-auto p-6">
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
+          <h2 className="text-lg font-semibold text-red-800">Error Loading Data</h2>
+          {subscriptionsError && (
+            <p className="text-red-700 mt-2">
+              Subscriptions Error: {subscriptionsError.message}
+            </p>
+          )}
+          {trialError && (
+            <p className="text-red-700 mt-2">
+              Trial Status Error: {trialError.message}
+            </p>
+          )}
+        </div>
+        <SubscriptionManagement subscriptions={allSubscriptions} stats={stats} />
+      </div>
+    )
   }
   
   return <SubscriptionManagement subscriptions={allSubscriptions} stats={stats} />
