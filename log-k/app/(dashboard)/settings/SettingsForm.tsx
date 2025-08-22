@@ -9,6 +9,7 @@ import { User, Bell, Shield, Palette, Download, Globe, AtSign, Loader2, CheckCir
 import { createClient } from '@/lib/supabase/client'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { MAJOR_AIRPORTS } from '@/lib/data/major-airports'
+import { useTranslation } from '@/lib/i18n/hooks'
 
 interface SettingsFormProps {
   initialData: {
@@ -28,6 +29,7 @@ interface SettingsFormProps {
 }
 
 export default function SettingsForm({ initialData, userId }: SettingsFormProps) {
+  const { t, language } = useTranslation()
   const [settings, setSettings] = useState(initialData)
   const [isSaving, setIsSaving] = useState(false)
   const [saveMessage, setSaveMessage] = useState('')
@@ -122,6 +124,7 @@ export default function SettingsForm({ initialData, userId }: SettingsFormProps)
         license_number: settings.licenseNumber,
         compliance_mode: settings.complianceMode,
         homebase: settings.homebase,
+        language: settings.language,
         updated_at: new Date().toISOString()
       }
       

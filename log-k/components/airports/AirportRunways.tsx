@@ -3,12 +3,14 @@
 import { useState, useEffect } from 'react'
 import { runwayService, type Runway } from '@/lib/data/runway-service'
 import { Plane, Loader2, Navigation, Lightbulb, TrendingUp } from 'lucide-react'
+import { useTranslation } from '@/lib/i18n/hooks'
 
 interface AirportRunwaysProps {
   icao: string
 }
 
 export default function AirportRunways({ icao }: AirportRunwaysProps) {
+  const { t } = useTranslation()
   const [runways, setRunways] = useState<Runway[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -33,7 +35,7 @@ export default function AirportRunways({ icao }: AirportRunwaysProps) {
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
         <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
           <Plane className="h-5 w-5 text-green-500" />
-          Start- und Landebahnen
+          {t('airports.runways.title')}
         </h2>
         <div className="flex items-center justify-center py-8">
           <Loader2 className="h-6 w-6 animate-spin text-violet-500" />
@@ -47,9 +49,9 @@ export default function AirportRunways({ icao }: AirportRunwaysProps) {
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
         <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
           <Plane className="h-5 w-5 text-green-500" />
-          Start- und Landebahnen
+          {t('airports.runways.title')}
         </h2>
-        <p className="text-gray-500 dark:text-gray-400">Keine Runway-Informationen verfügbar</p>
+        <p className="text-gray-500 dark:text-gray-400">{t('airports.runways.noRunwaysFound')}</p>
       </div>
     )
   }
@@ -75,13 +77,13 @@ export default function AirportRunways({ icao }: AirportRunwaysProps) {
               <div className="flex items-center gap-2">
                 {runway.inUse && (
                   <span className="px-2 py-1 bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200 rounded text-xs font-medium">
-                    In Betrieb
+                    {t('common.active') || 'Active'}
                   </span>
                 )}
                 {runway.lighted && (
                   <span className="px-2 py-1 bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200 rounded text-xs font-medium flex items-center gap-1">
                     <Lightbulb className="h-3 w-3" />
-                    Beleuchtet
+                    {t('airports.runways.lighting')}
                   </span>
                 )}
               </div>
@@ -90,7 +92,7 @@ export default function AirportRunways({ icao }: AirportRunwaysProps) {
             {/* Runway Details */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-3">
               <div>
-                <p className="text-xs text-gray-500 dark:text-gray-400">Länge</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">{t('airports.runways.length')}</p>
                 <p className="font-medium text-gray-900 dark:text-white">
                   {(runway.length_ft || runway.length || 0).toLocaleString()} ft
                   <span className="text-xs text-gray-500 dark:text-gray-400 ml-1">
@@ -99,7 +101,7 @@ export default function AirportRunways({ icao }: AirportRunwaysProps) {
                 </p>
               </div>
               <div>
-                <p className="text-xs text-gray-500 dark:text-gray-400">Breite</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">{t('airports.runways.width')}</p>
                 <p className="font-medium text-gray-900 dark:text-white">
                   {(runway.width_ft || runway.width || 0)} ft
                   <span className="text-xs text-gray-500 dark:text-gray-400 ml-1">
@@ -108,14 +110,14 @@ export default function AirportRunways({ icao }: AirportRunwaysProps) {
                 </p>
               </div>
               <div>
-                <p className="text-xs text-gray-500 dark:text-gray-400">Oberfläche</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">{t('airports.runways.surface')}</p>
                 <p className="font-medium text-gray-900 dark:text-white">
                   {runway.surface}
                 </p>
               </div>
               {runway.slope && runway.slope !== 0 && (
                 <div>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">Neigung</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">{t('airports.runways.slope') || 'Slope'}</p>
                   <p className="font-medium text-gray-900 dark:text-white flex items-center gap-1">
                     <TrendingUp className="h-3 w-3" />
                     {runway.slope.toFixed(2)}%

@@ -1,15 +1,14 @@
 import { notFound } from 'next/navigation'
-import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { airportService } from '@/lib/data/airport-service'
-import AirportDetail from '@/components/airports/AirportDetail'
+import AirportDetailClient from '@/components/airports/AirportDetailClient'
+import AirportPageHeader from '@/components/airports/AirportPageHeader'
 import AirportMap from '@/components/airports/AirportMap'
 import AirportWeather from '@/components/airports/AirportWeather'
 import AirportFrequencies from '@/components/airports/AirportFrequencies'
 import AirportRunways from '@/components/airports/AirportRunways'
 import AirportPIREPs from '@/components/airports/AirportPIREPs'
-import { Button } from '@/components/ui/button'
-import { ArrowLeft, Edit } from 'lucide-react'
+import { getServerTranslation } from '@/lib/i18n/server'
 
 interface PageProps {
   params: Promise<{ icao: string }>
@@ -18,6 +17,7 @@ interface PageProps {
 export default async function AirportDetailPage({ params }: PageProps) {
   const { icao } = await params
   const supabase = await createClient()
+  const { t } = await getServerTranslation()
   
   // Check authentication
   const { data: { user } } = await supabase.auth.getUser()
@@ -45,32 +45,15 @@ export default async function AirportDetailPage({ params }: PageProps) {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-4">
-          <Link href="/airports">
-            <Button variant="ghost" size="sm">
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Back to Airports
-            </Button>
-          </Link>
-        </div>
-        {isAdmin && (
-          <Link href={`/airports/admin/editor?icao=${airport.icao}`}>
-            <Button variant="outline">
-              <Edit className="h-4 w-4 mr-2" />
-              Edit Airport
-            </Button>
-          </Link>
-        )}
-      </div>
+      <AirportPageHeader icao={airport.icao} isAdmin={isAdmin} />
       
       {/* Airport Details */}
-      <AirportDetail airport={airport} />
+      <AirportDetailClient airport={airport} />
       
       {/* Map Section */}
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
         <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-          Airport Location
+          {t('airports.airportLocation')}
         </h2>
         <AirportMap airport={airport} />
       </div>

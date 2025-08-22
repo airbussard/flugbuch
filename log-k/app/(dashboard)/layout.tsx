@@ -4,6 +4,8 @@ import Sidebar from '@/components/dashboard/Sidebar'
 import TopBar from '@/components/dashboard/TopBar'
 import DebugPanel from '@/components/debug/DebugPanel'
 import VersionFooter from '@/components/dashboard/VersionFooter'
+import LanguageProvider from '@/components/providers/LanguageProvider'
+import { Language } from '@/lib/i18n/translations'
 import { subDays } from 'date-fns'
 
 export default async function DashboardLayout({
@@ -19,12 +21,17 @@ export default async function DashboardLayout({
     redirect('/login')
   }
 
-  // Fetch user profile for TopBar
+  // Fetch user profile for TopBar and language preference
   const { data: userProfile } = await supabase
     .from('user_profiles')
     .select('*')
     .eq('id', user.id)
     .single()
+  
+  // Get user's language preference or default to 'en'
+  const userLanguage: Language = (userProfile?.language && ['en', 'de', 'fr', 'es'].includes(userProfile.language)) 
+    ? userProfile.language as Language 
+    : 'en'
 
   // Calculate recent landings (last 90 days)
   const ninetyDaysAgo = subDays(new Date(), 90).toISOString()
@@ -44,20 +51,22 @@ export default async function DashboardLayout({
   recentLandings.totalLandings = recentLandings.dayLandings + recentLandings.nightLandings
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
-      <Sidebar />
-      <div className="flex-1 flex flex-col">
-        <TopBar 
-          user={user} 
-          userProfile={userProfile}
-          recentLandings={recentLandings}
-        />
-        <main className="flex-1 p-6">
-          {children}
-        </main>
-        <VersionFooter />
+    <LanguageProvider initialLanguage={userLanguage} userId={user.id}>
+      <div className="min-h-screen bg-gray-50 flex">
+        <Sidebar />
+        <div className="flex-1 flex flex-col">
+          <TopBar 
+            user={user} 
+            userProfile={userProfile}
+            recentLandings={recentLandings}
+          />
+          <main className="flex-1 p-6">
+            {children}
+          </main>
+          <VersionFooter />
+        </div>
+        <DebugPanel />
       </div>
-      <DebugPanel />
-    </div>
+    </LanguageProvider>
   )
 }

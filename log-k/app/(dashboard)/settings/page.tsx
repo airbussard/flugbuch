@@ -28,10 +28,10 @@ export default async function SettingsPage() {
     licenseNumber: userProfile?.license_number || '',
     complianceMode: userProfile?.compliance_mode || 'EASA',
     homebase: userProfile?.homebase || '',
+    language: userProfile?.language || 'en',
     // These fields don't exist in DB, using defaults
     notifications: true,
     darkMode: false, 
-    language: 'en',
     isAdmin: userProfile?.is_admin || false
   }
 
