@@ -54,6 +54,7 @@ export default function FlightForm({ onSubmit, loading = false, defaultValues }:
   const [nightMinutes, setNightMinutes] = useState(0)
   const [crewAssignments, setCrewAssignments] = useState<CrewAssignment[]>([])
   const [selectedCondition, setSelectedCondition] = useState<'IFR' | 'VFR'>('VFR')
+  const [myRole, setMyRole] = useState<'PIC' | 'SIC'>('PIC') // Default to PIC
 
   const {
     register,
@@ -128,20 +129,18 @@ export default function FlightForm({ onSubmit, loading = false, defaultValues }:
     // Set night_time in hours
     setValue('night_time', nightMinutes / 60)
     
-    // Calculate PIC/SIC time based on crew assignments
-    const hasPIC = crewAssignments.some(a => a.role_name === 'PIC')
-    const hasSIC = crewAssignments.some(a => a.role_name === 'SIC')
-    
-    if (hasPIC) {
+    // Calculate PIC/SIC time based on selected role
+    if (myRole === 'PIC') {
       setValue('pic_time', blockTime / 60)
       setValue('sic_time', 0)
-    } else if (hasSIC) {
+    } else if (myRole === 'SIC') {
       setValue('sic_time', blockTime / 60)
       setValue('pic_time', 0)
     }
     
-    // Set multi-pilot time if more than one crew member
-    if (crewAssignments.length > 1) {
+    // Set multi-pilot time if more than one crew member (including myself)
+    // Adding 1 because the user is always part of the crew
+    if (crewAssignments.length >= 1) {
       setValue('multi_pilot_time', blockTime / 60)
     } else {
       setValue('multi_pilot_time', 0)
@@ -162,7 +161,7 @@ export default function FlightForm({ onSubmit, loading = false, defaultValues }:
       setValue('ifr_time', 0)
       setValue('vfr_time', blockTime / 60)
     }
-  }, [blockTime, nightMinutes, crewAssignments, departureAirport, arrivalAirport, selectedCondition, setValue])
+  }, [blockTime, nightMinutes, crewAssignments, departureAirport, arrivalAirport, selectedCondition, myRole, setValue])
 
   const handleDayNightChange = (day: number, night: number) => {
     setDayMinutes(day)
@@ -338,10 +337,52 @@ export default function FlightForm({ onSubmit, loading = false, defaultValues }:
           <h3 className="text-lg font-medium text-gray-900 dark:text-white">Crew</h3>
         </div>
         
-        <CrewSelector
-          assignments={crewAssignments}
-          onChange={setCrewAssignments}
-        />
+        {/* My Role Selection */}
+        <div className="p-4 bg-blue-50 dark:bg-blue-950/30 rounded-lg border border-blue-200 dark:border-blue-800">
+          <Label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3 block">
+            My Role in this Flight
+          </Label>
+          <div className="flex gap-4">
+            <label className="flex items-center cursor-pointer group">
+              <input
+                type="radio"
+                value="PIC"
+                checked={myRole === 'PIC'}
+                onChange={() => setMyRole('PIC')}
+                className="mr-2 text-blue-600 focus:ring-blue-500"
+              />
+              <span className="font-medium group-hover:text-blue-600 dark:group-hover:text-blue-400">
+                PIC (Pilot in Command)
+              </span>
+            </label>
+            <label className="flex items-center cursor-pointer group">
+              <input
+                type="radio"
+                value="SIC"
+                checked={myRole === 'SIC'}
+                onChange={() => setMyRole('SIC')}
+                className="mr-2 text-blue-600 focus:ring-blue-500"
+              />
+              <span className="font-medium group-hover:text-blue-600 dark:group-hover:text-blue-400">
+                SIC (Second in Command)
+              </span>
+            </label>
+          </div>
+          <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+            This determines whether your flight time is logged as PIC or SIC time.
+          </p>
+        </div>
+        
+        {/* Additional Crew Members */}
+        <div>
+          <Label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 block">
+            Additional Crew Members
+          </Label>
+          <CrewSelector
+            assignments={crewAssignments}
+            onChange={setCrewAssignments}
+          />
+        </div>
       </div>
 
       {/* Flight Conditions */}

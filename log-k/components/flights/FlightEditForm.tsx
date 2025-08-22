@@ -56,6 +56,11 @@ export default function FlightEditForm({ flight, aircraft, crewMembers }: Flight
   const router = useRouter()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  // Initialize role based on existing PIC/SIC times
+  const [myRole, setMyRole] = useState<'PIC' | 'SIC'>(
+    flight.pic_time && flight.pic_time > 0 ? 'PIC' : 'SIC'
+  )
+  const [blockTime, setBlockTime] = useState(flight.block_time || 0)
   
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -66,6 +71,11 @@ export default function FlightEditForm({ flight, aircraft, crewMembers }: Flight
     const supabase = createClient()
     
     try {
+      // Calculate PIC/SIC time based on selected role
+      const currentBlockTime = parseFloat(formData.get('block_time') as string) || 0
+      const picTime = myRole === 'PIC' ? currentBlockTime : 0
+      const sicTime = myRole === 'SIC' ? currentBlockTime : 0
+      
       // Update flight
       const { error: updateError } = await supabase
         .from('flights')
@@ -76,9 +86,9 @@ export default function FlightEditForm({ flight, aircraft, crewMembers }: Flight
           registration: formData.get('registration'),
           aircraft_type: formData.get('aircraft_type'),
           flight_number: formData.get('flight_number') || null,
-          block_time: parseFloat(formData.get('block_time') as string) || null,
-          pic_time: parseFloat(formData.get('pic_time') as string) || null,
-          sic_time: parseFloat(formData.get('sic_time') as string) || null,
+          block_time: currentBlockTime,
+          pic_time: picTime,
+          sic_time: sicTime,
           night_time: parseFloat(formData.get('night_time') as string) || null,
           ifr_time: parseFloat(formData.get('ifr_time') as string) || null,
           vfr_time: parseFloat(formData.get('vfr_time') as string) || null,
@@ -215,6 +225,42 @@ export default function FlightEditForm({ flight, aircraft, crewMembers }: Flight
       <div className="bg-white rounded-lg shadow p-6">
         <h3 className="text-lg font-semibold text-gray-900 mb-4">Flight Times</h3>
         
+        {/* My Role Selection */}
+        <div className="p-4 bg-blue-50 dark:bg-blue-950/30 rounded-lg border border-blue-200 dark:border-blue-800 mb-4">
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+            My Role in this Flight
+          </label>
+          <div className="flex gap-4">
+            <label className="flex items-center cursor-pointer group">
+              <input
+                type="radio"
+                value="PIC"
+                checked={myRole === 'PIC'}
+                onChange={() => setMyRole('PIC')}
+                className="mr-2 text-blue-600 focus:ring-blue-500"
+              />
+              <span className="font-medium group-hover:text-blue-600 dark:group-hover:text-blue-400">
+                PIC (Pilot in Command)
+              </span>
+            </label>
+            <label className="flex items-center cursor-pointer group">
+              <input
+                type="radio"
+                value="SIC"
+                checked={myRole === 'SIC'}
+                onChange={() => setMyRole('SIC')}
+                className="mr-2 text-blue-600 focus:ring-blue-500"
+              />
+              <span className="font-medium group-hover:text-blue-600 dark:group-hover:text-blue-400">
+                SIC (Second in Command)
+              </span>
+            </label>
+          </div>
+          <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+            This determines whether your block time is logged as PIC or SIC time.
+          </p>
+        </div>
+        
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -226,6 +272,7 @@ export default function FlightEditForm({ flight, aircraft, crewMembers }: Flight
               defaultValue={flight.block_time || ''}
               step="0.1"
               min="0"
+              onChange={(e) => setBlockTime(parseFloat(e.target.value) || 0)}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
             />
           </div>
@@ -236,12 +283,13 @@ export default function FlightEditForm({ flight, aircraft, crewMembers }: Flight
             </label>
             <input
               type="number"
-              name="pic_time"
-              defaultValue={flight.pic_time || ''}
+              value={myRole === 'PIC' ? blockTime : 0}
               step="0.1"
               min="0"
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+              disabled
+              className="w-full px-3 py-2 border border-gray-200 rounded-lg bg-gray-50 text-gray-600"
             />
+            <p className="text-xs text-gray-500 mt-1">Auto-calculated</p>
           </div>
           
           <div>
@@ -250,12 +298,13 @@ export default function FlightEditForm({ flight, aircraft, crewMembers }: Flight
             </label>
             <input
               type="number"
-              name="sic_time"
-              defaultValue={flight.sic_time || ''}
+              value={myRole === 'SIC' ? blockTime : 0}
               step="0.1"
               min="0"
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+              disabled
+              className="w-full px-3 py-2 border border-gray-200 rounded-lg bg-gray-50 text-gray-600"
             />
+            <p className="text-xs text-gray-500 mt-1">Auto-calculated</p>
           </div>
           
           <div>
