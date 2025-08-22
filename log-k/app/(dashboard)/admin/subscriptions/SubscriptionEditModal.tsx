@@ -16,7 +16,10 @@ interface Subscription {
   stripe_customer_id: string | null
   promo_code: string | null
   notes: string | null
+  created_at: string
+  updated_at: string
   user_profiles: {
+    id: string
     first_name: string | null
     last_name: string | null
     email: string | null
