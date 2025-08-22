@@ -56,25 +56,65 @@ export default async function SubscriptionsPage() {
     `)
     .order('created_at', { ascending: false })
   
-  // Calculate statistics
+  // Also fetch active trials from user_trial_status table
+  const { data: trialStatus } = await adminSupabase
+    .from('user_trial_status')
+    .select(`
+      *,
+      user_profiles:user_id (
+        id,
+        first_name,
+        last_name,
+        email,
+        username
+      )
+    `)
+    .eq('trial_active', true)
+  
+  // Convert trial status to subscription format
+  const trialSubscriptions = trialStatus?.map(trial => ({
+    id: `trial_${trial.id}`, // Prefix to avoid ID conflicts
+    user_id: trial.user_id,
+    subscription_tier: 'trial' as const,
+    subscription_source: 'trial' as const,
+    activated_at: trial.trial_start || trial.created_at,
+    valid_until: trial.trial_end,
+    apple_transaction_id: null,
+    apple_original_transaction_id: null,
+    stripe_subscription_id: null,
+    stripe_customer_id: null,
+    promo_code: null,
+    notes: 'Trial from user_trial_status table',
+    created_at: trial.created_at,
+    updated_at: trial.updated_at || trial.created_at,
+    user_profiles: trial.user_profiles
+  })) || []
+  
+  // Merge subscriptions, removing duplicates (trial status takes priority)
+  const userIdsWithTrials = new Set(trialSubscriptions.map(t => t.user_id))
+  const regularSubscriptions = subscriptions?.filter(s => !userIdsWithTrials.has(s.user_id)) || []
+  const allSubscriptions = [...regularSubscriptions, ...trialSubscriptions]
+    .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+  
+  // Calculate statistics using merged data
   const now = new Date()
-  const activeTrialSubs = subscriptions?.filter(s => {
+  const activeTrialSubs = allSubscriptions.filter(s => {
     const validUntil = new Date(s.valid_until)
     return validUntil > now && s.subscription_tier === 'trial'
-  }) || []
+  })
   
   const stats = {
-    totalSubscriptions: subscriptions?.length || 0,
-    activeSubscriptions: subscriptions?.filter(s => {
+    totalSubscriptions: allSubscriptions.length,
+    activeSubscriptions: allSubscriptions.filter(s => {
       const validUntil = new Date(s.valid_until)
       return validUntil > now && s.subscription_tier !== 'none'
-    }).length || 0,
-    expiringSubscriptions: subscriptions?.filter(s => {
+    }).length,
+    expiringSubscriptions: allSubscriptions.filter(s => {
       const validUntil = new Date(s.valid_until)
       const thirtyDaysFromNow = new Date()
       thirtyDaysFromNow.setDate(thirtyDaysFromNow.getDate() + 30)
       return validUntil > now && validUntil <= thirtyDaysFromNow && s.subscription_tier !== 'trial'
-    }).length || 0,
+    }).length,
     activeTrials: activeTrialSubs.length,
     expiringTrials: activeTrialSubs.filter(s => {
       const validUntil = new Date(s.valid_until)
@@ -83,20 +123,20 @@ export default async function SubscriptionsPage() {
       return validUntil <= threeDaysFromNow
     }).length,
     tierBreakdown: {
-      none: subscriptions?.filter(s => s.subscription_tier === 'none').length || 0,
-      trial: subscriptions?.filter(s => s.subscription_tier === 'trial').length || 0,
-      basic: subscriptions?.filter(s => s.subscription_tier === 'basic').length || 0,
-      premium: subscriptions?.filter(s => s.subscription_tier === 'premium').length || 0,
-      enterprise: subscriptions?.filter(s => s.subscription_tier === 'enterprise').length || 0,
+      none: allSubscriptions.filter(s => s.subscription_tier === 'none').length,
+      trial: allSubscriptions.filter(s => s.subscription_tier === 'trial').length,
+      basic: allSubscriptions.filter(s => s.subscription_tier === 'basic').length,
+      premium: allSubscriptions.filter(s => s.subscription_tier === 'premium').length,
+      enterprise: allSubscriptions.filter(s => s.subscription_tier === 'enterprise').length,
     },
     sourceBreakdown: {
-      apple: subscriptions?.filter(s => s.subscription_source === 'apple').length || 0,
-      stripe: subscriptions?.filter(s => s.subscription_source === 'stripe').length || 0,
-      promo: subscriptions?.filter(s => s.subscription_source === 'promo').length || 0,
-      admin: subscriptions?.filter(s => s.subscription_source === 'admin').length || 0,
-      trial: subscriptions?.filter(s => s.subscription_source === 'trial').length || 0,
+      apple: allSubscriptions.filter(s => s.subscription_source === 'apple').length,
+      stripe: allSubscriptions.filter(s => s.subscription_source === 'stripe').length,
+      promo: allSubscriptions.filter(s => s.subscription_source === 'promo').length,
+      admin: allSubscriptions.filter(s => s.subscription_source === 'admin').length,
+      trial: allSubscriptions.filter(s => s.subscription_source === 'trial').length,
     }
   }
   
-  return <SubscriptionManagement subscriptions={subscriptions || []} stats={stats} />
+  return <SubscriptionManagement subscriptions={allSubscriptions} stats={stats} />
 }
