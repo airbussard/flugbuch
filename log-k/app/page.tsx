@@ -326,9 +326,10 @@ export default function HomePage() {
             <div>
               <h4 className="font-semibold mb-3">Legal</h4>
               <ul className="space-y-2 text-gray-400 text-sm">
-                <li><Link href="/privacy" className="hover:text-white transition">Privacy Policy</Link></li>
-                <li><Link href="/terms" className="hover:text-white transition">Terms of Service</Link></li>
-                <li><Link href="/imprint" className="hover:text-white transition">Imprint</Link></li>
+                <li><Link href="/privacy" className="hover:text-white transition">Datenschutz</Link></li>
+                <li><Link href="/terms" className="hover:text-white transition">AGB</Link></li>
+                <li><Link href="/imprint" className="hover:text-white transition">Impressum</Link></li>
+                <li><Link href="/cookie-policy" className="hover:text-white transition">Cookie-Richtlinie</Link></li>
               </ul>
             </div>
           </div>
@@ -338,10 +339,13 @@ export default function HomePage() {
             </p>
             <div className="flex space-x-4">
               <Link href="/privacy" className="text-gray-400 hover:text-white transition text-sm">
-                Privacy
+                Datenschutz
               </Link>
               <Link href="/terms" className="text-gray-400 hover:text-white transition text-sm">
-                Terms
+                AGB
+              </Link>
+              <Link href="/cookie-policy" className="text-gray-400 hover:text-white transition text-sm">
+                Cookies
               </Link>
             </div>
           </div>

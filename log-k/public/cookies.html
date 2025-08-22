@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cookie-Richtlinie - Log-K</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        h1 {
+            color: #2c3e50;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+        }
+        h2 {
+            color: #34495e;
+            margin-top: 30px;
+        }
+        h3 {
+            color: #34495e;
+            margin-top: 20px;
+        }
+        .info-box {
+            background-color: #d4edda;
+            border-left: 4px solid #28a745;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+        .cookie-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background-color: white;
+        }
+        .cookie-table th {
+            background-color: #3498db;
+            color: white;
+            padding: 10px;
+            text-align: left;
+        }
+        .cookie-table td {
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+        }
+        .cookie-table tr:hover {
+            background-color: #f5f5f5;
+        }
+        .contact-info {
+            background-color: #ecf0f1;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        .date {
+            color: #7f8c8d;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <h1>Cookie-Richtlinie</h1>
+    <p class="date">Stand: Januar 2025</p>
+
+    <div class="info-box">
+        <h2>📱 iOS App - Keine Cookies</h2>
+        <p><strong>Die Log-K iOS App verwendet KEINE Cookies oder ähnliche Tracking-Technologien.</strong> Alle Daten werden lokal auf Ihrem Gerät oder in Ihrer gesicherten Cloud gespeichert. Es findet kein webbasiertes Tracking statt.</p>
+    </div>
+
+    <h2>1. Was sind Cookies?</h2>
+    <p>Cookies sind kleine Textdateien, die auf Ihrem Gerät gespeichert werden, wenn Sie Websites besuchen. Sie werden verwendet, um Ihre Präferenzen zu speichern und die Benutzererfahrung zu verbessern.</p>
+
+    <h2>2. Cookie-Nutzung in der Log-K iOS App</h2>
+    <p>Die Log-K iOS App ist eine native Applikation und verwendet keine Cookies im herkömmlichen Sinne. Stattdessen nutzen wir:</p>
+    <ul>
+        <li><strong>Core Data:</strong> Lokale Datenbank auf Ihrem iOS-Gerät</li>
+        <li><strong>UserDefaults:</strong> Speicherung von App-Einstellungen</li>
+        <li><strong>Keychain:</strong> Sichere Speicherung von Anmeldedaten</li>
+        <li><strong>CloudKit:</strong> Optionale iCloud-Synchronisation (nur bei Aktivierung)</li>
+    </ul>
+
+    <h2>3. Website-Cookies (log-k.com)</h2>
+    <p>Wenn Sie unsere Website besuchen, verwenden wir folgende Cookie-Arten:</p>
+
+    <h3>3.1 Notwendige Cookies</h3>
+    <table class="cookie-table">
+        <thead>
+            <tr>
+                <th>Cookie-Name</th>
+                <th>Zweck</th>
+                <th>Speicherdauer</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>session_id</td>
+                <td>Aufrechterhaltung der Benutzersitzung</td>
+                <td>Sitzung</td>
+            </tr>
+            <tr>
+                <td>auth_token</td>
+                <td>Authentifizierung angemeldeter Nutzer</td>
+                <td>7 Tage</td>
+            </tr>
+            <tr>
+                <td>cookie_consent</td>
+                <td>Speicherung Ihrer Cookie-Einstellungen</td>
+                <td>1 Jahr</td>
+            </tr>
+            <tr>
+                <td>language_preference</td>
+                <td>Ihre bevorzugte Sprache</td>
+                <td>1 Jahr</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h3>3.2 Funktionale Cookies</h3>
+    <table class="cookie-table">
+        <thead>
+            <tr>
+                <th>Cookie-Name</th>
+                <th>Zweck</th>
+                <th>Speicherdauer</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>timezone</td>
+                <td>Anzeige von Zeiten in Ihrer Zeitzone</td>
+                <td>30 Tage</td>
+            </tr>
+            <tr>
+                <td>display_mode</td>
+                <td>Hell/Dunkel-Modus Präferenz</td>
+                <td>1 Jahr</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h2>4. Drittanbieter-Dienste</h2>
+    
+    <h3>4.1 Supabase (Authentifizierung & Datenbank)</h3>
+    <p>Supabase setzt technisch notwendige Cookies für die Authentifizierung:</p>
+    <ul>
+        <li><strong>sb-access-token:</strong> Zugriffstoken für API-Anfragen</li>
+        <li><strong>sb-refresh-token:</strong> Token zur Erneuerung der Sitzung</li>
+    </ul>
+    <p>Diese Cookies sind essentiell für die Funktionalität der Cloud-Synchronisation.</p>
+
+    <h3>4.2 Apple (App Store & iCloud)</h3>
+    <p>Bei der Nutzung von Apple-Diensten gelten die Cookie-Richtlinien von Apple. Weitere Informationen: <a href="https://www.apple.com/legal/privacy/" target="_blank">Apple Datenschutz</a></p>
+
+    <h2>5. Keine Werbe-Cookies oder Tracking</h2>
+    <div class="info-box">
+        <p><strong>Wir verwenden KEINE:</strong></p>
+        <ul>
+            <li>❌ Google Analytics oder andere Analyse-Tools</li>
+            <li>❌ Facebook Pixel oder Social Media Tracking</li>
+            <li>❌ Werbe-Cookies oder Retargeting</li>
+            <li>❌ Cross-Site-Tracking</li>
+            <li>❌ Fingerprinting-Technologien</li>
+        </ul>
+    </div>
+
+    <h2>6. Ihre Kontrolle über Cookies</h2>
+    
+    <h3>6.1 In der iOS App</h3>
+    <p>Da die App keine Cookies verwendet, sind keine speziellen Einstellungen erforderlich.</p>
+    
+    <h3>6.2 Auf der Website</h3>
+    <p>Sie können Cookies auf verschiedene Arten kontrollieren:</p>
+    <ul>
+        <li><strong>Browser-Einstellungen:</strong> Blockieren Sie alle oder bestimmte Cookies</li>
+        <li><strong>Cookie-Banner:</strong> Wählen Sie Ihre Präferenzen beim ersten Besuch</li>
+        <li><strong>Löschen:</strong> Entfernen Sie vorhandene Cookies über Ihre Browser-Einstellungen</li>
+    </ul>
+
+    <h3>6.3 Browser-Anleitungen</h3>
+    <ul>
+        <li><a href="https://support.apple.com/guide/safari/manage-cookies-sfri11471/mac" target="_blank">Safari</a></li>
+        <li><a href="https://support.google.com/chrome/answer/95647" target="_blank">Chrome</a></li>
+        <li><a href="https://support.mozilla.org/de/kb/cookies-erlauben-und-ablehnen" target="_blank">Firefox</a></li>
+        <li><a href="https://support.microsoft.com/de-de/microsoft-edge/cookies-in-microsoft-edge-löschen-63947406-40ac-c3b8-57b9-2a946a29ae09" target="_blank">Edge</a></li>
+    </ul>
+
+    <h2>7. Lokale Speicherung (Local Storage)</h2>
+    <p>Zusätzlich zu Cookies nutzt die Website möglicherweise Local Storage für:</p>
+    <ul>
+        <li>Temporäre Formulardaten</li>
+        <li>UI-Präferenzen</li>
+        <li>Offline-Funktionalität</li>
+    </ul>
+    <p>Diese Daten bleiben auf Ihrem Gerät und werden nicht an Server übertragen.</p>
+
+    <h2>8. Auswirkungen der Cookie-Deaktivierung</h2>
+    <p>Wenn Sie Cookies deaktivieren:</p>
+    <ul>
+        <li>Die iOS App funktioniert weiterhin normal</li>
+        <li>Auf der Website können Sie sich möglicherweise nicht anmelden</li>
+        <li>Ihre Präferenzen werden nicht gespeichert</li>
+        <li>Einige Funktionen sind möglicherweise eingeschränkt</li>
+    </ul>
+
+    <h2>9. Änderungen dieser Cookie-Richtlinie</h2>
+    <p>Wir können diese Cookie-Richtlinie gelegentlich aktualisieren. Wesentliche Änderungen werden auf der Website angekündigt. Das Datum der letzten Aktualisierung finden Sie am Anfang dieses Dokuments.</p>
+
+    <h2>10. Kontakt bei Fragen</h2>
+    <div class="contact-info">
+        <p>Bei Fragen zu unserer Cookie-Richtlinie kontaktieren Sie uns bitte:</p>
+        <p><strong>Fa. Oscar Knabe</strong><br>
+        E-Mail: oscar.knabe@knmail.de<br>
+        Betreff: Cookie-Richtlinie Log-K</p>
+    </div>
+
+    <h2>11. Rechtsgrundlage</h2>
+    <p>Die Verwendung von Cookies erfolgt auf Basis von:</p>
+    <ul>
+        <li><strong>Art. 6 Abs. 1 lit. a DSGVO:</strong> Ihre Einwilligung (für optionale Cookies)</li>
+        <li><strong>Art. 6 Abs. 1 lit. f DSGVO:</strong> Berechtigtes Interesse (für notwendige Cookies)</li>
+        <li><strong>§ 25 TTDSG:</strong> Telekommunikation-Telemedien-Datenschutz-Gesetz</li>
+    </ul>
+
+    <h2>12. Weitere Informationen</h2>
+    <p>Weitere Informationen zum Datenschutz finden Sie in unserer <a href="https://log-k.com/privacy.html">Datenschutzerklärung</a>.</p>
+    
+    <p>Allgemeine Informationen über Cookies: <a href="https://www.allaboutcookies.org/de/" target="_blank">www.allaboutcookies.org</a></p>
+</body>
+</html>
