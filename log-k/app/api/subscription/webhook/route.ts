@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { headers } from 'next/headers'
-import { syncStripeSubscription, cancelSubscription } from '@/lib/subscription/service'
+import { syncStripeSubscription, cancelSubscription } from '@/lib/subscription/service.server'
 
 // This will be uncommented when Stripe is configured
 // import Stripe from 'stripe'

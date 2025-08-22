@@ -1,7 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import SubscriptionPlans from '../SubscriptionPlans'
-import { getUserSubscriptionStatus } from '@/lib/subscription/service'
+import { getUserSubscriptionStatus } from '@/lib/subscription/service.server'
 
 export default async function SubscriptionChoosePage({
   searchParams

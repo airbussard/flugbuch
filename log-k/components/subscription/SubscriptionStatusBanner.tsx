@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { AlertCircle, Clock, CreditCard, X } from 'lucide-react'
 import Link from 'next/link'
-import { getUserSubscriptionStatusClient } from '@/lib/subscription/service'
+import { getUserSubscriptionStatusClient } from '@/lib/subscription/service.client'
 import type { SubscriptionStatus } from '@/lib/subscription/types'
 
 export default function SubscriptionStatusBanner() {

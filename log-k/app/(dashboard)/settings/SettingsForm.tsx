@@ -11,7 +11,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { MAJOR_AIRPORTS } from '@/lib/data/major-airports'
 import { useTranslation } from '@/lib/i18n/hooks'
 import DeleteAccountModal from './DeleteAccountModal'
-import { getUserSubscriptionStatusClient } from '@/lib/subscription/service'
+import { getUserSubscriptionStatusClient } from '@/lib/subscription/service.client'
 import type { SubscriptionStatus } from '@/lib/subscription/types'
 
 interface SettingsFormProps {
