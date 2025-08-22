@@ -5,9 +5,10 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select } from '@/components/ui/select'
-import { User, Bell, Shield, Palette, Download, Globe, AtSign, Loader2, CheckCircle, AlertCircle } from 'lucide-react'
+import { User, Bell, Shield, Palette, Download, Globe, AtSign, Loader2, CheckCircle, AlertCircle, MapPin } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter, useSearchParams } from 'next/navigation'
+import { MAJOR_AIRPORTS } from '@/lib/data/major-airports'
 
 interface SettingsFormProps {
   initialData: {
@@ -17,6 +18,7 @@ interface SettingsFormProps {
     username: string
     licenseNumber: string
     complianceMode: string
+    homebase: string
     notifications: boolean
     darkMode: boolean
     language: string
@@ -119,6 +121,7 @@ export default function SettingsForm({ initialData, userId }: SettingsFormProps)
         email: settings.email,
         license_number: settings.licenseNumber,
         compliance_mode: settings.complianceMode,
+        homebase: settings.homebase,
         updated_at: new Date().toISOString()
       }
       
@@ -334,6 +337,85 @@ export default function SettingsForm({ initialData, userId }: SettingsFormProps)
               value={settings.licenseNumber}
               onChange={(e) => setSettings({ ...settings, licenseNumber: e.target.value })}
             />
+          </div>
+          
+          <div>
+            <Label htmlFor="homebase">
+              <MapPin className="inline-block h-3 w-3 mr-1" />
+              Homebase Airport
+            </Label>
+            <Select
+              id="homebase"
+              value={settings.homebase}
+              onChange={(e) => setSettings({ ...settings, homebase: e.target.value })}
+              className="w-full"
+            >
+              <option value="">Select your homebase airport</option>
+              <optgroup label="Europe">
+                {MAJOR_AIRPORTS.filter(a => ['Germany', 'France', 'UK', 'Spain', 'Italy', 'Netherlands', 'Belgium', 'Switzerland', 'Austria', 'Poland', 'Denmark', 'Norway', 'Sweden', 'Finland', 'Czech Republic', 'Greece', 'Portugal', 'Ireland', 'Hungary', 'Romania'].includes(a.country))
+                  .sort((a, b) => a.name.localeCompare(b.name))
+                  .map(airport => (
+                    <option key={airport.icao} value={airport.icao}>
+                      {airport.icao} - {airport.name}, {airport.city}
+                    </option>
+                  ))}
+              </optgroup>
+              <optgroup label="North America">
+                {MAJOR_AIRPORTS.filter(a => ['USA', 'Canada'].includes(a.country))
+                  .sort((a, b) => a.name.localeCompare(b.name))
+                  .map(airport => (
+                    <option key={airport.icao} value={airport.icao}>
+                      {airport.icao} - {airport.name}, {airport.city}
+                    </option>
+                  ))}
+              </optgroup>
+              <optgroup label="Asia">
+                {MAJOR_AIRPORTS.filter(a => ['Japan', 'China', 'India', 'South Korea', 'Thailand', 'Singapore', 'Malaysia', 'Indonesia', 'Hong Kong'].includes(a.country))
+                  .sort((a, b) => a.name.localeCompare(b.name))
+                  .map(airport => (
+                    <option key={airport.icao} value={airport.icao}>
+                      {airport.icao} - {airport.name}, {airport.city}
+                    </option>
+                  ))}
+              </optgroup>
+              <optgroup label="Middle East">
+                {MAJOR_AIRPORTS.filter(a => ['UAE', 'Saudi Arabia', 'Qatar', 'Israel', 'Jordan', 'Turkey'].includes(a.country))
+                  .sort((a, b) => a.name.localeCompare(b.name))
+                  .map(airport => (
+                    <option key={airport.icao} value={airport.icao}>
+                      {airport.icao} - {airport.name}, {airport.city}
+                    </option>
+                  ))}
+              </optgroup>
+              <optgroup label="Oceania">
+                {MAJOR_AIRPORTS.filter(a => ['Australia', 'New Zealand'].includes(a.country))
+                  .sort((a, b) => a.name.localeCompare(b.name))
+                  .map(airport => (
+                    <option key={airport.icao} value={airport.icao}>
+                      {airport.icao} - {airport.name}, {airport.city}
+                    </option>
+                  ))}
+              </optgroup>
+              <optgroup label="South America">
+                {MAJOR_AIRPORTS.filter(a => ['Brazil', 'Argentina', 'Chile', 'Colombia', 'Peru'].includes(a.country))
+                  .sort((a, b) => a.name.localeCompare(b.name))
+                  .map(airport => (
+                    <option key={airport.icao} value={airport.icao}>
+                      {airport.icao} - {airport.name}, {airport.city}
+                    </option>
+                  ))}
+              </optgroup>
+              <optgroup label="Africa">
+                {MAJOR_AIRPORTS.filter(a => ['South Africa', 'Egypt', 'Morocco', 'Ethiopia', 'Kenya'].includes(a.country))
+                  .sort((a, b) => a.name.localeCompare(b.name))
+                  .map(airport => (
+                    <option key={airport.icao} value={airport.icao}>
+                      {airport.icao} - {airport.name}, {airport.city}
+                    </option>
+                  ))}
+              </optgroup>
+            </Select>
+            <p className="text-xs text-gray-500 mt-1">This will be used to center the weather map on your dashboard</p>
           </div>
         </div>
       </div>

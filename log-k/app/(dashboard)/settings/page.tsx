@@ -27,6 +27,7 @@ export default async function SettingsPage() {
     username: userProfile?.username || '',
     licenseNumber: userProfile?.license_number || '',
     complianceMode: userProfile?.compliance_mode || 'EASA',
+    homebase: userProfile?.homebase || '',
     // These fields don't exist in DB, using defaults
     notifications: true,
     darkMode: false, 

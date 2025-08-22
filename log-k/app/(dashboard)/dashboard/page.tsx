@@ -11,11 +11,11 @@ export default async function DashboardPage() {
   // Fetch user data
   const { data: { user } } = await supabase.auth.getUser()
   
-  // Fetch user profile for personalization
+  // Fetch user profile for personalization and homebase
   const { data: userProfile } = await supabase
     .from('user_profiles')
-    .select('first_name, last_name')
-    .eq('user_id', user?.id)
+    .select('first_name, last_name, homebase')
+    .eq('id', user?.id)  // Changed from user_id to id as per schema
     .single()
   
   // Fetch ALL flights for total statistics
@@ -137,7 +137,7 @@ export default async function DashboardPage() {
       </div>
       
       {/* Airport Weather Map */}
-      <AirportWeatherMap />
+      <AirportWeatherMap homebase={userProfile?.homebase} />
     </div>
   )
 }

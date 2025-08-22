@@ -35,11 +35,29 @@ interface AirportWeather {
 
 // Import Leaflet CSS
 import 'leaflet/dist/leaflet.css'
+import Link from 'next/link'
+import { MapPin, Info } from 'lucide-react'
 
-export default function AirportWeatherMap() {
+interface AirportWeatherMapProps {
+  homebase?: string | null
+}
+
+export default function AirportWeatherMap({ homebase }: AirportWeatherMapProps) {
   const [weatherData, setWeatherData] = useState<Map<string, AirportWeather>>(new Map())
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  
+  // Find homebase airport coordinates
+  const homebaseAirport = homebase ? 
+    MAJOR_AIRPORTS.find(a => a.icao.toUpperCase() === homebase.toUpperCase()) : null
+  
+  // Default center (Germany) or homebase
+  const mapCenter: [number, number] = homebaseAirport 
+    ? [homebaseAirport.lat, homebaseAirport.lng]
+    : [50.1109, 8.6821] // Frankfurt area as default
+  
+  // Zoom level - closer for homebase
+  const zoomLevel = homebaseAirport ? 7 : 4
 
   // Fetch weather data for all airports
   useEffect(() => {
@@ -124,6 +142,35 @@ export default function AirportWeatherMap() {
 
   return (
     <div className="bg-white rounded-lg shadow p-6">
+      {/* Homebase Info Banner */}
+      <div className="mb-4">
+        {homebaseAirport ? (
+          <div className="flex items-center justify-between p-3 bg-blue-50 dark:bg-blue-950/30 rounded-lg border border-blue-200 dark:border-blue-800">
+            <div className="flex items-center gap-2">
+              <MapPin className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+              <span className="text-sm text-blue-900 dark:text-blue-100">
+                Map centered on your homebase: <strong>{homebaseAirport.icao}</strong> - {homebaseAirport.name}, {homebaseAirport.city}
+              </span>
+            </div>
+          </div>
+        ) : (
+          <div className="flex items-center justify-between p-3 bg-amber-50 dark:bg-amber-950/30 rounded-lg border border-amber-200 dark:border-amber-800">
+            <div className="flex items-center gap-2">
+              <Info className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+              <span className="text-sm text-amber-900 dark:text-amber-100">
+                No homebase set. Map centered on Europe.
+              </span>
+            </div>
+            <Link 
+              href="/settings" 
+              className="text-sm font-medium text-amber-600 hover:text-amber-700 dark:text-amber-400 dark:hover:text-amber-300 underline"
+            >
+              Set homebase
+            </Link>
+          </div>
+        )}
+      </div>
+      
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-lg font-semibold text-gray-900">Airport Weather Map</h3>
         <div className="flex items-center space-x-4 text-sm">
@@ -148,8 +195,8 @@ export default function AirportWeatherMap() {
       
       <div className="h-96 rounded-lg overflow-hidden">
         <MapContainer
-          center={[50.1109, 8.6821]} // Center on Frankfurt
-          zoom={5}
+          center={mapCenter}
+          zoom={zoomLevel}
           style={{ height: '100%', width: '100%' }}
           scrollWheelZoom={false}
         >
@@ -161,17 +208,18 @@ export default function AirportWeatherMap() {
           {MAJOR_AIRPORTS.map((airport) => {
             const weather = weatherData.get(airport.icao)
             const category = weather?.flightCategory || 'UNKNOWN'
+            const isHomebase = homebaseAirport && airport.icao === homebaseAirport.icao
             
             return (
               <CircleMarker
                 key={airport.icao}
                 center={[airport.lat, airport.lng]}
-                radius={8}
+                radius={isHomebase ? 12 : 8}
                 fillColor={getMarkerColor(category)}
-                color="#fff"
-                weight={2}
+                color={isHomebase ? "#fbbf24" : "#fff"}
+                weight={isHomebase ? 3 : 2}
                 opacity={1}
-                fillOpacity={0.8}
+                fillOpacity={isHomebase ? 1 : 0.8}
               >
                 <Popup>
                   <div className="p-2">
