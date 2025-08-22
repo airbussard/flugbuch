@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { Plane, Shield, Cloud, BarChart3, Users, Globe, Check, Star, Zap, Lock, Smartphone, FileText } from 'lucide-react'
+import Footer from '@/components/layout/Footer'
 
 export default function HomePage() {
   return (

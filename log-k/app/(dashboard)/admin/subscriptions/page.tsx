@@ -69,7 +69,7 @@ export default async function SubscriptionsPage() {
         username
       )
     `)
-    .eq('trial_active', true)
+    .eq('trial_status', 'active_trial')
   
   // Convert trial status to subscription format
   const trialSubscriptions = trialStatus?.map(trial => ({
@@ -77,8 +77,8 @@ export default async function SubscriptionsPage() {
     user_id: trial.user_id,
     subscription_tier: 'trial' as const,
     subscription_source: 'trial' as const,
-    activated_at: trial.trial_start || trial.created_at,
-    valid_until: trial.trial_end,
+    activated_at: trial.trial_started || trial.created_at,
+    valid_until: trial.trial_ends,
     apple_transaction_id: null,
     apple_original_transaction_id: null,
     stripe_subscription_id: null,
