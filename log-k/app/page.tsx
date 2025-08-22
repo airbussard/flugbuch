@@ -2,60 +2,64 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { Plane, Shield, Cloud, BarChart3, Users, Globe, Check, Star, Zap, Lock, Smartphone, FileText } from 'lucide-react'
 import Footer from '@/components/layout/Footer'
+import HeroSlider from '@/components/layout/HeroSlider'
 
 export default function HomePage() {
   return (
     <div className="min-h-screen bg-white">
-      {/* Navigation */}
-      <nav className="container mx-auto px-6 py-4 border-b border-gray-100">
-        <div className="flex justify-between items-center">
-          <Link href="/" className="flex items-center space-x-3">
-            <Image 
-              src="/logo.png" 
-              alt="Log-K Logo" 
-              width={48} 
-              height={48}
-              className="rounded-lg"
-            />
-            <span className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-violet-600 bg-clip-text text-transparent">Log-K</span>
-          </Link>
-          <div className="flex items-center space-x-6">
-            <Link href="/login" className="text-gray-600 hover:text-gray-900 transition font-medium">
-              Login
+      {/* Hero Section with Slider */}
+      <HeroSlider>
+        {/* Navigation - Absolute positioned over the slider */}
+        <nav className="absolute top-0 left-0 right-0 z-20 container mx-auto px-6 py-4">
+          <div className="flex justify-between items-center">
+            <Link href="/" className="flex items-center space-x-3">
+              <Image 
+                src="/logo.png" 
+                alt="Log-K Logo" 
+                width={48} 
+                height={48}
+                className="rounded-lg"
+              />
+              <span className="text-2xl font-bold text-white">Log-K</span>
             </Link>
-            <Link href="/register" className="bg-gradient-to-r from-blue-500 to-violet-500 text-white px-5 py-2.5 rounded-lg hover:from-blue-600 hover:to-violet-600 transition font-medium shadow-sm">
-              Start Free Trial
-            </Link>
+            <div className="flex items-center space-x-6">
+              <Link href="/login" className="text-white/90 hover:text-white transition font-medium">
+                Login
+              </Link>
+              <Link href="/register" className="bg-gradient-to-r from-blue-500 to-violet-500 text-white px-5 py-2.5 rounded-lg hover:from-blue-600 hover:to-violet-600 transition font-medium shadow-lg">
+                Start Free Trial
+              </Link>
+            </div>
           </div>
-        </div>
-      </nav>
+        </nav>
 
-      {/* Hero Section */}
-      <div className="container mx-auto px-6 pt-16 pb-20">
-        <div className="text-center max-w-4xl mx-auto">
-          <div className="inline-flex items-center bg-gradient-to-r from-blue-50 to-violet-50 text-violet-700 px-3 py-1 rounded-full text-sm font-medium mb-6 border border-violet-200">
-            <Star className="h-4 w-4 mr-1" />
-            4 Weeks Free Trial - No Credit Card Required
-          </div>
-          <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-6 leading-tight">
-            Professional Digital<br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-violet-600">
-              Pilot Logbook
-            </span>
-          </h1>
-          <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
-            EASA & FAA compliant flight logging with real-time sync, advanced analytics, and seamless multi-device access
-          </p>
-          <div className="flex justify-center space-x-4">
-            <Link href="/register" className="bg-gradient-to-r from-blue-500 to-violet-500 text-white px-8 py-3 rounded-lg text-lg font-semibold hover:from-blue-600 hover:to-violet-600 transition shadow-md">
-              Start 4-Week Free Trial
-            </Link>
-            <Link href="#pricing" className="border-2 border-gray-300 text-gray-700 px-8 py-3 rounded-lg text-lg font-semibold hover:border-gray-400 hover:bg-gray-50 transition">
-              View Pricing
-            </Link>
+        {/* Hero Content */}
+        <div className="container mx-auto px-6">
+          <div className="text-center max-w-4xl mx-auto">
+            <div className="inline-flex items-center bg-white/10 backdrop-blur-sm text-white px-3 py-1 rounded-full text-sm font-medium mb-6 border border-white/20">
+              <Star className="h-4 w-4 mr-1" />
+              4 Weeks Free Trial - No Credit Card Required
+            </div>
+            <h1 className="text-5xl md:text-7xl font-bold text-white mb-6 leading-tight">
+              Professional Digital<br />
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-300 to-violet-300">
+                Pilot Logbook
+              </span>
+            </h1>
+            <p className="text-xl text-white/90 mb-8 max-w-2xl mx-auto">
+              EASA & FAA compliant flight logging with real-time sync, advanced analytics, and seamless multi-device access
+            </p>
+            <div className="flex justify-center space-x-4">
+              <Link href="/register" className="bg-gradient-to-r from-blue-500 to-violet-500 text-white px-8 py-3 rounded-lg text-lg font-semibold hover:from-blue-600 hover:to-violet-600 transition shadow-xl">
+                Start 4-Week Free Trial
+              </Link>
+              <Link href="#pricing" className="bg-white/10 backdrop-blur-sm border-2 border-white/30 text-white px-8 py-3 rounded-lg text-lg font-semibold hover:bg-white/20 transition">
+                View Pricing
+              </Link>
+            </div>
           </div>
         </div>
-      </div>
+      </HeroSlider>
 
       {/* Trust Indicators */}
       <div className="bg-gray-50 py-12 border-y border-gray-100">
@@ -145,11 +149,11 @@ export default function HomePage() {
               features={[
                 { text: "Full app access for 4 weeks", included: true },
                 { text: "Local device storage", included: true },
-                { text: "Basic flight logging", included: true },
+                { text: "Advanced flight logging", included: true },
                 { text: "EASA/FAA compliance", included: true },
-                { text: "Cloud sync", included: false },
-                { text: "Web dashboard access", included: false },
-                { text: "Multi-device sync", included: false },
+                { text: "Cloud sync & backup", included: true },
+                { text: "Web dashboard access", included: true },
+                { text: "Multi-device sync", included: true },
                 { text: "Priority support", included: false }
               ]}
               buttonText="Start Free Trial"
@@ -160,9 +164,9 @@ export default function HomePage() {
             {/* Basic Pack */}
             <PricingCard
               title="Basic Pack"
-              price="49,99€"
-              period="3 years"
-              monthlyPrice="1,39€/month"
+              price="19,99€"
+              period="year"
+              monthlyPrice="1,67€/month"
               description="Essential features for casual pilots"
               features={[
                 { text: "Everything in Free Trial", included: true },
@@ -182,9 +186,9 @@ export default function HomePage() {
             {/* Pro Pack */}
             <PricingCard
               title="Pro Pack"
-              price="69,99€"
-              period="3 years"
-              monthlyPrice="1,94€/month"
+              price="27,99€"
+              period="year"
+              monthlyPrice="2,33€/month"
               description="Complete solution for professional pilots"
               popular={true}
               features={[
