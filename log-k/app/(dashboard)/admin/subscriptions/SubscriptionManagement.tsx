@@ -16,8 +16,8 @@ interface UserProfile {
 interface Subscription {
   id: string
   user_id: string
-  subscription_tier: 'none' | 'basic' | 'premium' | 'enterprise'
-  subscription_source: 'apple' | 'stripe' | 'promo' | 'admin'
+  subscription_tier: 'none' | 'trial' | 'basic' | 'premium' | 'enterprise'
+  subscription_source: 'apple' | 'stripe' | 'promo' | 'admin' | 'trial'
   activated_at: string
   valid_until: string
   apple_transaction_id: string | null
@@ -35,8 +35,11 @@ interface SubscriptionStats {
   totalSubscriptions: number
   activeSubscriptions: number
   expiringSubscriptions: number
+  activeTrials: number
+  expiringTrials: number
   tierBreakdown: {
     none: number
+    trial: number
     basic: number
     premium: number
     enterprise: number
@@ -46,6 +49,7 @@ interface SubscriptionStats {
     stripe: number
     promo: number
     admin: number
+    trial: number
   }
 }
 
@@ -78,6 +82,7 @@ export default function SubscriptionManagement({ subscriptions: initialSubscript
   const getTierColor = (tier: string) => {
     switch (tier) {
       case 'none': return 'bg-gray-100 text-gray-700'
+      case 'trial': return 'bg-green-100 text-green-700'
       case 'basic': return 'bg-blue-100 text-blue-700'
       case 'premium': return 'bg-purple-100 text-purple-700'
       case 'enterprise': return 'bg-yellow-100 text-yellow-700'
@@ -91,6 +96,7 @@ export default function SubscriptionManagement({ subscriptions: initialSubscript
       case 'stripe': return '💳'
       case 'promo': return '🎟️'
       case 'admin': return '👤'
+      case 'trial': return '🧪'
       default: return '❓'
     }
   }
@@ -100,6 +106,22 @@ export default function SubscriptionManagement({ subscriptions: initialSubscript
     const thirtyDaysFromNow = new Date()
     thirtyDaysFromNow.setDate(thirtyDaysFromNow.getDate() + 30)
     return expiryDate > new Date() && expiryDate <= thirtyDaysFromNow
+  }
+
+  const isTrialExpiringSoon = (subscription: Subscription) => {
+    if (subscription.subscription_tier !== 'trial') return false
+    const expiryDate = new Date(subscription.valid_until)
+    const threeDaysFromNow = new Date()
+    threeDaysFromNow.setDate(threeDaysFromNow.getDate() + 3)
+    return expiryDate > new Date() && expiryDate <= threeDaysFromNow
+  }
+
+  const getTrialDaysRemaining = (validUntil: string) => {
+    const expiryDate = new Date(validUntil)
+    const today = new Date()
+    const diffTime = expiryDate.getTime() - today.getTime()
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+    return diffDays > 0 ? diffDays : 0
   }
 
   const isExpired = (validUntil: string) => {
@@ -124,11 +146,11 @@ export default function SubscriptionManagement({ subscriptions: initialSubscript
       </div>
 
       {/* Statistics */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
         <div className="bg-white rounded-lg shadow p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-600">Total Subscriptions</p>
+              <p className="text-sm text-gray-600">Total</p>
               <p className="text-2xl font-bold text-gray-900">{stats.totalSubscriptions}</p>
             </div>
             <Users className="h-8 w-8 text-gray-400" />
@@ -138,17 +160,30 @@ export default function SubscriptionManagement({ subscriptions: initialSubscript
         <div className="bg-white rounded-lg shadow p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-600">Active Subscriptions</p>
+              <p className="text-sm text-gray-600">Active</p>
               <p className="text-2xl font-bold text-green-600">{stats.activeSubscriptions}</p>
             </div>
             <TrendingUp className="h-8 w-8 text-green-400" />
+          </div>
+        </div>
+
+        <div className="bg-white rounded-lg shadow p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-gray-600">Active Trials</p>
+              <p className="text-2xl font-bold text-blue-600">{stats.activeTrials}</p>
+              {stats.expiringTrials > 0 && (
+                <p className="text-xs text-orange-600 mt-1">{stats.expiringTrials} expiring</p>
+              )}
+            </div>
+            <Calendar className="h-8 w-8 text-blue-400" />
           </div>
         </div>
         
         <div className="bg-white rounded-lg shadow p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-600">Expiring Soon</p>
+              <p className="text-sm text-gray-600">Expiring</p>
               <p className="text-2xl font-bold text-yellow-600">{stats.expiringSubscriptions}</p>
             </div>
             <AlertCircle className="h-8 w-8 text-yellow-400" />
@@ -159,6 +194,12 @@ export default function SubscriptionManagement({ subscriptions: initialSubscript
           <div>
             <p className="text-sm text-gray-600 mb-2">Tier Distribution</p>
             <div className="space-y-1 text-sm">
+              {stats.tierBreakdown.trial > 0 && (
+                <div className="flex justify-between">
+                  <span>Trial:</span>
+                  <span className="font-medium text-green-600">{stats.tierBreakdown.trial}</span>
+                </div>
+              )}
               <div className="flex justify-between">
                 <span>Premium:</span>
                 <span className="font-medium">{stats.tierBreakdown.premium}</span>
@@ -200,6 +241,7 @@ export default function SubscriptionManagement({ subscriptions: initialSubscript
             >
               <option value="all">All Tiers</option>
               <option value="none">None</option>
+              <option value="trial">Trial</option>
               <option value="basic">Basic</option>
               <option value="premium">Premium</option>
               <option value="enterprise">Enterprise</option>
@@ -215,6 +257,7 @@ export default function SubscriptionManagement({ subscriptions: initialSubscript
               <option value="stripe">Stripe</option>
               <option value="promo">Promo</option>
               <option value="admin">Admin</option>
+              <option value="trial">Trial</option>
             </select>
           </div>
         </div>
@@ -283,7 +326,15 @@ export default function SubscriptionManagement({ subscriptions: initialSubscript
                   {isExpired(subscription.valid_until) && (
                     <span className="text-xs text-red-600">Expired</span>
                   )}
-                  {!isExpired(subscription.valid_until) && isExpiringSoon(subscription.valid_until) && (
+                  {!isExpired(subscription.valid_until) && subscription.subscription_tier === 'trial' && (
+                    <span className="text-xs text-blue-600">
+                      {getTrialDaysRemaining(subscription.valid_until)} days left
+                    </span>
+                  )}
+                  {!isExpired(subscription.valid_until) && isTrialExpiringSoon(subscription) && (
+                    <span className="text-xs text-orange-600 font-semibold">⚠️ Trial ending</span>
+                  )}
+                  {!isExpired(subscription.valid_until) && subscription.subscription_tier !== 'trial' && isExpiringSoon(subscription.valid_until) && (
                     <span className="text-xs text-yellow-600">Expiring soon</span>
                   )}
                 </td>

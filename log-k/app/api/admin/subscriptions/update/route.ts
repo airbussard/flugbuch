@@ -82,12 +82,28 @@ export async function PATCH(request: NextRequest) {
     
     // Create history entry if tier changed
     if (subscription_tier && subscription_tier !== currentSubscription.subscription_tier) {
+      // Determine event type based on tier changes
+      let eventType = 'change'
+      if (subscription_tier === 'none') {
+        eventType = 'cancellation'
+      } else if (currentSubscription.subscription_tier === 'none') {
+        eventType = 'activation'
+      } else if (currentSubscription.subscription_tier === 'trial') {
+        eventType = subscription_tier !== 'none' ? 'trial_conversion' : 'trial_cancellation'
+      } else if (subscription_tier === 'trial') {
+        eventType = 'trial_activation'
+      } else {
+        // Compare tier levels for paid tiers
+        const tierLevels = { 'trial': 0, 'basic': 1, 'premium': 2, 'enterprise': 3 }
+        const currentLevel = tierLevels[currentSubscription.subscription_tier as keyof typeof tierLevels] || 0
+        const newLevel = tierLevels[subscription_tier as keyof typeof tierLevels] || 0
+        eventType = newLevel > currentLevel ? 'upgrade' : 'downgrade'
+      }
+      
       const historyEntry = {
         user_id: currentSubscription.user_id,
         subscription_id: subscriptionId,
-        event_type: subscription_tier === 'none' ? 'cancellation' : 
-                   (currentSubscription.subscription_tier === 'none' ? 'activation' :
-                   (subscription_tier > currentSubscription.subscription_tier ? 'upgrade' : 'downgrade')),
+        event_type: eventType,
         previous_tier: currentSubscription.subscription_tier,
         new_tier: subscription_tier,
         metadata: {
