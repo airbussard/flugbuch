@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { notFound, redirect } from 'next/navigation'
-import { formatDate, formatTime } from '@/lib/utils'
+import { formatTime } from '@/lib/utils'
+import { formatUTCDate, formatUTCTime } from '@/lib/utils/utc-time'
 import { Button } from '@/components/ui/button'
 import { ArrowLeft, Edit, Trash2, Plane, Calendar, Clock, MapPin, Users } from 'lucide-react'
 import Link from 'next/link'
@@ -120,7 +121,7 @@ export default async function FlightDetailPage({ params }: PageProps) {
               </h2>
               <p className="text-gray-600">
                 {flight.flight_number ? `Flight ${flight.flight_number} • ` : ''}
-                {flight.flight_date ? formatDate(flight.flight_date) : 'No date'}
+                {flight.flight_date ? formatUTCDate(flight.flight_date) : 'No date'}
               </p>
             </div>
           </div>
@@ -149,14 +150,15 @@ export default async function FlightDetailPage({ params }: PageProps) {
           <div className="space-y-1">
             <p className="text-sm text-gray-600 flex items-center">
               <Clock className="h-4 w-4 mr-2" />
-              Block Times
+              Block Times (UTC)
             </p>
             <p className="font-medium text-gray-900">
               {flight.off_block && flight.on_block ? (
                 <>
-                  {new Date(flight.off_block).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                  {formatUTCTime(flight.off_block)}
                   {' - '}
-                  {new Date(flight.on_block).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                  {formatUTCTime(flight.on_block)}
+                  {' UTC'}
                 </>
               ) : 'Not recorded'}
             </p>
@@ -251,8 +253,8 @@ export default async function FlightDetailPage({ params }: PageProps) {
       
       {/* Metadata */}
       <div className="bg-gray-50 rounded-lg p-4 text-sm text-gray-600">
-        <p>Created: {formatDate(flight.created_at)} at {new Date(flight.created_at).toLocaleTimeString()}</p>
-        <p>Last updated: {formatDate(flight.updated_at)} at {new Date(flight.updated_at).toLocaleTimeString()}</p>
+        <p>Created: {formatUTCDate(flight.created_at)} at {formatUTCTime(flight.created_at)} UTC</p>
+        <p>Last updated: {formatUTCDate(flight.updated_at)} at {formatUTCTime(flight.updated_at)} UTC</p>
       </div>
     </div>
   )

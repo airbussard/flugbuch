@@ -1,7 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import { formatDate, formatTime } from '@/lib/utils'
+import { formatTime } from '@/lib/utils'
+import { formatUTCTime, formatUTCDate } from '@/lib/utils/utc-time'
 import { Edit, Trash2, Eye } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
@@ -55,7 +56,7 @@ export default function FlightsTable({ flights }: { flights: Flight[] }) {
                 Date
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Route
+                Route / Times (UTC)
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Aircraft
@@ -93,7 +94,7 @@ export default function FlightsTable({ flights }: { flights: Flight[] }) {
                     />
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {flight.flight_date ? formatDate(flight.flight_date) : 'N/A'}
+                    {flight.flight_date ? formatUTCDate(flight.flight_date) : 'N/A'}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                     <span className="font-medium">
@@ -101,7 +102,7 @@ export default function FlightsTable({ flights }: { flights: Flight[] }) {
                     </span>
                     {flight.off_block && flight.on_block && (
                       <span className="block text-xs text-gray-500">
-                        {new Date(flight.off_block).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})} - {new Date(flight.on_block).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                        {formatUTCTime(flight.off_block)} - {formatUTCTime(flight.on_block)} UTC
                       </span>
                     )}
                   </td>

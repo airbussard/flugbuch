@@ -41,16 +41,17 @@ export default function NewFlightPage() {
     const crewAssignments: CrewAssignment[] = data.crew_assignments || []
     delete data.crew_assignments
 
-    // Format times for database (convert time strings to timestamps)
+    // Format times for database (convert time strings to UTC timestamps)
+    // Important: Append 'Z' to indicate UTC time
     const flightDate = data.flight_date
     const formattedData = {
       ...data,
       user_id: user.id,
       deleted: false,
-      off_block: data.off_block ? `${flightDate}T${data.off_block}:00` : null,
-      on_block: data.on_block ? `${flightDate}T${data.on_block}:00` : null,
-      takeoff: data.takeoff ? `${flightDate}T${data.takeoff}:00` : null,
-      landing: data.landing ? `${flightDate}T${data.landing}:00` : null,
+      off_block: data.off_block ? `${flightDate}T${data.off_block}:00Z` : null,
+      on_block: data.on_block ? `${flightDate}T${data.on_block}:00Z` : null,
+      takeoff: data.takeoff ? `${flightDate}T${data.takeoff}:00Z` : null,
+      landing: data.landing ? `${flightDate}T${data.landing}:00Z` : null,
       block_time: data.block_time || null
     }
     

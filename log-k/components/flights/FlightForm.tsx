@@ -239,7 +239,7 @@ export default function FlightForm({ onSubmit, loading = false, defaultValues }:
         
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <div>
-            <Label htmlFor="off_block">Off Block *</Label>
+            <Label htmlFor="off_block">Off Block (UTC) *</Label>
             <Input
               id="off_block"
               type="time"
@@ -250,7 +250,7 @@ export default function FlightForm({ onSubmit, loading = false, defaultValues }:
           </div>
           
           <div>
-            <Label htmlFor="on_block">On Block *</Label>
+            <Label htmlFor="on_block">On Block (UTC) *</Label>
             <Input
               id="on_block"
               type="time"
@@ -261,7 +261,7 @@ export default function FlightForm({ onSubmit, loading = false, defaultValues }:
           </div>
           
           <div>
-            <Label htmlFor="takeoff">Takeoff</Label>
+            <Label htmlFor="takeoff">Takeoff (UTC)</Label>
             <Input
               id="takeoff"
               type="time"
@@ -270,7 +270,7 @@ export default function FlightForm({ onSubmit, loading = false, defaultValues }:
           </div>
           
           <div>
-            <Label htmlFor="landing">Landing</Label>
+            <Label htmlFor="landing">Landing (UTC)</Label>
             <Input
               id="landing"
               type="time"

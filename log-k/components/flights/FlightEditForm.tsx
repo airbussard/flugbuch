@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import { extractUTCTime, extractUTCDate } from '@/lib/utils/utc-time'
 import { Button } from '@/components/ui/button'
 import { ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
@@ -76,16 +77,27 @@ export default function FlightEditForm({ flight, aircraft, crewMembers }: Flight
       const picTime = myRole === 'PIC' ? currentBlockTime : 0
       const sicTime = myRole === 'SIC' ? currentBlockTime : 0
       
+      // Get date and times for UTC timestamps
+      const flightDate = formData.get('flight_date') as string
+      const offBlockTime = formData.get('off_block') as string
+      const onBlockTime = formData.get('on_block') as string
+      const takeoffTime = formData.get('takeoff') as string
+      const landingTime = formData.get('landing') as string
+      
       // Update flight
       const { error: updateError } = await supabase
         .from('flights')
         .update({
-          flight_date: formData.get('flight_date'),
+          flight_date: flightDate,
           departure_airport: formData.get('departure_airport'),
           arrival_airport: formData.get('arrival_airport'),
           registration: formData.get('registration'),
           aircraft_type: formData.get('aircraft_type'),
           flight_number: formData.get('flight_number') || null,
+          off_block: offBlockTime ? `${flightDate}T${offBlockTime}:00Z` : null,
+          on_block: onBlockTime ? `${flightDate}T${onBlockTime}:00Z` : null,
+          takeoff: takeoffTime ? `${flightDate}T${takeoffTime}:00Z` : null,
+          landing: landingTime ? `${flightDate}T${landingTime}:00Z` : null,
           block_time: currentBlockTime,
           pic_time: picTime,
           sic_time: sicTime,
@@ -215,6 +227,59 @@ export default function FlightEditForm({ flight, aircraft, crewMembers }: Flight
               name="aircraft_type"
               defaultValue={flight.aircraft_type}
               required
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+            />
+          </div>
+        </div>
+        
+        {/* Times Row */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Off Block (UTC) *
+            </label>
+            <input
+              type="time"
+              name="off_block"
+              defaultValue={extractUTCTime(flight.off_block)}
+              required
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+            />
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              On Block (UTC) *
+            </label>
+            <input
+              type="time"
+              name="on_block"
+              defaultValue={extractUTCTime(flight.on_block)}
+              required
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+            />
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Takeoff (UTC)
+            </label>
+            <input
+              type="time"
+              name="takeoff"
+              defaultValue={extractUTCTime(flight.takeoff)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+            />
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Landing (UTC)
+            </label>
+            <input
+              type="time"
+              name="landing"
+              defaultValue={extractUTCTime(flight.landing)}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
             />
           </div>
