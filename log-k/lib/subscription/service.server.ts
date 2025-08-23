@@ -245,8 +245,17 @@ function mapSubscriptionToStatus(subscription: UserSubscription): SubscriptionSt
     }
   }
 
-  // Map 'premium' from DB to 'premium' (Pro) tier
-  const tier = subscription.subscription_tier === 'premium' ? 'premium' : subscription.subscription_tier
+  // Map database tiers to application tiers
+  // Note: Trials have subscription_tier='pro' with subscription_source='trial'
+  let tier = subscription.subscription_tier
+  
+  // Handle special mappings
+  if (subscription.subscription_tier === 'premium') {
+    tier = 'premium' // Map 'premium' to 'premium' (Pro tier)
+  } else if (subscription.subscription_tier === 'pro' && isTrial) {
+    // Trial users get pro features but we keep the tier as 'pro'
+    tier = 'pro'
+  }
 
   return {
     tier,

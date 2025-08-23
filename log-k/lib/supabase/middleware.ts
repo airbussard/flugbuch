@@ -81,7 +81,7 @@ export async function updateSession(request: NextRequest) {
       // Check user's subscription status
       const { data: subscription } = await supabase
         .from('user_subscriptions')
-        .select('subscription_tier, valid_until')
+        .select('subscription_tier, subscription_source, valid_until')
         .eq('user_id', user.id)
         .gte('valid_until', new Date().toISOString())
         .order('created_at', { ascending: false })
@@ -94,7 +94,8 @@ export async function updateSession(request: NextRequest) {
         httpOnly: true
       })
 
-      // If no active subscription, redirect to expired page
+      // If no active subscription (including trials), redirect to expired page
+      // Note: Trials have subscription_tier='pro' with subscription_source='trial'
       if (!subscription) {
         const url = new URL('/subscription/expired', request.url)
         url.searchParams.set('return_to', pathname)

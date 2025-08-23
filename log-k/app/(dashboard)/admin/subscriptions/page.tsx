@@ -158,6 +158,7 @@ export default async function SubscriptionsPage() {
       none: allSubscriptions.filter(s => s.subscription_tier === 'none').length,
       trial: allSubscriptions.filter(s => s.subscription_tier === 'trial').length,
       basic: allSubscriptions.filter(s => s.subscription_tier === 'basic').length,
+      pro: allSubscriptions.filter(s => s.subscription_tier === 'pro').length,
       premium: allSubscriptions.filter(s => s.subscription_tier === 'premium').length,
       enterprise: allSubscriptions.filter(s => s.subscription_tier === 'enterprise').length,
     },

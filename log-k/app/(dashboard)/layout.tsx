@@ -32,7 +32,7 @@ export default async function DashboardLayout({
   // Check subscription status for trial banner
   const { data: subscription } = await supabase
     .from('user_subscriptions')
-    .select('subscription_tier, valid_until')
+    .select('subscription_tier, subscription_source, valid_until')
     .eq('user_id', user.id)
     .gte('valid_until', new Date().toISOString())
     .order('created_at', { ascending: false })
@@ -40,8 +40,9 @@ export default async function DashboardLayout({
     .single()
   
   // Calculate days remaining if trial
+  // Note: Trials have subscription_tier='pro' with subscription_source='trial'
   let trialDaysRemaining = null
-  if (subscription?.subscription_tier === 'trial') {
+  if (subscription?.subscription_source === 'trial') {
     const validUntil = new Date(subscription.valid_until)
     const now = new Date()
     const daysRemaining = Math.ceil((validUntil.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
