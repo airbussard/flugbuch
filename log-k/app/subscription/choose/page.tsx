@@ -3,11 +3,14 @@ import { redirect } from 'next/navigation'
 import SubscriptionPlans from '../SubscriptionPlans'
 import { getUserSubscriptionStatus } from '@/lib/subscription/service.server'
 
+interface PageProps {
+  searchParams: Promise<{ feature?: string; return_to?: string; expired?: string }>
+}
+
 export default async function SubscriptionChoosePage({
   searchParams
-}: {
-  searchParams: { feature?: string; return_to?: string; expired?: string }
-}) {
+}: PageProps) {
+  const params = await searchParams
   const supabase = await createClient()
   
   // Get current user
@@ -22,7 +25,7 @@ export default async function SubscriptionChoosePage({
 
   // If user has active subscription, redirect to dashboard or return URL
   if (subscriptionStatus.isActive && subscriptionStatus.tier !== 'none') {
-    const returnTo = searchParams.return_to || '/dashboard'
+    const returnTo = params.return_to || '/dashboard'
     redirect(returnTo)
   }
 
@@ -31,7 +34,7 @@ export default async function SubscriptionChoosePage({
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Header */}
         <div className="text-center mb-10">
-          {searchParams.expired === 'true' ? (
+          {params.expired === 'true' ? (
             <>
               <h1 className="text-4xl font-bold text-gray-900 mb-4">
                 Your Trial Has Expired
@@ -40,13 +43,13 @@ export default async function SubscriptionChoosePage({
                 Choose a plan to continue using Log-K
               </p>
             </>
-          ) : searchParams.feature ? (
+          ) : params.feature ? (
             <>
               <h1 className="text-4xl font-bold text-gray-900 mb-4">
                 Upgrade to Access This Feature
               </h1>
               <p className="text-xl text-gray-600">
-                The {searchParams.feature} feature requires a subscription
+                The {params.feature} feature requires a subscription
               </p>
             </>
           ) : (
@@ -65,8 +68,8 @@ export default async function SubscriptionChoosePage({
         <SubscriptionPlans 
           userId={user.id}
           currentTier={subscriptionStatus.tier}
-          returnTo={searchParams.return_to}
-          highlightFeature={searchParams.feature}
+          returnTo={params.return_to}
+          highlightFeature={params.feature}
         />
 
         {/* iOS Subscription Note */}
