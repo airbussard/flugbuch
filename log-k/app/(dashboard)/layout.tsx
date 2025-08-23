@@ -4,6 +4,7 @@ import Sidebar from '@/components/dashboard/Sidebar'
 import TopBar from '@/components/dashboard/TopBar'
 import DebugPanel from '@/components/debug/DebugPanel'
 import VersionFooter from '@/components/dashboard/VersionFooter'
+import TrialBanner from '@/components/subscription/TrialBanner'
 import LanguageProvider from '@/components/providers/LanguageProvider'
 import { Language } from '@/lib/i18n/translations'
 import { subDays } from 'date-fns'
@@ -27,6 +28,25 @@ export default async function DashboardLayout({
     .select('*')
     .eq('id', user.id)
     .single()
+  
+  // Check subscription status for trial banner
+  const { data: subscription } = await supabase
+    .from('user_subscriptions')
+    .select('subscription_tier, valid_until')
+    .eq('user_id', user.id)
+    .gte('valid_until', new Date().toISOString())
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .single()
+  
+  // Calculate days remaining if trial
+  let trialDaysRemaining = null
+  if (subscription?.subscription_tier === 'trial') {
+    const validUntil = new Date(subscription.valid_until)
+    const now = new Date()
+    const daysRemaining = Math.ceil((validUntil.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
+    trialDaysRemaining = Math.max(0, daysRemaining)
+  }
   
   // Get user's language preference or default to 'en'
   const userLanguage: Language = (userProfile?.language && ['en', 'de', 'fr', 'es'].includes(userProfile.language)) 
@@ -61,6 +81,9 @@ export default async function DashboardLayout({
             recentLandings={recentLandings}
           />
           <main className="flex-1 p-6">
+            {trialDaysRemaining !== null && (
+              <TrialBanner daysRemaining={trialDaysRemaining} />
+            )}
             {children}
           </main>
           <VersionFooter />

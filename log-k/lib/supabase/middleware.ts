@@ -1,6 +1,15 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
+// Routes that are ALWAYS accessible (even without active subscription)
+const ALWAYS_ACCESSIBLE = [
+  '/settings',              // Account settings
+  '/subscription',          // Subscription management
+  '/api/account/delete',    // Account deletion API
+  '/api/subscription',      // Subscription APIs
+  '/logout'                 // Logout
+]
+
 export async function updateSession(request: NextRequest) {
   const pathname = request.nextUrl.pathname
   
@@ -53,10 +62,45 @@ export async function updateSession(request: NextRequest) {
     pathname.startsWith(route)
   )
   
-  // Simple auth check - no subscription verification
+  // Check if route is always accessible
+  const isAlwaysAccessible = ALWAYS_ACCESSIBLE.some(route => 
+    pathname.startsWith(route)
+  )
+  
   // Redirect to login if not authenticated
   if (!user && isProtectedRoute) {
     return NextResponse.redirect(new URL('/login', request.url))
+  }
+
+  // Check subscription for authenticated users on protected routes
+  if (user && isProtectedRoute && !isAlwaysAccessible) {
+    // Only check subscription once per session (cache in cookie for 1 hour)
+    const hasCheckedRecently = request.cookies.has('sub-check')
+    
+    if (!hasCheckedRecently) {
+      // Check user's subscription status
+      const { data: subscription } = await supabase
+        .from('user_subscriptions')
+        .select('subscription_tier, valid_until')
+        .eq('user_id', user.id)
+        .gte('valid_until', new Date().toISOString())
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .single()
+
+      // Set cookie to avoid repeated checks
+      supabaseResponse.cookies.set('sub-check', '1', {
+        maxAge: 60 * 60, // 1 hour
+        httpOnly: true
+      })
+
+      // If no active subscription, redirect to expired page
+      if (!subscription) {
+        const url = new URL('/subscription/expired', request.url)
+        url.searchParams.set('return_to', pathname)
+        return NextResponse.redirect(url)
+      }
+    }
   }
 
   // Redirect authenticated users away from auth pages
