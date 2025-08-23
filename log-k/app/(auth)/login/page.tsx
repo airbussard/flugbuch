@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
@@ -15,35 +15,18 @@ export default function LoginPage() {
   const router = useRouter()
   const supabase = createClient()
 
-  useEffect(() => {
-    console.log('🔵 LoginPage mounted')
-    console.log('🔵 Supabase client created:', !!supabase)
-  }, [])
-
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
-    console.log('🟢 Login button clicked')
-    console.log('🟢 Email:', email)
-    console.log('🟢 Password length:', password.length)
-    
     setLoading(true)
     setError(null)
 
     try {
-      console.log('🟡 Attempting login with Supabase...')
-      const { data, error } = await supabase.auth.signInWithPassword({
+      const { error } = await supabase.auth.signInWithPassword({
         email,
         password,
       })
 
-      console.log('🟡 Supabase response:', { 
-        hasData: !!data, 
-        hasError: !!error,
-        errorMessage: error?.message 
-      })
-
       if (error) {
-        console.error('🔴 Login error:', error)
         // Spezifische Fehlermeldungen auf Deutsch
         if (error.message.includes('Invalid login credentials')) {
           setError('Ungültige Anmeldedaten. Bitte überprüfen Sie Ihre E-Mail und Ihr Passwort.')
@@ -53,20 +36,16 @@ export default function LoginPage() {
           setError(error.message || 'Ein Fehler ist beim Anmelden aufgetreten.')
         }
       } else {
-        console.log('✅ Login successful, redirecting...')
         // Erfolgreiche Anmeldung - Session refresh und Weiterleitung
         router.refresh()
         // Kleine Verzögerung für Session-Etablierung
         setTimeout(() => {
-          console.log('✅ Pushing to /dashboard')
           router.push('/dashboard')
         }, 100)
       }
     } catch (error: any) {
-      console.error('🔴 Unexpected error:', error)
       setError(error.message || 'Ein Fehler ist beim Anmelden aufgetreten.')
     } finally {
-      console.log('🔵 Setting loading to false')
       setLoading(false)
     }
   }
