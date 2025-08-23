@@ -1,17 +1,25 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { headers } from 'next/headers'
 import { syncStripeSubscription, cancelSubscription } from '@/lib/subscription/service.server'
+import Stripe from 'stripe'
 
-// This will be uncommented when Stripe is configured
-// import Stripe from 'stripe'
-// const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-//   apiVersion: '2023-10-16',
-// })
+// Initialize Stripe - only if configured
+const stripe = process.env.STRIPE_SECRET_KEY 
+  ? new Stripe(process.env.STRIPE_SECRET_KEY, {
+      apiVersion: '2025-07-30.basil',
+    })
+  : null
 
-// const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!
+const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET
 
 export async function POST(request: NextRequest) {
   try {
+    // Check if Stripe is configured
+    if (!stripe || !webhookSecret) {
+      console.log('Stripe webhook not configured')
+      return NextResponse.json({ received: true })
+    }
+
     const body = await request.text()
     const headersList = await headers()
     const signature = headersList.get('stripe-signature')
@@ -23,10 +31,9 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Stripe webhook handling (to be implemented)
-    /* 
+    // Verify webhook signature
     let event: Stripe.Event
-
+    
     try {
       event = stripe.webhooks.constructEvent(body, signature, webhookSecret)
     } catch (err) {
@@ -42,22 +49,28 @@ export async function POST(request: NextRequest) {
       case 'checkout.session.completed': {
         const session = event.data.object as Stripe.Checkout.Session
         
-        if (session.payment_status === 'paid') {
+        if (session.payment_status === 'paid' && session.subscription) {
           const userId = session.metadata?.userId
-          const tier = session.metadata?.tier as 'basic' | 'premium'
+          const tier = session.metadata?.tier as 'basic' | 'pro'
           
-          if (userId && tier && session.customer && session.subscription) {
-            // Calculate subscription end date (1 year from now)
-            const validUntil = new Date()
-            validUntil.setFullYear(validUntil.getFullYear() + 1)
+          if (userId && tier) {
+            // Get subscription details
+            const subscriptionId = session.subscription as string
+            const subscriptionResponse = await stripe.subscriptions.retrieve(subscriptionId)
+            const subscriptionData = subscriptionResponse as Stripe.Subscription
+            
+            // Stripe returns the subscription data directly
+            const validUntil = new Date((subscriptionData as any).current_period_end * 1000)
             
             await syncStripeSubscription(
               userId,
               session.customer as string,
-              session.subscription as string,
+              subscriptionData.id,
               tier,
               validUntil
             )
+            
+            console.log(`Subscription created for user ${userId}: ${tier} until ${validUntil}`)
           }
         }
         break
@@ -66,10 +79,10 @@ export async function POST(request: NextRequest) {
       case 'customer.subscription.updated': {
         const subscription = event.data.object as Stripe.Subscription
         const userId = subscription.metadata?.userId
-        const tier = subscription.metadata?.tier as 'basic' | 'premium'
+        const tier = subscription.metadata?.tier as 'basic' | 'pro'
         
         if (userId && tier) {
-          const validUntil = new Date(subscription.current_period_end * 1000)
+          const validUntil = new Date((subscription as any).current_period_end * 1000)
           
           await syncStripeSubscription(
             userId,
@@ -78,6 +91,8 @@ export async function POST(request: NextRequest) {
             tier,
             validUntil
           )
+          
+          console.log(`Subscription updated for user ${userId}: ${tier} until ${validUntil}`)
         }
         break
       }
@@ -88,29 +103,33 @@ export async function POST(request: NextRequest) {
         
         if (userId) {
           await cancelSubscription(userId)
+          console.log(`Subscription cancelled for user ${userId}`)
         }
         break
       }
 
       case 'invoice.payment_succeeded': {
         const invoice = event.data.object as Stripe.Invoice
-        const subscriptionId = invoice.subscription as string
+        const subscriptionId = (invoice as any).subscription as string
         
         if (subscriptionId) {
-          const subscription = await stripe.subscriptions.retrieve(subscriptionId)
-          const userId = subscription.metadata?.userId
-          const tier = subscription.metadata?.tier as 'basic' | 'premium'
+          const subscriptionResponse = await stripe.subscriptions.retrieve(subscriptionId)
+          const subscriptionData = subscriptionResponse as Stripe.Subscription
+          const userId = subscriptionData.metadata?.userId
+          const tier = subscriptionData.metadata?.tier as 'basic' | 'pro'
           
           if (userId && tier) {
-            const validUntil = new Date(subscription.current_period_end * 1000)
+            const validUntil = new Date((subscriptionData as any).current_period_end * 1000)
             
             await syncStripeSubscription(
               userId,
-              subscription.customer as string,
-              subscription.id,
+              subscriptionData.customer as string,
+              subscriptionData.id,
               tier,
               validUntil
             )
+            
+            console.log(`Payment succeeded for user ${userId}: ${tier} renewed until ${validUntil}`)
           }
         }
         break
@@ -118,18 +137,26 @@ export async function POST(request: NextRequest) {
 
       case 'invoice.payment_failed': {
         const invoice = event.data.object as Stripe.Invoice
-        // Handle failed payment (send email, etc.)
-        console.error('Payment failed for invoice:', invoice.id)
+        const customerEmail = (invoice as any).customer_email
+        
+        // Log failed payment for manual follow-up
+        console.error('Payment failed for invoice:', {
+          invoiceId: invoice.id,
+          customerEmail,
+          amountDue: (invoice as any).amount_due,
+          currency: (invoice as any).currency
+        })
+        
+        // TODO: Send email notification to customer
         break
       }
 
       default:
         console.log(`Unhandled event type: ${event.type}`)
     }
-    */
 
-    // For now, just acknowledge the webhook
     return NextResponse.json({ received: true })
+    
   } catch (error) {
     console.error('Webhook error:', error)
     return NextResponse.json(
@@ -139,9 +166,5 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// Stripe requires raw body for webhook verification
-export const config = {
-  api: {
-    bodyParser: false,
-  },
-}
+// Disable body parsing for webhook signature verification
+export const runtime = 'nodejs'

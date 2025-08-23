@@ -5,7 +5,7 @@ import IOSSyncButton from '../IOSSyncButton'
 import { getUserSubscriptionStatus } from '@/lib/subscription/service.server'
 
 interface PageProps {
-  searchParams: Promise<{ feature?: string; return_to?: string; expired?: string }>
+  searchParams: Promise<{ feature?: string; return_to?: string; expired?: string; plan?: string }>
 }
 
 export default async function SubscriptionChoosePage({
@@ -72,6 +72,7 @@ export default async function SubscriptionChoosePage({
           currentTier={subscriptionStatus.tier}
           returnTo={params.return_to}
           highlightFeature={params.feature}
+          preselectedPlan={params.plan}
         />
 
         {/* iOS Subscription Note */}

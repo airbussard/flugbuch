@@ -1,5 +1,6 @@
 // Server-side subscription service
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { 
   UserSubscription, 
   SubscriptionStatus, 
@@ -156,14 +157,19 @@ export async function syncStripeSubscription(
   userId: string,
   stripeCustomerId: string,
   stripeSubscriptionId: string,
-  tier: 'basic' | 'premium',
+  tier: 'basic' | 'pro',
   validUntil: Date
 ): Promise<boolean> {
-  const supabase = await createClient()
+  const adminClient = await createAdminClient()
+  
+  if (!adminClient) {
+    console.error('Admin client not available for Stripe sync')
+    return false
+  }
   
   try {
     // Check if subscription already exists
-    const { data: existing } = await supabase
+    const { data: existing } = await adminClient
       .from('user_subscriptions')
       .select('id')
       .eq('user_id', userId)
@@ -172,7 +178,7 @@ export async function syncStripeSubscription(
 
     if (existing) {
       // Update existing subscription
-      const { error } = await supabase
+      const { error } = await adminClient
         .from('user_subscriptions')
         .update({
           valid_until: validUntil.toISOString(),
@@ -181,10 +187,16 @@ export async function syncStripeSubscription(
         })
         .eq('id', existing.id)
 
-      return !error
+      if (error) {
+        console.error('Error updating Stripe subscription:', error)
+        return false
+      }
+      
+      console.log(`Updated Stripe subscription for user ${userId}`)
+      return true
     } else {
       // Create new subscription
-      const { error } = await supabase
+      const { error } = await adminClient
         .from('user_subscriptions')
         .insert({
           user_id: userId,
@@ -196,7 +208,13 @@ export async function syncStripeSubscription(
           stripe_subscription_id: stripeSubscriptionId
         })
 
-      return !error
+      if (error) {
+        console.error('Error creating Stripe subscription:', error)
+        return false
+      }
+      
+      console.log(`Created new Stripe subscription for user ${userId}`)
+      return true
     }
   } catch (error) {
     console.error('Error syncing Stripe subscription:', error)

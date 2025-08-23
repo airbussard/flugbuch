@@ -179,7 +179,7 @@ export default function HomePage() {
                 { text: "Priority support", included: false }
               ]}
               buttonText="Choose Basic"
-              buttonHref="/subscription/checkout?plan=basic"
+              buttonHref="/subscription/choose?plan=basic"
               buttonStyle="bg-gray-800 text-white hover:bg-gray-900"
             />
 
@@ -202,7 +202,7 @@ export default function HomePage() {
                 { text: "Priority 24/7 support", included: true }
               ]}
               buttonText="Choose Pro"
-              buttonHref="/subscription/checkout?plan=premium"
+              buttonHref="/subscription/choose?plan=pro"
               buttonStyle="bg-gradient-to-r from-blue-500 to-violet-500 text-white hover:from-blue-600 hover:to-violet-600 shadow-lg"
             />
           </div>

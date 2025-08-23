@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Check, X, Loader2, Star } from 'lucide-react'
 import { 
   SubscriptionTier, 
@@ -15,16 +15,36 @@ interface SubscriptionPlansProps {
   currentTier: SubscriptionTier
   returnTo?: string
   highlightFeature?: string
+  preselectedPlan?: string
 }
 
 export default function SubscriptionPlans({
   userId,
   currentTier,
   returnTo,
-  highlightFeature
+  highlightFeature,
+  preselectedPlan
 }: SubscriptionPlansProps) {
   const [loading, setLoading] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
+  
+  // Auto-scroll to preselected plan on mount
+  useEffect(() => {
+    if (preselectedPlan) {
+      // Small delay to ensure DOM is ready
+      setTimeout(() => {
+        const element = document.getElementById(`plan-${preselectedPlan}`)
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'center' })
+          // Add highlight animation
+          element.classList.add('ring-2', 'ring-blue-500', 'ring-offset-4')
+          setTimeout(() => {
+            element.classList.remove('ring-2', 'ring-blue-500', 'ring-offset-4')
+          }, 2000)
+        }
+      }, 100)
+    }
+  }, [preselectedPlan])
 
   const handleSelectPlan = async (tier: SubscriptionTier) => {
     setLoading(tier)
@@ -142,7 +162,8 @@ export default function SubscriptionPlans({
         {plans.map((plan) => (
           <div
             key={plan.tier}
-            className={`relative bg-white rounded-2xl shadow-lg p-8 ${
+            id={`plan-${plan.tier}`}
+            className={`relative bg-white rounded-2xl shadow-lg p-8 transition-all ${
               plan.popular ? 'ring-2 ring-violet-500' : ''
             } ${!plan.available ? 'opacity-60' : ''}`}
           >
