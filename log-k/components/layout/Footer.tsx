@@ -31,6 +31,14 @@ export default function Footer() {
             <ul className="space-y-2">
               <li>
                 <Link 
+                  href="/help" 
+                  className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
+                >
+                  Help Center
+                </Link>
+              </li>
+              <li>
+                <Link 
                   href="/docs" 
                   className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
                 >
@@ -60,6 +68,14 @@ export default function Footer() {
                   className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
                 >
                   Datenschutzerklärung
+                </Link>
+              </li>
+              <li>
+                <Link 
+                  href="/security" 
+                  className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
+                >
+                  Sicherheit
                 </Link>
               </li>
               <li>

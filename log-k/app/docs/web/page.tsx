@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import { 
   Monitor, Home, Plane, Users, BarChart3, Cloud, Globe, Settings, 
-  CreditCard, FileText, Upload, Download, Shield, Zap, AlertCircle 
+  CreditCard, FileText, Upload, Download, Shield, Zap, AlertCircle, Check as CheckIcon
 } from 'lucide-react'
 
 export default function WebDocsPage() {
@@ -93,19 +93,19 @@ export default function WebDocsPage() {
           <h3 className="font-semibold text-gray-900 mb-3">Key Elements:</h3>
           <ul className="space-y-2 text-gray-600">
             <li className="flex items-start">
-              <Check className="h-5 w-5 text-green-500 mr-2 mt-0.5" />
+              <CheckIcon className="h-5 w-5 text-green-500 mr-2 mt-0.5" />
               <span><strong>Statistics Cards:</strong> Total hours, landings, flights, and current month activity</span>
             </li>
             <li className="flex items-start">
-              <Check className="h-5 w-5 text-green-500 mr-2 mt-0.5" />
+              <CheckIcon className="h-5 w-5 text-green-500 mr-2 mt-0.5" />
               <span><strong>Recent Flights:</strong> Quick view of your last 5 flights</span>
             </li>
             <li className="flex items-start">
-              <Check className="h-5 w-5 text-green-500 mr-2 mt-0.5" />
+              <CheckIcon className="h-5 w-5 text-green-500 mr-2 mt-0.5" />
               <span><strong>Quick Actions:</strong> Add new flight, view analytics, export logbook</span>
             </li>
             <li className="flex items-start">
-              <Check className="h-5 w-5 text-green-500 mr-2 mt-0.5" />
+              <CheckIcon className="h-5 w-5 text-green-500 mr-2 mt-0.5" />
               <span><strong>Compliance Status:</strong> EASA/FAA currency and requirements</span>
             </li>
           </ul>
