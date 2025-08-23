@@ -1,9 +1,10 @@
 // Client-side PDF text extraction using pdf.js
 import * as pdfjsLib from 'pdfjs-dist'
 
-// Configure worker
+// Configure worker - use local worker file
 if (typeof window !== 'undefined') {
-  pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`
+  // Use local worker from public folder
+  pdfjsLib.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.mjs'
 }
 
 export async function extractTextFromPDF(file: File): Promise<string> {
