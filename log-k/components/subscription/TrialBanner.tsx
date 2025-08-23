@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react'
 import { X, Clock, Zap, AlertTriangle } from 'lucide-react'
-import Link from 'next/link'
 
 interface TrialBannerProps {
   daysRemaining: number
@@ -126,12 +125,12 @@ export default function TrialBanner({ daysRemaining, onDismiss }: TrialBannerPro
           </p>
         </div>
         <div className="flex items-center ml-4 space-x-2">
-          <Link
+          <a
             href="/subscription/choose"
-            className={`${styles.button} px-3 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm font-medium rounded-lg transition whitespace-nowrap`}
+            className={`${styles.button} px-3 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm font-medium rounded-lg transition whitespace-nowrap inline-block text-center`}
           >
             {message.cta}
-          </Link>
+          </a>
           {daysRemaining > 7 && (
             <button
               onClick={handleDismiss}
