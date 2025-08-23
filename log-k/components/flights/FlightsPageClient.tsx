@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
-import { Plus, Download, Upload } from 'lucide-react'
+import { Plus, Download, Upload, FileText } from 'lucide-react'
 import Link from 'next/link'
 import FlightsTable from '@/components/flights/FlightsTable'
 import FlightFilters from '@/components/flights/FlightFilters'
@@ -51,6 +51,12 @@ export default function FlightsPageClient({
           <p className="text-gray-600 dark:text-gray-400 mt-1">Manage your flight records</p>
         </div>
         <div className="flex gap-3">
+          <Link href="/flights/import">
+            <Button variant="outline">
+              <FileText className="h-4 w-4 mr-2" />
+              Import LogTen
+            </Button>
+          </Link>
           <Button 
             variant="outline"
             onClick={() => setShowImportExport(true)}
