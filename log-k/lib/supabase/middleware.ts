@@ -33,6 +33,9 @@ const TIER_FEATURES: Record<SubscriptionTier, AppFeature[]> = {
 }
 
 export async function updateSession(request: NextRequest) {
+  const pathname = request.nextUrl.pathname
+  console.log('🔶 Middleware: Processing request for', pathname)
+  
   let supabaseResponse = NextResponse.next({
     request,
   })
@@ -63,9 +66,10 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser()
 
-  const pathname = request.nextUrl.pathname
+  console.log('🔶 Middleware: User authenticated:', !!user, user?.email)
 
   // Protected routes - all dashboard group routes
+  // NOTE: /subscription routes are NOT protected to avoid redirect loops
   const protectedRoutes = [
     '/dashboard',
     '/flights',
@@ -76,15 +80,19 @@ export async function updateSession(request: NextRequest) {
     '/weather',
     '/airports',
     '/settings',
-    '/admin'
+    '/admin',
+    '/profile'
   ]
   
   const isProtectedRoute = protectedRoutes.some(route => 
     pathname.startsWith(route)
   )
   
+  console.log('🔶 Middleware: Is protected route:', isProtectedRoute)
+  
   // Redirect to login if not authenticated
   if (!user && isProtectedRoute) {
+    console.log('🔴 Middleware: Redirecting to login - no user')
     return NextResponse.redirect(new URL('/login', request.url))
   }
 
@@ -95,9 +103,11 @@ export async function updateSession(request: NextRequest) {
       pathname.startsWith(route)
     )
     
+    console.log('🔶 Middleware: Always accessible route:', isAlwaysAccessible)
+    
     if (!isAlwaysAccessible) {
       // Get user's subscription
-      const { data: subscription } = await supabase
+      const { data: subscription, error: subError } = await supabase
         .from('user_subscriptions')
         .select('subscription_tier, valid_until')
         .eq('user_id', user.id)
@@ -105,6 +115,12 @@ export async function updateSession(request: NextRequest) {
         .order('created_at', { ascending: false })
         .limit(1)
         .single()
+
+      console.log('🔶 Middleware: Subscription check:', { 
+        hasSubscription: !!subscription, 
+        tier: subscription?.subscription_tier,
+        error: subError?.message 
+      })
 
       const tier = (subscription?.subscription_tier || 'none') as SubscriptionTier
       
@@ -118,10 +134,12 @@ export async function updateSession(request: NextRequest) {
         
         // If user doesn't have access to this feature, redirect to subscription page
         if (!allowedFeatures.includes(requiredFeature)) {
+          console.log('🔴 Middleware: No access to feature:', requiredFeature, 'Tier:', tier)
           // Add query param to indicate which feature was attempted
           const url = new URL('/subscription/choose', request.url)
           url.searchParams.set('feature', requiredFeature)
           url.searchParams.set('return_to', pathname)
+          console.log('🔴 Middleware: Redirecting to:', url.toString())
           return NextResponse.redirect(url)
         }
       }
