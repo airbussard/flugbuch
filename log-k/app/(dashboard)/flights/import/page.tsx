@@ -228,59 +228,110 @@ export default function LogTenImportPage() {
           <div className="bg-white rounded-lg shadow-sm border border-gray-200">
             <div className="px-6 py-4 border-b border-gray-200">
               <h3 className="text-lg font-semibold">Flight Preview</h3>
-              <p className="text-sm text-gray-600 mt-1">First 10 flights to be imported</p>
+              <p className="text-sm text-gray-600 mt-1">
+                {parseResult.flights.length > 0 
+                  ? `First ${Math.min(10, parseResult.flights.length)} flights to be imported`
+                  : 'No flights found in the PDF'}
+              </p>
             </div>
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Date
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Aircraft
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Route
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Time
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Crew
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {parseResult.flights.slice(0, 10).map((flight, index) => (
-                    <tr key={index}>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {flight.date}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {flight.aircraftId} {flight.aircraftType}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {flight.from} → {flight.to}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {flight.totalTime.toFixed(1)}h
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {flight.picCrew || '-'}
-                        {flight.sicCrew && ` / ${flight.sicCrew}`}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-            {parseResult.flights.length > 10 && (
-              <div className="px-6 py-3 bg-gray-50 text-sm text-gray-600">
-                ... and {parseResult.flights.length - 10} more flights
+            {parseResult.flights.length > 0 ? (
+              <>
+                <div className="overflow-x-auto">
+                  <table className="min-w-full divide-y divide-gray-200">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Date
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Aircraft
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Route
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Time
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Crew (PIC / SIC)
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                      {parseResult.flights.slice(0, 10).map((flight, index) => (
+                        <tr key={index} className="hover:bg-gray-50">
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            {flight.date}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            <span className="font-medium">{flight.aircraftId}</span>
+                            {flight.aircraftType && (
+                              <span className="text-gray-500 ml-1">({flight.aircraftType})</span>
+                            )}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            <span className="font-mono">{flight.from}</span>
+                            <span className="mx-1">→</span>
+                            <span className="font-mono">{flight.to}</span>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            {flight.totalTime.toFixed(1)}h
+                          </td>
+                          <td className="px-6 py-4 text-sm text-gray-900">
+                            <div>
+                              {flight.picCrew || flight.sicCrew ? (
+                                <>
+                                  {flight.picCrew && (
+                                    <span className="text-blue-600">{flight.picCrew}</span>
+                                  )}
+                                  {flight.picCrew && flight.sicCrew && (
+                                    <span className="mx-1 text-gray-400">/</span>
+                                  )}
+                                  {flight.sicCrew && (
+                                    <span className="text-green-600">{flight.sicCrew}</span>
+                                  )}
+                                </>
+                              ) : (
+                                <span className="text-gray-400 italic">No crew data</span>
+                              )}
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+                {parseResult.flights.length > 10 && (
+                  <div className="px-6 py-3 bg-gray-50 text-sm text-gray-600">
+                    ... and {parseResult.flights.length - 10} more flights
+                  </div>
+                )}
+              </>
+            ) : (
+              <div className="px-6 py-8 text-center text-gray-500">
+                <AlertCircle className="h-12 w-12 mx-auto mb-3 text-gray-400" />
+                <p>No flights could be parsed from the PDF.</p>
+                <p className="text-sm mt-2">Please check if the PDF is a valid LogTen export.</p>
               </div>
             )}
           </div>
+
+          {/* Debug Information */}
+          {parseResult.errors && parseResult.errors.length > 0 && (
+            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6">
+              <h3 className="text-lg font-semibold text-yellow-900 mb-3">
+                Parser Warnings
+              </h3>
+              <ul className="space-y-1 text-sm text-yellow-800">
+                {parseResult.errors.map((error, i) => (
+                  <li key={i} className="flex items-start">
+                    <span className="text-yellow-600 mr-2">•</span>
+                    <span>{error}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
 
           {/* New Items */}
           {(parseResult.newAircraft.length > 0 || parseResult.newCrew.length > 0) && (
