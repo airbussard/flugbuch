@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import SubscriptionPlans from '../SubscriptionPlans'
+import IOSSyncButton from '../IOSSyncButton'
 import { getUserSubscriptionStatus } from '@/lib/subscription/service.server'
 
 interface PageProps {
@@ -81,12 +82,7 @@ export default async function SubscriptionChoosePage({
             If you purchased a subscription through the iOS app, your subscription is already active.
             Simply log in with the same account on both platforms.
           </p>
-          <button
-            className="text-blue-600 hover:text-blue-800 font-medium underline"
-            onClick={() => window.location.href = '/api/subscription/sync-ios'}
-          >
-            Sync iOS Subscription
-          </button>
+          <IOSSyncButton />
         </div>
 
         {/* Return to Settings */}
