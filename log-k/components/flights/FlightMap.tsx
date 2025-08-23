@@ -30,21 +30,6 @@ const Polyline = dynamic(
 // Import Leaflet CSS
 import 'leaflet/dist/leaflet.css'
 
-// Fix for default markers in production build
-import L from 'leaflet'
-import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png'
-import markerIcon from 'leaflet/dist/images/marker-icon.png'
-import markerShadow from 'leaflet/dist/images/marker-shadow.png'
-
-if (typeof window !== 'undefined') {
-  delete (L.Icon.Default.prototype as any)._getIconUrl
-  L.Icon.Default.mergeOptions({
-    iconUrl: markerIcon.src,
-    iconRetinaUrl: markerIcon2x.src,
-    shadowUrl: markerShadow.src,
-  })
-}
-
 interface FlightMapProps {
   departureIcao: string
   arrivalIcao: string
@@ -58,6 +43,51 @@ export default function FlightMap({ departureIcao, arrivalIcao, alternateIcao }:
   const [loading, setLoading] = useState(true)
   const [distance, setDistance] = useState<number>(0)
   const [bearing, setBearing] = useState<number>(0)
+  const [leafletLoaded, setLeafletLoaded] = useState(false)
+  const [icons, setIcons] = useState<any>({})
+
+  // Initialize Leaflet
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      import('leaflet').then((L) => {
+        import('leaflet/dist/images/marker-icon-2x.png').then((markerIcon2x) => {
+          import('leaflet/dist/images/marker-icon.png').then((markerIcon) => {
+            import('leaflet/dist/images/marker-shadow.png').then((markerShadow) => {
+              delete (L.Icon.Default.prototype as any)._getIconUrl
+              L.Icon.Default.mergeOptions({
+                iconUrl: markerIcon.default.src,
+                iconRetinaUrl: markerIcon2x.default.src,
+                shadowUrl: markerShadow.default.src,
+              })
+
+              // Create custom icons
+              const createIcon = (color: string, type: 'departure' | 'arrival' | 'alternate') => {
+                const iconHtml = type === 'departure' 
+                  ? `<div style="background: ${color}; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 3px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3);"><svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z"/></svg></div>`
+                  : type === 'arrival'
+                  ? `<div style="background: ${color}; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 3px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3);"><svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M2.5 19h19v2h-19v-2zm9.68-13.27L14.03 10l1.41-1.41-1.86-1.86.01-.01c.31-.31.31-.82 0-1.13-.31-.31-.82-.31-1.13 0l-.01.01L8 10.05l1.41 1.41 4.27-1.73 4.54 4.54.7-2.12-6.74-6.42z"/></svg></div>`
+                  : `<div style="background: ${color}; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3);"></div>`
+
+                return L.divIcon({
+                  html: iconHtml,
+                  iconSize: [30, 30],
+                  iconAnchor: [15, 15],
+                  className: ''
+                })
+              }
+
+              setIcons({
+                departure: createIcon('#10b981', 'departure'),
+                arrival: createIcon('#ef4444', 'arrival'),
+                alternate: createIcon('#f59e0b', 'alternate')
+              })
+              setLeafletLoaded(true)
+            })
+          })
+        })
+      })
+    }
+  }, [])
 
   useEffect(() => {
     const loadAirports = async () => {
@@ -125,24 +155,6 @@ export default function FlightMap({ departureIcao, arrivalIcao, alternateIcao }:
     return 3
   }
 
-  // Create custom icons
-  const createIcon = (color: string, type: 'departure' | 'arrival' | 'alternate') => {
-    const iconHtml = type === 'departure' 
-      ? `<div style="background: ${color}; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 3px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3);"><svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z"/></svg></div>`
-      : type === 'arrival'
-      ? `<div style="background: ${color}; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 3px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3);"><svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M2.5 19h19v2h-19v-2zm9.68-13.27L14.03 10l1.41-1.41-1.86-1.86.01-.01c.31-.31.31-.82 0-1.13-.31-.31-.82-.31-1.13 0l-.01.01L8 10.05l1.41 1.41 4.27-1.73 4.54 4.54.7-2.12-6.74-6.42z"/></svg></div>`
-      : `<div style="background: ${color}; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3);"></div>`
-
-    if (typeof window !== 'undefined') {
-      return L.divIcon({
-        html: iconHtml,
-        iconSize: [30, 30],
-        iconAnchor: [15, 15],
-        className: ''
-      })
-    }
-    return undefined
-  }
 
   // Create great circle route points
   const createGreatCircleRoute = (dep: Airport, arr: Airport, numPoints = 50): [number, number][] => {
@@ -223,7 +235,7 @@ export default function FlightMap({ departureIcao, arrivalIcao, alternateIcao }:
 
       {/* Map */}
       <div className="h-96 rounded-lg overflow-hidden shadow-lg">
-        {typeof window !== 'undefined' && (
+        {typeof window !== 'undefined' && leafletLoaded && (
           <MapContainer
             center={[centerLat, centerLon]}
             zoom={getZoomLevel(distance)}
@@ -247,7 +259,7 @@ export default function FlightMap({ departureIcao, arrivalIcao, alternateIcao }:
             {/* Departure marker */}
             <Marker 
               position={[departure.lat, departure.lon]}
-              icon={createIcon('#10B981', 'departure')}
+              icon={icons.departure}
             >
               <Popup>
                 <div className="text-sm">
@@ -262,7 +274,7 @@ export default function FlightMap({ departureIcao, arrivalIcao, alternateIcao }:
             {/* Arrival marker */}
             <Marker 
               position={[arrival.lat, arrival.lon]}
-              icon={createIcon('#3B82F6', 'arrival')}
+              icon={icons.arrival}
             >
               <Popup>
                 <div className="text-sm">
@@ -278,7 +290,7 @@ export default function FlightMap({ departureIcao, arrivalIcao, alternateIcao }:
             {alternate && (
               <Marker 
                 position={[alternate.lat, alternate.lon]}
-                icon={createIcon('#F97316', 'alternate')}
+                icon={icons.alternate}
               >
                 <Popup>
                   <div className="text-sm">

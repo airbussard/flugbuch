@@ -31,21 +31,6 @@ const Polyline = dynamic(
 // Import Leaflet CSS
 import 'leaflet/dist/leaflet.css'
 
-// Fix for default markers in production build
-import L from 'leaflet'
-import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png'
-import markerIcon from 'leaflet/dist/images/marker-icon.png'
-import markerShadow from 'leaflet/dist/images/marker-shadow.png'
-
-if (typeof window !== 'undefined') {
-  delete (L.Icon.Default.prototype as any)._getIconUrl
-  L.Icon.Default.mergeOptions({
-    iconUrl: markerIcon.src,
-    iconRetinaUrl: markerIcon2x.src,
-    shadowUrl: markerShadow.src,
-  })
-}
-
 interface Flight {
   id: string
   flight_date: string
@@ -63,6 +48,8 @@ interface FlightsMapProps {
 export default function FlightsMap({ flights }: FlightsMapProps) {
   const [loading, setLoading] = useState(true)
   const [selectedYear, setSelectedYear] = useState<number | null>(null)
+  const [leafletLoaded, setLeafletLoaded] = useState(false)
+  const [customIcons, setCustomIcons] = useState<any>({})
   const [flightRoutes, setFlightRoutes] = useState<Array<{
     flight: Flight
     departure: Airport | null
@@ -77,6 +64,53 @@ export default function FlightsMap({ flights }: FlightsMapProps) {
   const filteredFlights = selectedYear 
     ? flights.filter(f => new Date(f.flight_date).getFullYear() === selectedYear)
     : flights
+
+  // Initialize Leaflet
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      import('leaflet').then((L) => {
+        import('leaflet/dist/images/marker-icon-2x.png').then((markerIcon2x) => {
+          import('leaflet/dist/images/marker-icon.png').then((markerIcon) => {
+            import('leaflet/dist/images/marker-shadow.png').then((markerShadow) => {
+              delete (L.Icon.Default.prototype as any)._getIconUrl
+              L.Icon.Default.mergeOptions({
+                iconUrl: markerIcon.default.src,
+                iconRetinaUrl: markerIcon2x.default.src,
+                shadowUrl: markerShadow.default.src,
+              })
+
+              // Create custom icons
+              const airportIcon = L.divIcon({
+                html: `
+                  <div style="
+                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    width: 24px;
+                    height: 24px;
+                    border-radius: 50%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    border: 2px solid white;
+                    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+                  ">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="white">
+                      <path d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z"/>
+                    </svg>
+                  </div>
+                `,
+                iconSize: [24, 24],
+                iconAnchor: [12, 12],
+                className: ''
+              })
+
+              setCustomIcons({ airport: airportIcon })
+              setLeafletLoaded(true)
+            })
+          })
+        })
+      })
+    }
+  }, [])
 
   useEffect(() => {
     const loadAirportData = async () => {
@@ -250,7 +284,7 @@ export default function FlightsMap({ flights }: FlightsMapProps) {
       </div>
       
       <div className="h-[500px] relative">
-        {typeof window !== 'undefined' && flightRoutes.length > 0 && (
+        {typeof window !== 'undefined' && leafletLoaded && flightRoutes.length > 0 && (
           <MapContainer
             center={getMapCenter()}
             zoom={4}
@@ -308,6 +342,7 @@ export default function FlightsMap({ flights }: FlightsMapProps) {
                   <Marker
                     key={airport.icao}
                     position={[airport.lat, airport.lon]}
+                    icon={customIcons.airport}
                   >
                     <Popup>
                       <div className="p-2">

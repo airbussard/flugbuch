@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import dynamic from 'next/dynamic'
 import { Airport } from '@/lib/data/airport-service'
 import { MapPin } from 'lucide-react'
@@ -24,55 +24,64 @@ const Popup = dynamic(
 )
 
 import 'leaflet/dist/leaflet.css'
-import L from 'leaflet'
-import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png'
-import markerIcon from 'leaflet/dist/images/marker-icon.png'
-import markerShadow from 'leaflet/dist/images/marker-shadow.png'
-
-if (typeof window !== 'undefined') {
-  delete (L.Icon.Default.prototype as any)._getIconUrl
-  L.Icon.Default.mergeOptions({
-    iconUrl: markerIcon.src,
-    iconRetinaUrl: markerIcon2x.src,
-    shadowUrl: markerShadow.src,
-  })
-}
 
 interface AirportMapProps {
   airport: Airport
 }
 
 export default function AirportMap({ airport }: AirportMapProps) {
-  // Create custom airport icon
-  const createAirportIcon = () => {
+  const [leafletLoaded, setLeafletLoaded] = useState(false)
+  const [customIcon, setCustomIcon] = useState<any>(null)
+
+  useEffect(() => {
     if (typeof window !== 'undefined') {
-      const iconHtml = `
-        <div style="
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-          width: 36px;
-          height: 36px;
-          border-radius: 50%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          border: 3px solid white;
-          box-shadow: 0 4px 6px rgba(0,0,0,0.3);
-        ">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="white">
-            <path d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z"/>
-          </svg>
-        </div>
-      `
-      
-      return L.divIcon({
-        html: iconHtml,
-        iconSize: [36, 36],
-        iconAnchor: [18, 18],
-        className: ''
+      // Dynamically import Leaflet
+      import('leaflet').then((L) => {
+        // Fix marker icons
+        import('leaflet/dist/images/marker-icon-2x.png').then((markerIcon2x) => {
+          import('leaflet/dist/images/marker-icon.png').then((markerIcon) => {
+            import('leaflet/dist/images/marker-shadow.png').then((markerShadow) => {
+              delete (L.Icon.Default.prototype as any)._getIconUrl
+              L.Icon.Default.mergeOptions({
+                iconUrl: markerIcon.default.src,
+                iconRetinaUrl: markerIcon2x.default.src,
+                shadowUrl: markerShadow.default.src,
+              })
+
+              // Create custom airport icon
+              const iconHtml = `
+                <div style="
+                  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                  width: 36px;
+                  height: 36px;
+                  border-radius: 50%;
+                  display: flex;
+                  align-items: center;
+                  justify-content: center;
+                  border: 3px solid white;
+                  box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+                ">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="white">
+                    <path d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z"/>
+                  </svg>
+                </div>
+              `
+              
+              const icon = L.divIcon({
+                html: iconHtml,
+                iconSize: [36, 36],
+                iconAnchor: [18, 18],
+                className: ''
+              })
+
+              setCustomIcon(icon)
+              setLeafletLoaded(true)
+            })
+          })
+        })
       })
     }
-    return undefined
-  }
+  }, [])
 
   // Determine appropriate zoom level based on airport type
   const getZoomLevel = (type: string) => {
@@ -95,7 +104,7 @@ export default function AirportMap({ airport }: AirportMapProps) {
 
   return (
     <div className="h-96 rounded-lg overflow-hidden shadow-inner">
-      {typeof window !== 'undefined' && (
+      {typeof window !== 'undefined' && leafletLoaded && (
         <MapContainer
           center={[airport.lat, airport.lon]}
           zoom={getZoomLevel(airport.type)}
@@ -109,7 +118,7 @@ export default function AirportMap({ airport }: AirportMapProps) {
           
           <Marker 
             position={[airport.lat, airport.lon]}
-            icon={createAirportIcon()}
+            icon={customIcon}
           >
             <Popup>
               <div className="p-2">
