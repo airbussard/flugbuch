@@ -330,6 +330,7 @@ export default function HomePage() {
                 <li><Link href="/terms" className="hover:text-white transition">AGB</Link></li>
                 <li><Link href="/imprint" className="hover:text-white transition">Impressum</Link></li>
                 <li><Link href="/cookie-policy" className="hover:text-white transition">Cookie-Richtlinie</Link></li>
+                <li><Link href="/security" className="hover:text-white transition">Sicherheit</Link></li>
               </ul>
             </div>
           </div>
