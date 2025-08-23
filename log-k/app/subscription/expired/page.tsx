@@ -20,19 +20,30 @@ export default async function SubscriptionExpiredPage({ searchParams }: PageProp
   }
 
   // Check if user actually has an expired subscription or never had one
+  // Use maybeSingle() to handle users with no subscription record
   const { data: subscription } = await supabase
     .from('user_subscriptions')
-    .select('subscription_tier, valid_until')
+    .select('subscription_tier, subscription_source, valid_until')
     .eq('user_id', user.id)
     .order('created_at', { ascending: false })
     .limit(1)
-    .single()
+    .maybeSingle()
+
+  // Check if user ever had a trial (including expired ones)
+  const { data: anyTrial } = await supabase
+    .from('user_subscriptions')
+    .select('id')
+    .eq('user_id', user.id)
+    .eq('subscription_source', 'trial')
+    .limit(1)
+    .maybeSingle()
 
   const hasExpiredTrial = subscription && 
-    subscription.subscription_tier === 'trial' && 
+    subscription.subscription_source === 'trial' && 
     new Date(subscription.valid_until) < new Date()
 
   const neverHadSubscription = !subscription
+  const canStartTrial = !anyTrial // User never had a trial before
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -67,10 +78,34 @@ export default async function SubscriptionExpiredPage({ searchParams }: PageProp
           </div>
         </div>
 
+        {/* Trial Option for eligible users */}
+        {canStartTrial && (
+          <div className="mb-8 bg-green-50 rounded-lg border border-green-200 p-6">
+            <h2 className="text-xl font-semibold text-green-900 mb-3">
+              🎉 Start Your Free Trial
+            </h2>
+            <p className="text-green-700 mb-4">
+              Try Log-K Pro free for 4 weeks! No credit card required.
+            </p>
+            <form action="/api/subscription/start-trial" method="POST">
+              <input type="hidden" name="return_to" value={params.return_to || '/dashboard'} />
+              <button
+                type="submit"
+                className="inline-flex items-center px-6 py-3 bg-green-600 text-white font-medium rounded-lg hover:bg-green-700 transition"
+              >
+                Start Free Trial (4 Weeks)
+              </button>
+            </form>
+            <p className="text-sm text-green-600 mt-3">
+              ✓ All Pro features included • ✓ No payment required • ✓ Cancel anytime
+            </p>
+          </div>
+        )}
+
         {/* Subscription Plans */}
         <div className="mb-12">
           <h2 className="text-xl font-semibold text-gray-900 mb-6">
-            Choose Your Plan
+            {canStartTrial ? 'Or Choose a Paid Plan' : 'Choose Your Plan'}
           </h2>
           <SubscriptionPlans 
             userId={user.id}

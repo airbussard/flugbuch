@@ -3,25 +3,42 @@ import { createClient } from '@/lib/supabase/server'
 
 export async function POST(request: Request) {
   try {
-    const { userId } = await request.json()
+    const supabase = await createClient()
     
-    if (!userId) {
+    // Get the current user
+    const { data: { user } } = await supabase.auth.getUser()
+    
+    if (!user) {
       return NextResponse.json(
-        { error: 'User ID is required' },
-        { status: 400 }
+        { error: 'Not authenticated' },
+        { status: 401 }
       )
     }
+    
+    const userId = user.id
+    
+    // Get return_to from form data or JSON
+    let returnTo = '/dashboard'
+    const contentType = request.headers.get('content-type')
+    
+    if (contentType?.includes('application/x-www-form-urlencoded')) {
+      // Handle form submission
+      const formData = await request.formData()
+      returnTo = formData.get('return_to')?.toString() || '/dashboard'
+    } else if (contentType?.includes('application/json')) {
+      // Handle JSON request
+      const body = await request.json()
+      returnTo = body.return_to || '/dashboard'
+    }
 
-    const supabase = await createClient()
-
-    // Check if user already had a trial
+    // Check if user already had a trial (use maybeSingle to handle no results)
     const { data: existingTrial } = await supabase
       .from('user_subscriptions')
       .select('id')
       .eq('user_id', userId)
       .eq('subscription_source', 'trial')
       .limit(1)
-      .single()
+      .maybeSingle()
 
     if (existingTrial) {
       return NextResponse.json(
@@ -30,7 +47,7 @@ export async function POST(request: Request) {
       )
     }
 
-    // Create trial subscription
+    // Create trial subscription (matching iOS app structure: tier='pro' with source='trial')
     const trialDurationDays = 28 // 4 weeks
     const now = new Date()
     const validUntil = new Date(now.getTime() + trialDurationDays * 24 * 60 * 60 * 1000)
@@ -39,7 +56,7 @@ export async function POST(request: Request) {
       .from('user_subscriptions')
       .insert({
         user_id: userId,
-        subscription_tier: 'trial',
+        subscription_tier: 'pro', // Pro features during trial (matching iOS app)
         subscription_source: 'trial',
         activated_at: now.toISOString(),
         valid_until: validUntil.toISOString(),
@@ -56,6 +73,12 @@ export async function POST(request: Request) {
       )
     }
 
+    // If form submission, redirect to return URL
+    if (contentType?.includes('application/x-www-form-urlencoded')) {
+      return NextResponse.redirect(new URL(returnTo, request.url))
+    }
+
+    // Otherwise return JSON
     return NextResponse.json({ 
       success: true, 
       subscription,

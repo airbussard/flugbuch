@@ -79,6 +79,7 @@ export async function updateSession(request: NextRequest) {
     
     if (!hasCheckedRecently) {
       // Check user's subscription status
+      // Use maybeSingle() to handle cases where user has no subscription record at all
       const { data: subscription } = await supabase
         .from('user_subscriptions')
         .select('subscription_tier, subscription_source, valid_until')
@@ -86,7 +87,7 @@ export async function updateSession(request: NextRequest) {
         .gte('valid_until', new Date().toISOString())
         .order('created_at', { ascending: false })
         .limit(1)
-        .single()
+        .maybeSingle()
 
       // Set cookie to avoid repeated checks
       supabaseResponse.cookies.set('sub-check', '1', {
@@ -95,6 +96,10 @@ export async function updateSession(request: NextRequest) {
       })
 
       // If no active subscription (including trials), redirect to expired page
+      // This includes:
+      // - Users with no subscription record at all (legacy accounts)
+      // - Users with expired subscriptions
+      // - Users whose trial has ended
       // Note: Trials have subscription_tier='pro' with subscription_source='trial'
       if (!subscription) {
         const url = new URL('/subscription/expired', request.url)
