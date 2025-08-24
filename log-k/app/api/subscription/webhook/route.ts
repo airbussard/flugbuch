@@ -3,9 +3,15 @@ import { headers } from 'next/headers'
 import { syncStripeSubscription, cancelSubscription } from '@/lib/subscription/service.server'
 import Stripe from 'stripe'
 
+// Add immediate logging
+console.log('[WEBHOOK] Route file loaded at:', new Date().toISOString())
+
 export async function POST(request: NextRequest) {
-  console.log('=== Webhook received ===')
+  // Log immediately when function is called
+  console.log('=== STRIPE WEBHOOK POST REQUEST RECEIVED ===')
   console.log('Timestamp:', new Date().toISOString())
+  console.log('URL:', request.url)
+  console.log('Method:', request.method)
   
   try {
     const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET
@@ -178,15 +184,31 @@ export async function POST(request: NextRequest) {
         console.log(`Unhandled event type: ${event.type}`)
     }
 
+    console.log('=== Webhook processing completed successfully ===')
     return NextResponse.json({ received: true })
     
   } catch (error) {
-    console.error('Webhook error:', error)
+    console.error('=== WEBHOOK ERROR ===')
+    console.error('Error type:', error instanceof Error ? error.constructor.name : typeof error)
+    console.error('Error message:', error instanceof Error ? error.message : error)
+    console.error('Stack trace:', error instanceof Error ? error.stack : 'No stack trace')
+    
     return NextResponse.json(
-      { error: 'Webhook processing failed' },
+      { error: 'Webhook processing failed', details: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }
     )
   }
+}
+
+// Add GET method for testing
+export async function GET(request: NextRequest) {
+  console.log('Webhook GET request received for testing')
+  return NextResponse.json({
+    status: 'Webhook endpoint is working',
+    timestamp: new Date().toISOString(),
+    message: 'This endpoint only accepts POST requests from Stripe',
+    testCommand: 'curl -X POST https://log-k.com/api/subscription/webhook -H "Content-Type: application/json" -d \'{"test": true}\''
+  })
 }
 
 // Disable body parsing for webhook signature verification
