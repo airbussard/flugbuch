@@ -6,7 +6,7 @@ import { X, Save, Calendar, CreditCard, Tag } from 'lucide-react'
 interface Subscription {
   id: string
   user_id: string
-  subscription_tier: 'none' | 'trial' | 'basic' | 'premium' | 'enterprise'
+  subscription_tier: 'none' | 'trial' | 'basic' | 'pro' | 'premium' | 'enterprise'
   subscription_source: 'apple' | 'stripe' | 'promo' | 'admin' | 'trial'
   activated_at: string
   valid_until: string
@@ -47,6 +47,28 @@ export default function SubscriptionEditModal({ subscription, onClose, onUpdate 
   })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+
+  // Quick action helpers
+  const extendSubscription = (months: number) => {
+    const currentDate = new Date(formData.valid_until)
+    currentDate.setMonth(currentDate.getMonth() + months)
+    setFormData(prev => ({
+      ...prev,
+      valid_until: currentDate.toISOString().split('T')[0]
+    }))
+  }
+
+  const activateNow = () => {
+    const now = new Date()
+    const oneYearLater = new Date()
+    oneYearLater.setFullYear(oneYearLater.getFullYear() + 1)
+    
+    setFormData(prev => ({
+      ...prev,
+      valid_until: oneYearLater.toISOString().split('T')[0],
+      subscription_source: 'admin' // Mark as admin-activated
+    }))
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -135,9 +157,10 @@ export default function SubscriptionEditModal({ subscription, onClose, onUpdate 
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
             >
               <option value="none">None</option>
-              <option value="trial">Trial (14 days)</option>
+              <option value="trial">Trial (28 days)</option>
               <option value="basic">Basic</option>
-              <option value="premium">Premium</option>
+              <option value="pro">Pro</option>
+              <option value="premium">Premium (Legacy)</option>
               <option value="enterprise">Enterprise</option>
             </select>
             {formData.subscription_tier === 'trial' && (
@@ -178,6 +201,37 @@ export default function SubscriptionEditModal({ subscription, onClose, onUpdate 
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
               required
             />
+            {/* Quick Actions */}
+            <div className="flex gap-2 mt-2">
+              <button
+                type="button"
+                onClick={() => extendSubscription(1)}
+                className="text-xs px-2 py-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200"
+              >
+                +1 Month
+              </button>
+              <button
+                type="button"
+                onClick={() => extendSubscription(3)}
+                className="text-xs px-2 py-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200"
+              >
+                +3 Months
+              </button>
+              <button
+                type="button"
+                onClick={() => extendSubscription(12)}
+                className="text-xs px-2 py-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200"
+              >
+                +1 Year
+              </button>
+              <button
+                type="button"
+                onClick={activateNow}
+                className="text-xs px-2 py-1 bg-green-100 text-green-700 rounded hover:bg-green-200"
+              >
+                Activate Now (1 Year)
+              </button>
+            </div>
           </div>
 
           {/* Promo Code */}

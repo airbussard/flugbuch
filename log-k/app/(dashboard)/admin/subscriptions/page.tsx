@@ -85,8 +85,17 @@ export default async function SubscriptionsPage() {
   console.log('Trial status fetched:', trialStatus?.length || 0)
   console.log('User profiles fetched:', userProfilesMap.size)
   
+  // Create a set of user IDs that have real subscriptions (not trials)
+  const usersWithRealSubscriptions = new Set(
+    subscriptions?.filter(s => s.subscription_source !== 'trial')
+      .map(s => s.user_id) || []
+  )
+  
   // Convert trial status to subscription format with user profiles
-  const trialSubscriptions = trialStatus?.map(trial => ({
+  // BUT only include users who don't have a real subscription
+  const trialSubscriptions = trialStatus
+    ?.filter(trial => !usersWithRealSubscriptions.has(trial.user_id))
+    ?.map(trial => ({
     id: `trial_${trial.user_id}`, // Use user_id as unique identifier
     user_id: trial.user_id,
     subscription_tier: 'trial' as const,

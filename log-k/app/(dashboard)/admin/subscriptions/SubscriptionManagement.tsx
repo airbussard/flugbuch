@@ -16,7 +16,7 @@ interface UserProfile {
 interface Subscription {
   id: string
   user_id: string
-  subscription_tier: 'none' | 'trial' | 'basic' | 'premium' | 'enterprise'
+  subscription_tier: 'none' | 'trial' | 'basic' | 'pro' | 'premium' | 'enterprise'
   subscription_source: 'apple' | 'stripe' | 'promo' | 'admin' | 'trial'
   activated_at: string
   valid_until: string
@@ -84,7 +84,8 @@ export default function SubscriptionManagement({ subscriptions: initialSubscript
       case 'none': return 'bg-gray-100 text-gray-700'
       case 'trial': return 'bg-green-100 text-green-700'
       case 'basic': return 'bg-blue-100 text-blue-700'
-      case 'premium': return 'bg-purple-100 text-purple-700'
+      case 'pro': return 'bg-purple-100 text-purple-700'
+      case 'premium': return 'bg-indigo-100 text-indigo-700'
       case 'enterprise': return 'bg-yellow-100 text-yellow-700'
       default: return 'bg-gray-100 text-gray-700'
     }
