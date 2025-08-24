@@ -4,6 +4,9 @@ import { syncStripeSubscription, cancelSubscription } from '@/lib/subscription/s
 import Stripe from 'stripe'
 
 export async function POST(request: NextRequest) {
+  console.log('=== Webhook received ===')
+  console.log('Timestamp:', new Date().toISOString())
+  
   try {
     const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET
 
@@ -13,6 +16,14 @@ export async function POST(request: NextRequest) {
       console.log('STRIPE_SECRET_KEY present:', !!process.env.STRIPE_SECRET_KEY)
       console.log('STRIPE_WEBHOOK_SECRET present:', !!webhookSecret)
       return NextResponse.json({ received: true })
+    }
+
+    // Check Supabase service role key
+    if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
+      console.error('SUPABASE_SERVICE_ROLE_KEY not configured - cannot update database!')
+      return NextResponse.json({ 
+        error: 'Database configuration missing' 
+      }, { status: 500 })
     }
 
     // Initialize Stripe at runtime
@@ -36,8 +47,13 @@ export async function POST(request: NextRequest) {
     
     try {
       event = stripe.webhooks.constructEvent(body, signature, webhookSecret)
+      console.log('✅ Webhook signature verified')
+      console.log('Event type:', event.type)
+      console.log('Event ID:', event.id)
     } catch (err) {
-      console.error('Webhook signature verification failed:', err)
+      console.error('❌ Webhook signature verification failed:', err)
+      console.error('Signature received:', signature?.substring(0, 20) + '...')
+      console.error('Webhook secret starts with:', webhookSecret?.substring(0, 10))
       return NextResponse.json(
         { error: 'Invalid signature' },
         { status: 400 }
@@ -48,10 +64,17 @@ export async function POST(request: NextRequest) {
     switch (event.type) {
       case 'checkout.session.completed': {
         const session = event.data.object as Stripe.Checkout.Session
+        console.log('Processing checkout.session.completed')
+        console.log('Session ID:', session.id)
+        console.log('Payment status:', session.payment_status)
+        console.log('Metadata:', session.metadata)
         
         if (session.payment_status === 'paid' && session.subscription) {
           const userId = session.metadata?.userId
           const tier = session.metadata?.tier as 'basic' | 'pro'
+          
+          console.log('User ID from metadata:', userId)
+          console.log('Tier from metadata:', tier)
           
           if (userId && tier) {
             // Get subscription details
