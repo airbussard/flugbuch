@@ -3,22 +3,22 @@ import { headers } from 'next/headers'
 import { syncStripeSubscription, cancelSubscription } from '@/lib/subscription/service.server'
 import Stripe from 'stripe'
 
-// Initialize Stripe - only if configured
-const stripe = process.env.STRIPE_SECRET_KEY 
-  ? new Stripe(process.env.STRIPE_SECRET_KEY, {
-      apiVersion: '2025-07-30.basil',
-    })
-  : null
-
-const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET
-
 export async function POST(request: NextRequest) {
   try {
+    const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET
+
     // Check if Stripe is configured
-    if (!stripe || !webhookSecret) {
+    if (!process.env.STRIPE_SECRET_KEY || !webhookSecret) {
       console.log('Stripe webhook not configured')
+      console.log('STRIPE_SECRET_KEY present:', !!process.env.STRIPE_SECRET_KEY)
+      console.log('STRIPE_WEBHOOK_SECRET present:', !!webhookSecret)
       return NextResponse.json({ received: true })
     }
+
+    // Initialize Stripe at runtime
+    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
+      apiVersion: '2025-07-30.basil',
+    })
 
     const body = await request.text()
     const headersList = await headers()

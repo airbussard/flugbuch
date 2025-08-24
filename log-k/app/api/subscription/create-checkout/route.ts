@@ -2,11 +2,6 @@ import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import Stripe from 'stripe'
 
-// Initialize Stripe
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2025-07-30.basil',
-})
-
 export async function POST(request: Request) {
   try {
     const { tier, userId, returnUrl, cancelUrl } = await request.json()
@@ -34,11 +29,20 @@ export async function POST(request: Request) {
         !process.env.STRIPE_BASIC_PRICE_ID || 
         !process.env.STRIPE_PRO_PRICE_ID) {
       console.log('Stripe not configured - returning placeholder response')
+      console.log('STRIPE_SECRET_KEY present:', !!process.env.STRIPE_SECRET_KEY)
+      console.log('STRIPE_BASIC_PRICE_ID:', process.env.STRIPE_BASIC_PRICE_ID)
+      console.log('STRIPE_PRO_PRICE_ID:', process.env.STRIPE_PRO_PRICE_ID)
       return NextResponse.json({ 
         url: null,
         message: 'Stripe integration coming soon. Please use the iOS app to subscribe for now.'
       })
     }
+
+    // Initialize Stripe with runtime environment variable
+    console.log('Initializing Stripe with key starting with:', process.env.STRIPE_SECRET_KEY?.substring(0, 7))
+    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
+      apiVersion: '2025-07-30.basil',
+    })
 
     // Get the correct price ID based on tier
     let priceId: string
