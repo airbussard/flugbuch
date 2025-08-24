@@ -83,23 +83,45 @@ export async function POST(request: NextRequest) {
           console.log('Tier from metadata:', tier)
           
           if (userId && tier) {
-            // Get subscription details
-            const subscriptionId = session.subscription as string
-            const subscriptionResponse = await stripe.subscriptions.retrieve(subscriptionId)
-            const subscriptionData = subscriptionResponse as Stripe.Subscription
-            
-            // Stripe returns the subscription data directly
-            const validUntil = new Date((subscriptionData as any).current_period_end * 1000)
-            
-            await syncStripeSubscription(
-              userId,
-              session.customer as string,
-              subscriptionData.id,
-              tier,
-              validUntil
-            )
-            
-            console.log(`Subscription created for user ${userId}: ${tier} until ${validUntil}`)
+            try {
+              // Get subscription details
+              const subscriptionId = session.subscription as string
+              console.log('Retrieving subscription:', subscriptionId)
+              
+              const subscriptionData = await stripe.subscriptions.retrieve(subscriptionId)
+              console.log('Subscription data received:', {
+                id: subscriptionData.id,
+                status: subscriptionData.status,
+                current_period_end: subscriptionData.current_period_end,
+                current_period_start: subscriptionData.current_period_start,
+              })
+              
+              // Safely extract period end with fallback
+              let validUntil: Date
+              if (subscriptionData.current_period_end) {
+                validUntil = new Date(subscriptionData.current_period_end * 1000)
+              } else {
+                // Fallback: 1 year from now for yearly subscriptions
+                console.warn('No current_period_end found, using fallback (1 year from now)')
+                validUntil = new Date()
+                validUntil.setFullYear(validUntil.getFullYear() + 1)
+              }
+              
+              console.log(`Valid until calculated: ${validUntil.toISOString()}`)
+              
+              await syncStripeSubscription(
+                userId,
+                session.customer as string,
+                subscriptionData.id,
+                tier,
+                validUntil
+              )
+              
+              console.log(`✅ Subscription created for user ${userId}: ${tier} until ${validUntil.toISOString()}`)
+            } catch (subError) {
+              console.error('Error processing subscription:', subError)
+              throw subError
+            }
           }
         }
         break
@@ -110,8 +132,18 @@ export async function POST(request: NextRequest) {
         const userId = subscription.metadata?.userId
         const tier = subscription.metadata?.tier as 'basic' | 'pro'
         
+        console.log('Processing customer.subscription.updated')
+        console.log('User ID:', userId, 'Tier:', tier)
+        
         if (userId && tier) {
-          const validUntil = new Date((subscription as any).current_period_end * 1000)
+          let validUntil: Date
+          if (subscription.current_period_end) {
+            validUntil = new Date(subscription.current_period_end * 1000)
+          } else {
+            console.warn('No current_period_end in subscription update, using fallback')
+            validUntil = new Date()
+            validUntil.setFullYear(validUntil.getFullYear() + 1)
+          }
           
           await syncStripeSubscription(
             userId,
@@ -121,7 +153,7 @@ export async function POST(request: NextRequest) {
             validUntil
           )
           
-          console.log(`Subscription updated for user ${userId}: ${tier} until ${validUntil}`)
+          console.log(`✅ Subscription updated for user ${userId}: ${tier} until ${validUntil.toISOString()}`)
         }
         break
       }
@@ -139,16 +171,27 @@ export async function POST(request: NextRequest) {
 
       case 'invoice.payment_succeeded': {
         const invoice = event.data.object as Stripe.Invoice
-        const subscriptionId = (invoice as any).subscription as string
+        const subscriptionId = invoice.subscription as string
+        
+        console.log('Processing invoice.payment_succeeded')
+        console.log('Subscription ID:', subscriptionId)
         
         if (subscriptionId) {
-          const subscriptionResponse = await stripe.subscriptions.retrieve(subscriptionId)
-          const subscriptionData = subscriptionResponse as Stripe.Subscription
+          const subscriptionData = await stripe.subscriptions.retrieve(subscriptionId)
           const userId = subscriptionData.metadata?.userId
           const tier = subscriptionData.metadata?.tier as 'basic' | 'pro'
           
+          console.log('User ID:', userId, 'Tier:', tier)
+          
           if (userId && tier) {
-            const validUntil = new Date((subscriptionData as any).current_period_end * 1000)
+            let validUntil: Date
+            if (subscriptionData.current_period_end) {
+              validUntil = new Date(subscriptionData.current_period_end * 1000)
+            } else {
+              console.warn('No current_period_end in payment succeeded, using fallback')
+              validUntil = new Date()
+              validUntil.setFullYear(validUntil.getFullYear() + 1)
+            }
             
             await syncStripeSubscription(
               userId,
@@ -158,7 +201,7 @@ export async function POST(request: NextRequest) {
               validUntil
             )
             
-            console.log(`Payment succeeded for user ${userId}: ${tier} renewed until ${validUntil}`)
+            console.log(`✅ Payment succeeded for user ${userId}: ${tier} renewed until ${validUntil.toISOString()}`)
           }
         }
         break
