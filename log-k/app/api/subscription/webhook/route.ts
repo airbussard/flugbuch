@@ -128,7 +128,7 @@ export async function POST(request: NextRequest) {
       }
 
       case 'customer.subscription.updated': {
-        const subscription = event.data.object as Stripe.Subscription
+        const subscription = event.data.object as any
         const userId = subscription.metadata?.userId
         const tier = subscription.metadata?.tier as 'basic' | 'pro'
         
@@ -159,7 +159,7 @@ export async function POST(request: NextRequest) {
       }
 
       case 'customer.subscription.deleted': {
-        const subscription = event.data.object as Stripe.Subscription
+        const subscription = event.data.object as any
         const userId = subscription.metadata?.userId
         
         if (userId) {
@@ -170,7 +170,7 @@ export async function POST(request: NextRequest) {
       }
 
       case 'invoice.payment_succeeded': {
-        const invoice = event.data.object as Stripe.Invoice
+        const invoice = event.data.object as any
         const subscriptionId = invoice.subscription as string
         
         console.log('Processing invoice.payment_succeeded')
@@ -208,15 +208,15 @@ export async function POST(request: NextRequest) {
       }
 
       case 'invoice.payment_failed': {
-        const invoice = event.data.object as Stripe.Invoice
-        const customerEmail = (invoice as any).customer_email
+        const invoice = event.data.object as any
+        const customerEmail = invoice.customer_email
         
         // Log failed payment for manual follow-up
         console.error('Payment failed for invoice:', {
           invoiceId: invoice.id,
           customerEmail,
-          amountDue: (invoice as any).amount_due,
-          currency: (invoice as any).currency
+          amountDue: invoice.amount_due,
+          currency: invoice.currency
         })
         
         // TODO: Send email notification to customer
