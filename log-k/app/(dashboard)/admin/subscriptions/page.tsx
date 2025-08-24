@@ -51,7 +51,8 @@ export default async function SubscriptionsPage() {
     console.error('Error fetching subscriptions:', subscriptionsError)
   }
   
-  // Also fetch active trials from user_trial_status table
+  // Only fetch ACTIVE trials from user_trial_status table
+  // Inactive trials are users who now have real subscriptions
   const { data: trialStatus, error: trialError } = await adminSupabase
     .from('user_trial_status')
     .select('*')
