@@ -88,7 +88,7 @@ export async function POST(request: NextRequest) {
               const subscriptionId = session.subscription as string
               console.log('Retrieving subscription:', subscriptionId)
               
-              const subscriptionData = await stripe.subscriptions.retrieve(subscriptionId)
+              const subscriptionData = await stripe.subscriptions.retrieve(subscriptionId) as any
               console.log('Subscription data received:', {
                 id: subscriptionData.id,
                 status: subscriptionData.status,
@@ -177,7 +177,7 @@ export async function POST(request: NextRequest) {
         console.log('Subscription ID:', subscriptionId)
         
         if (subscriptionId) {
-          const subscriptionData = await stripe.subscriptions.retrieve(subscriptionId)
+          const subscriptionData = await stripe.subscriptions.retrieve(subscriptionId) as any
           const userId = subscriptionData.metadata?.userId
           const tier = subscriptionData.metadata?.tier as 'basic' | 'pro'
           
