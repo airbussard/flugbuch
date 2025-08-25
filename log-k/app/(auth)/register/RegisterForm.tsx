@@ -113,27 +113,6 @@ function RegisterFormContent() {
         })
       }
 
-      // First check if email already exists by trying to sign in
-      // This helps detect if user already registered but not confirmed
-      const { error: signInCheckError } = await supabase.auth.signInWithPassword({
-        email: formData.email,
-        password: 'dummy_password_to_check_existence_12345!'
-      })
-      
-      if (debugMode) {
-        console.log('🔍 [DEBUG] Email existence check:', {
-          error: signInCheckError?.message,
-          status: signInCheckError?.status
-        })
-      }
-      
-      // If we get "Invalid login credentials" it means the email exists
-      if (signInCheckError?.message?.includes('Invalid login credentials')) {
-        setError('An account with this email already exists. Please try logging in or reset your password.')
-        setLoading(false)
-        return
-      }
-
       // Sign up the user
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: formData.email,
@@ -152,22 +131,51 @@ function RegisterFormContent() {
             message: authError.message,
             status: authError.status,
             name: authError.name,
+            code: authError.code,
             fullError: authError
           })
         }
         
         // Spezifische Fehlerbehandlung für verschiedene Fehlertypen
         if (authError.message.includes('already registered') || 
-            authError.message.includes('already exists')) {
-          setError('Diese E-Mail-Adresse ist bereits registriert. Bitte melden Sie sich an.')
+            authError.message.includes('already exists') ||
+            authError.message.includes('User already registered')) {
+          setError('Diese E-Mail-Adresse ist bereits registriert. Bitte melden Sie sich an oder bestätigen Sie Ihre E-Mail.')
         } else if (authError.message.includes('weak') || 
                    authError.message.includes('at least 6 characters')) {
           setError('Das Passwort muss mindestens 6 Zeichen lang sein.')
-        } else if (authError.message.includes('invalid')) {
+        } else if (authError.message.includes('invalid') || 
+                   authError.message.includes('valid email')) {
           setError('Bitte geben Sie eine gültige E-Mail-Adresse ein.')
+        } else if (authError.message.includes('rate limit')) {
+          setError('Zu viele Registrierungsversuche. Bitte warten Sie einen Moment.')
         } else {
+          // Log the exact error for debugging
+          console.error('Unhandled signup error:', authError)
           setError(authError.message || 'Ein Fehler ist bei der Registrierung aufgetreten.')
         }
+        setLoading(false)
+        return
+      }
+
+      // Check if we actually got a user back
+      if (!authData.user) {
+        if (debugMode) {
+          console.log('🔍 [DEBUG] SignUp returned no user, likely needs email confirmation', {
+            data: authData,
+            session: authData.session
+          })
+        }
+        
+        // User needs to confirm email
+        setSuccess(true)
+        setError(null)
+        
+        setTimeout(() => {
+          setError('Registration successful! Please check your email to confirm your account.')
+          setSuccess(false)
+        }, 100)
+        
         setLoading(false)
         return
       }
@@ -183,7 +191,7 @@ function RegisterFormContent() {
       }
 
       // Check if email confirmation is required
-      const emailNotConfirmed = !authData.user?.email_confirmed_at && !authData.user?.confirmed_at
+      const emailNotConfirmed = !authData.user.email_confirmed_at && !authData.user.confirmed_at
       
       if (emailNotConfirmed) {
         if (debugMode) {
