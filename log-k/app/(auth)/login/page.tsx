@@ -6,6 +6,7 @@ import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { Mail, Lock, AlertCircle } from 'lucide-react'
+import { ensureUserProfile } from '@/lib/auth/profile-completion'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
@@ -36,7 +37,21 @@ export default function LoginPage() {
           setError(error.message || 'Ein Fehler ist beim Anmelden aufgetreten.')
         }
       } else {
-        // Erfolgreiche Anmeldung - Session refresh und Weiterleitung
+        // Erfolgreiche Anmeldung - Ensure profile exists
+        console.log('Login successful, ensuring user profile...')
+        
+        // Try to create/ensure profile exists
+        const profileResult = await ensureUserProfile()
+        
+        if (!profileResult.success) {
+          console.error('Profile creation/check failed:', profileResult.error)
+          // Don't block login, just log the error
+          // Profile will be created on next attempt
+        } else {
+          console.log('Profile ready:', profileResult.profile)
+        }
+        
+        // Session refresh und Weiterleitung
         router.refresh()
         // Kleine Verzögerung für Session-Etablierung
         setTimeout(() => {

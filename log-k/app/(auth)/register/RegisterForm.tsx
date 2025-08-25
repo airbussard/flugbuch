@@ -113,6 +113,27 @@ function RegisterFormContent() {
         })
       }
 
+      // First check if email already exists by trying to sign in
+      // This helps detect if user already registered but not confirmed
+      const { error: signInCheckError } = await supabase.auth.signInWithPassword({
+        email: formData.email,
+        password: 'dummy_password_to_check_existence_12345!'
+      })
+      
+      if (debugMode) {
+        console.log('🔍 [DEBUG] Email existence check:', {
+          error: signInCheckError?.message,
+          status: signInCheckError?.status
+        })
+      }
+      
+      // If we get "Invalid login credentials" it means the email exists
+      if (signInCheckError?.message?.includes('Invalid login credentials')) {
+        setError('An account with this email already exists. Please try logging in or reset your password.')
+        setLoading(false)
+        return
+      }
+
       // Sign up the user
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: formData.email,
@@ -155,12 +176,36 @@ function RegisterFormContent() {
         console.log('🔍 [DEBUG] SignUp successful:', {
           userId: authData.user?.id,
           email: authData.user?.email,
-          emailConfirmed: authData.user?.email_confirmed_at
+          emailConfirmed: authData.user?.email_confirmed_at,
+          identities: authData.user?.identities,
+          confirmedAt: authData.user?.confirmed_at
         })
       }
 
-      // Create user profile with username - with retry logic
-      if (authData.user) {
+      // Check if email confirmation is required
+      const emailNotConfirmed = !authData.user?.email_confirmed_at && !authData.user?.confirmed_at
+      
+      if (emailNotConfirmed) {
+        if (debugMode) {
+          console.log('🔍 [DEBUG] Email confirmation required, skipping profile creation')
+        }
+        
+        // Don't try to create profile if email is not confirmed
+        setSuccess(true)
+        setError(null)
+        
+        // Show success message with email confirmation note
+        setTimeout(() => {
+          setError('Registration successful! Please check your email to confirm your account.')
+          setSuccess(false)
+        }, 100)
+        
+        setLoading(false)
+        return
+      }
+
+      // Only create profile if email is confirmed or confirmation is not required
+      if (authData.user && !emailNotConfirmed) {
         let profileCreated = false
         let attempts = 0
         const maxAttempts = 3
@@ -243,10 +288,36 @@ function RegisterFormContent() {
               })
             }
             
+            // Check for foreign key constraint error
+            if (actualError.code === '23503' || actualError.message?.includes('foreign key constraint')) {
+              if (debugMode) {
+                console.log('🔍 [DEBUG] Foreign key constraint error - user might need email confirmation')
+              }
+              
+              // User was created but needs email confirmation
+              setSuccess(true)
+              setError(null)
+              
+              setTimeout(() => {
+                setError('Registration successful! Please check your email to confirm your account before logging in.')
+                setSuccess(false)
+              }, 100)
+              
+              setLoading(false)
+              return
+            }
+            
             // If it's the last attempt, show error
             if (attempts === maxAttempts) {
               console.error('Profile creation failed after all retries:', actualError)
-              setError('Database error saving new user. Please try again or contact support.')
+              
+              // Provide more helpful error message based on error type
+              if (actualError.code === '23505' || actualError.message?.includes('duplicate')) {
+                setError('An account with this email or username already exists. Please try logging in.')
+              } else {
+                setError('Registration successful! Your profile will be created when you first log in.')
+              }
+              
               setLoading(false)
               return
             }
