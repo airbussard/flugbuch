@@ -72,6 +72,18 @@ function RegisterFormContent() {
     setLoading(true)
     setError(null)
 
+    // Check if debug mode is enabled
+    const debugMode = process.env.NEXT_PUBLIC_DEBUG_AUTH === 'true' || 
+                     localStorage.getItem('debug_auth') === 'true'
+    
+    if (debugMode) {
+      console.log('🔍 [DEBUG] Starting registration process', {
+        email: formData.email,
+        username: formData.username,
+        timestamp: new Date().toISOString()
+      })
+    }
+
     if (formData.password !== formData.confirmPassword) {
       setError('Passwords do not match')
       setLoading(false)
@@ -92,6 +104,15 @@ function RegisterFormContent() {
     }
 
     try {
+      // Check session before signup
+      if (debugMode) {
+        const { data: sessionBefore } = await supabase.auth.getSession()
+        console.log('🔍 [DEBUG] Session before signup:', {
+          hasSession: !!sessionBefore?.session,
+          userId: sessionBefore?.session?.user?.id
+        })
+      }
+
       // Sign up the user
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: formData.email,
@@ -105,6 +126,15 @@ function RegisterFormContent() {
       })
 
       if (authError) {
+        if (debugMode) {
+          console.error('🔍 [DEBUG] SignUp error:', {
+            message: authError.message,
+            status: authError.status,
+            name: authError.name,
+            fullError: authError
+          })
+        }
+        
         // Spezifische Fehlerbehandlung für verschiedene Fehlertypen
         if (authError.message.includes('already registered') || 
             authError.message.includes('already exists')) {
@@ -121,31 +151,124 @@ function RegisterFormContent() {
         return
       }
 
-      // Create user profile with username
+      if (debugMode) {
+        console.log('🔍 [DEBUG] SignUp successful:', {
+          userId: authData.user?.id,
+          email: authData.user?.email,
+          emailConfirmed: authData.user?.email_confirmed_at
+        })
+      }
+
+      // Create user profile with username - with retry logic
       if (authData.user) {
-        const { error: profileError } = await supabase
-          .from('user_profiles')
-          .insert([
-            {
-              id: authData.user.id, // user_profiles uses 'id' as primary key matching auth.users.id
+        let profileCreated = false
+        let attempts = 0
+        const maxAttempts = 3
+        const retryDelay = 1000 // 1 second
+        
+        while (!profileCreated && attempts < maxAttempts) {
+          attempts++
+          
+          // Wait before retry (except first attempt)
+          if (attempts > 1) {
+            if (debugMode) {
+              console.log(`🔍 [DEBUG] Retry attempt ${attempts} after ${retryDelay}ms delay`)
+            }
+            await new Promise(resolve => setTimeout(resolve, retryDelay))
+            
+            // Re-check session after delay
+            const { data: currentSession } = await supabase.auth.getSession()
+            if (debugMode) {
+              console.log(`🔍 [DEBUG] Session check on retry ${attempts}:`, {
+                hasSession: !!currentSession?.session,
+                userId: currentSession?.session?.user?.id,
+                matchesAuthUser: currentSession?.session?.user?.id === authData.user.id
+              })
+            }
+          }
+          
+          if (debugMode) {
+            console.log(`🔍 [DEBUG] Profile creation attempt ${attempts}`, {
+              userId: authData.user.id,
+              username: formData.username.toLowerCase()
+            })
+          }
+          
+          // Versuche zuerst die neue Funktion zu nutzen
+          const { error: profileError, data: profileData } = await supabase
+            .rpc('create_user_profile_on_signup', {
+              user_id: authData.user.id,
+              user_email: formData.email,
               first_name: formData.firstName,
               last_name: formData.lastName,
-              email: formData.email,
-              username: formData.username.toLowerCase(), // Store in lowercase for consistency
-              compliance_mode: 'EASA',
+              username: formData.username.toLowerCase()
+            })
+          
+          // Fallback: Direkter Insert falls Funktion nicht existiert
+          let actualError = profileError
+          let actualData = profileData
+          
+          if (profileError && profileError.message.includes('function') && profileError.message.includes('does not exist')) {
+            if (debugMode) {
+              console.log('🔍 [DEBUG] Fallback to direct insert')
             }
-          ])
+            
+            const { error: insertError, data: insertData } = await supabase
+              .from('user_profiles')
+              .insert([
+                {
+                  id: authData.user.id,
+                  first_name: formData.firstName,
+                  last_name: formData.lastName,
+                  email: formData.email,
+                  username: formData.username.toLowerCase(),
+                  compliance_mode: 'EASA',
+                }
+              ])
+              .select()
+              .single()
+            
+            actualError = insertError
+            actualData = insertData
+          }
 
-        if (profileError) {
-          console.error('Profile creation error:', profileError)
-          // Important: Show error to user and stop the registration process
-          setError('Database error saving new user. Please try again or contact support.')
-          setLoading(false)
-          return
+          if (actualError) {
+            if (debugMode) {
+              console.error(`🔍 [DEBUG] Profile creation error (attempt ${attempts}):`, {
+                message: actualError.message,
+                code: actualError.code,
+                details: actualError.details,
+                hint: actualError.hint,
+                fullError: actualError
+              })
+            }
+            
+            // If it's the last attempt, show error
+            if (attempts === maxAttempts) {
+              console.error('Profile creation failed after all retries:', actualError)
+              setError('Database error saving new user. Please try again or contact support.')
+              setLoading(false)
+              return
+            }
+          } else {
+            profileCreated = true
+            if (debugMode) {
+              console.log(`🔍 [DEBUG] Profile created successfully on attempt ${attempts}:`, {
+                profileId: actualData?.id || actualData?.user_id,
+                username: actualData?.username,
+                data: actualData
+              })
+            }
+          }
         }
       }
 
       setSuccess(true)
+      
+      if (debugMode) {
+        console.log('🔍 [DEBUG] Registration complete, redirecting in 1.5s')
+      }
+      
       // Kurze Verzögerung für Session-Etablierung
       setTimeout(() => {
         router.refresh()
@@ -154,6 +277,9 @@ function RegisterFormContent() {
         router.push(plan ? redirectTo : '/dashboard')
       }, 1500)
     } catch (error: any) {
+      if (debugMode) {
+        console.error('🔍 [DEBUG] Unexpected error:', error)
+      }
       setError(error.message || 'Ein Fehler ist bei der Registrierung aufgetreten.')
     } finally {
       setLoading(false)
