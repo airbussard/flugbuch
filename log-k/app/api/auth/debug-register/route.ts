@@ -76,9 +76,9 @@ export async function POST(req: NextRequest) {
     
     debugInfo.steps.push({
       step: 'Database auth.uid() check',
-      authUid: authUidData?.uid,
+      authUid: (authUidData as any)?.uid,
       error: authUidError?.message,
-      hasAuthContext: !!authUidData?.uid
+      hasAuthContext: !!(authUidData as any)?.uid
     })
 
     // Step 5: Check RLS policies
@@ -191,7 +191,7 @@ export async function GET() {
   let authUid = null
   try {
     const { data } = await supabase.rpc('get_auth_uid').single()
-    authUid = data?.uid
+    authUid = (data as any)?.uid
   } catch (e) {
     // Function might not exist yet
   }
