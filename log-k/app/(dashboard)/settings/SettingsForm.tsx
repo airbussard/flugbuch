@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select } from '@/components/ui/select'
-import { User, Bell, Shield, Palette, Download, Globe, AtSign, Loader2, CheckCircle, AlertCircle, MapPin } from 'lucide-react'
+import { User, Bell, Shield, Palette, Download, Globe, AtSign, Loader2, CheckCircle, AlertCircle, MapPin, Database } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { MAJOR_AIRPORTS } from '@/lib/data/major-airports'
@@ -13,6 +13,7 @@ import { useTranslation } from '@/lib/i18n/hooks'
 import DeleteAccountModal from './DeleteAccountModal'
 import { getUserSubscriptionStatusClient } from '@/lib/subscription/service.client'
 import type { SubscriptionStatus } from '@/lib/subscription/types'
+import Link from 'next/link'
 
 interface SettingsFormProps {
   initialData: {
@@ -526,6 +527,12 @@ export default function SettingsForm({ initialData, userId }: SettingsFormProps)
         </div>
         
         <div className="space-y-4">
+          <Link href="/settings/backup" className="block">
+            <Button variant="default" className="w-full flex items-center justify-center gap-2">
+              <Database className="h-4 w-4" />
+              Backup & Restore
+            </Button>
+          </Link>
           <Button variant="outline" className="w-full" onClick={exportCSV}>
             Export Flight Data (CSV)
           </Button>
