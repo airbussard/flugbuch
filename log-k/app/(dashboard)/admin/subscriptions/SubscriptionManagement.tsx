@@ -16,7 +16,7 @@ interface UserProfile {
 interface Subscription {
   id: string
   user_id: string
-  subscription_tier: 'none' | 'trial' | 'basic' | 'pro' | 'premium' | 'enterprise'
+  subscription_tier: 'none' | 'trial' | 'basic' | 'pro'
   subscription_source: 'apple' | 'stripe' | 'promo' | 'admin' | 'trial'
   activated_at: string
   valid_until: string
@@ -41,8 +41,7 @@ interface SubscriptionStats {
     none: number
     trial: number
     basic: number
-    premium: number
-    enterprise: number
+    pro: number
   }
   sourceBreakdown: {
     apple: number
@@ -85,8 +84,6 @@ export default function SubscriptionManagement({ subscriptions: initialSubscript
       case 'trial': return 'bg-green-100 text-green-700'
       case 'basic': return 'bg-blue-100 text-blue-700'
       case 'pro': return 'bg-purple-100 text-purple-700'
-      case 'premium': return 'bg-indigo-100 text-indigo-700'
-      case 'enterprise': return 'bg-yellow-100 text-yellow-700'
       default: return 'bg-gray-100 text-gray-700'
     }
   }
@@ -201,18 +198,18 @@ export default function SubscriptionManagement({ subscriptions: initialSubscript
                   <span className="font-medium text-green-600">{stats.tierBreakdown.trial}</span>
                 </div>
               )}
-              <div className="flex justify-between">
-                <span>Premium:</span>
-                <span className="font-medium">{stats.tierBreakdown.premium}</span>
-              </div>
-              <div className="flex justify-between">
-                <span>Basic:</span>
-                <span className="font-medium">{stats.tierBreakdown.basic}</span>
-              </div>
-              <div className="flex justify-between">
-                <span>Enterprise:</span>
-                <span className="font-medium">{stats.tierBreakdown.enterprise}</span>
-              </div>
+              {stats.tierBreakdown.basic > 0 && (
+                <div className="flex justify-between">
+                  <span>Basic:</span>
+                  <span className="font-medium text-blue-600">{stats.tierBreakdown.basic}</span>
+                </div>
+              )}
+              {stats.tierBreakdown.pro > 0 && (
+                <div className="flex justify-between">
+                  <span>Pro:</span>
+                  <span className="font-medium text-purple-600">{stats.tierBreakdown.pro}</span>
+                </div>
+              )}
             </div>
           </div>
         </div>

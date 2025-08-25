@@ -6,7 +6,7 @@ import { X, Save, Calendar, CreditCard, Tag } from 'lucide-react'
 interface Subscription {
   id: string
   user_id: string
-  subscription_tier: 'none' | 'trial' | 'basic' | 'pro' | 'premium' | 'enterprise'
+  subscription_tier: 'none' | 'trial' | 'basic' | 'pro'
   subscription_source: 'apple' | 'stripe' | 'promo' | 'admin' | 'trial'
   activated_at: string
   valid_until: string
@@ -160,8 +160,6 @@ export default function SubscriptionEditModal({ subscription, onClose, onUpdate 
               <option value="trial">Trial (28 days)</option>
               <option value="basic">Basic</option>
               <option value="pro">Pro</option>
-              <option value="premium">Premium (Legacy)</option>
-              <option value="enterprise">Enterprise</option>
             </select>
             {formData.subscription_tier === 'trial' && (
               <p className="text-xs text-blue-600 mt-1">
