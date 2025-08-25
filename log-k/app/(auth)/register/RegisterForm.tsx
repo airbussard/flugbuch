@@ -127,7 +127,7 @@ function RegisterFormContent() {
           .from('user_profiles')
           .insert([
             {
-              user_id: authData.user.id, // Use user_id field, not id (id is auto-generated)
+              id: authData.user.id, // user_profiles uses 'id' as primary key matching auth.users.id
               first_name: formData.firstName,
               last_name: formData.lastName,
               email: formData.email,
