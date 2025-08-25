@@ -127,7 +127,7 @@ function RegisterFormContent() {
           .from('user_profiles')
           .insert([
             {
-              id: authData.user.id, // Using 'id' as primary key, not 'user_id'
+              user_id: authData.user.id, // Use user_id field, not id (id is auto-generated)
               first_name: formData.firstName,
               last_name: formData.lastName,
               email: formData.email,
@@ -136,7 +136,13 @@ function RegisterFormContent() {
             }
           ])
 
-        if (profileError) console.error('Profile creation error:', profileError)
+        if (profileError) {
+          console.error('Profile creation error:', profileError)
+          // Important: Show error to user and stop the registration process
+          setError('Database error saving new user. Please try again or contact support.')
+          setLoading(false)
+          return
+        }
       }
 
       setSuccess(true)
