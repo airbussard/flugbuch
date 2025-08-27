@@ -9,6 +9,7 @@ import {
   AppFeature,
   FEATURE_ACCESS 
 } from '@/lib/subscription/types'
+import { getAppUrl } from '@/lib/utils/app-url'
 
 interface SubscriptionPlansProps {
   userId: string
@@ -73,7 +74,7 @@ export default function SubscriptionPlans({
           body: JSON.stringify({ 
             tier,
             userId,
-            returnUrl: window.location.origin + (returnTo || '/dashboard'),
+            returnUrl: getAppUrl() + (returnTo || '/dashboard'),
             cancelUrl: window.location.href
           })
         })

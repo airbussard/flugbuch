@@ -6,6 +6,7 @@ import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { Mail, AlertCircle, CheckCircle, ArrowLeft } from 'lucide-react'
+import { getAppUrl } from '@/lib/utils/app-url'
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState('')
@@ -23,7 +24,7 @@ export default function ForgotPasswordPage() {
 
     try {
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/reset-password`,
+        redirectTo: `${getAppUrl()}/reset-password`,
       })
 
       if (error) {

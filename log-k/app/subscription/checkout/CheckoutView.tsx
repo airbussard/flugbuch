@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Check, X, ArrowLeft, Shield, Zap, Clock, CreditCard, Info } from 'lucide-react'
 import { SubscriptionTier, TIER_PRICES, TIER_DISPLAY_NAMES } from '@/lib/subscription/types'
+import { getAppUrl } from '@/lib/utils/app-url'
 
 interface CheckoutViewProps {
   userId: string
@@ -84,7 +85,7 @@ export default function CheckoutView({
         body: JSON.stringify({
           tier: selectedPlan,
           userId,
-          returnUrl: window.location.origin + redirectTo,
+          returnUrl: getAppUrl() + redirectTo,
           cancelUrl: window.location.href
         })
       })
