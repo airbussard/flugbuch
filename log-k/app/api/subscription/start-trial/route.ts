@@ -36,7 +36,7 @@ export async function POST(request: Request) {
       .from('user_subscriptions')
       .select('id')
       .eq('user_id', userId)
-      .eq('subscription_source', 'trial')
+      .eq('subscription_tier', 'trial')
       .limit(1)
       .maybeSingle()
 
@@ -47,7 +47,7 @@ export async function POST(request: Request) {
       )
     }
 
-    // Create trial subscription (matching iOS app structure: tier='pro' with source='trial')
+    // Create trial subscription
     const trialDurationDays = 28 // 4 weeks
     const now = new Date()
     const validUntil = new Date(now.getTime() + trialDurationDays * 24 * 60 * 60 * 1000)
@@ -56,8 +56,8 @@ export async function POST(request: Request) {
       .from('user_subscriptions')
       .insert({
         user_id: userId,
-        subscription_tier: 'pro', // Pro features during trial (matching iOS app)
-        subscription_source: 'trial',
+        subscription_tier: 'trial', // Trial tier
+        subscription_source: 'promo', // Trials are technically promotional
         activated_at: now.toISOString(),
         valid_until: validUntil.toISOString(),
         notes: '4-week free trial'

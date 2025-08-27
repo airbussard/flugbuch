@@ -88,7 +88,7 @@ export default async function SubscriptionsPage() {
   
   // Create a set of user IDs that have real subscriptions (not trials)
   const usersWithRealSubscriptions = new Set(
-    subscriptions?.filter(s => s.subscription_source !== 'trial')
+    subscriptions?.filter(s => s.subscription_tier !== 'trial')
       .map(s => s.user_id) || []
   )
   
@@ -100,7 +100,7 @@ export default async function SubscriptionsPage() {
     id: `trial_${trial.user_id}`, // Use user_id as unique identifier
     user_id: trial.user_id,
     subscription_tier: 'trial' as const,
-    subscription_source: 'trial' as const,
+    subscription_source: 'promo' as const,
     activated_at: trial.trial_started || new Date().toISOString(),
     valid_until: trial.trial_ends || new Date(Date.now() + 28 * 24 * 60 * 60 * 1000).toISOString(), // Default to 28 days if not set
     apple_transaction_id: null,
@@ -177,7 +177,7 @@ export default async function SubscriptionsPage() {
       stripe: allSubscriptions.filter(s => s.subscription_source === 'stripe').length,
       promo: allSubscriptions.filter(s => s.subscription_source === 'promo').length,
       admin: allSubscriptions.filter(s => s.subscription_source === 'admin').length,
-      trial: allSubscriptions.filter(s => s.subscription_source === 'trial').length,
+      trial: allSubscriptions.filter(s => s.subscription_tier === 'trial').length,
     }
   }
   

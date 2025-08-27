@@ -17,7 +17,7 @@ interface Subscription {
   id: string
   user_id: string
   subscription_tier: 'none' | 'trial' | 'basic' | 'pro'
-  subscription_source: 'apple' | 'stripe' | 'promo' | 'admin' | 'trial'
+  subscription_source: 'apple' | 'stripe' | 'promo' | 'admin'
   activated_at: string
   valid_until: string
   apple_transaction_id: string | null

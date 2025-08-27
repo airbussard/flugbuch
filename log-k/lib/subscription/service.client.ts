@@ -47,7 +47,7 @@ export async function getUserSubscriptionStatusClient(userId?: string): Promise<
 function mapSubscriptionToStatus(subscription: UserSubscription): SubscriptionStatus {
   const isExpired = isSubscriptionExpired(subscription.valid_until)
   const daysRemaining = getDaysRemaining(subscription.valid_until)
-  const isTrial = subscription.subscription_source === 'trial'
+  const isTrial = subscription.subscription_tier === 'trial'
   
   // If subscription is expired, treat as no subscription
   if (isExpired) {
@@ -63,7 +63,7 @@ function mapSubscriptionToStatus(subscription: UserSubscription): SubscriptionSt
   }
 
   // Map database tiers to application tiers
-  // Note: Trials have subscription_tier='pro' with subscription_source='trial'
+  // Note: Trials have subscription_tier='trial' with subscription_source='promo'
   let tier = subscription.subscription_tier
   
   // Handle special mappings

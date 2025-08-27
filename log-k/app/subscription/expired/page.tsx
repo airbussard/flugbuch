@@ -34,12 +34,12 @@ export default async function SubscriptionExpiredPage({ searchParams }: PageProp
     .from('user_subscriptions')
     .select('id')
     .eq('user_id', user.id)
-    .eq('subscription_source', 'trial')
+    .eq('subscription_tier', 'trial')
     .limit(1)
     .maybeSingle()
 
   const hasExpiredTrial = subscription && 
-    subscription.subscription_source === 'trial' && 
+    subscription.subscription_tier === 'trial' && 
     new Date(subscription.valid_until) < new Date()
 
   const neverHadSubscription = !subscription

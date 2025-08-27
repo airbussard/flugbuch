@@ -100,7 +100,7 @@ export async function updateSession(request: NextRequest) {
       // - Users with no subscription record at all (legacy accounts)
       // - Users with expired subscriptions
       // - Users whose trial has ended
-      // Note: Trials have subscription_tier='pro' with subscription_source='trial'
+      // Note: Trials have subscription_tier='trial' with subscription_source='promo'
       if (!subscription) {
         const url = new URL('/subscription/expired', request.url)
         url.searchParams.set('return_to', pathname)

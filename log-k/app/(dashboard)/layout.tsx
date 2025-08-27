@@ -40,9 +40,9 @@ export default async function DashboardLayout({
     .single()
   
   // Calculate days remaining if trial
-  // Note: Trials have subscription_tier='pro' with subscription_source='trial'
+  // Note: Trials have subscription_tier='trial' with subscription_source='promo'
   let trialDaysRemaining = null
-  if (subscription?.subscription_source === 'trial') {
+  if (subscription?.subscription_tier === 'trial') {
     const validUntil = new Date(subscription.valid_until)
     const now = new Date()
     const daysRemaining = Math.ceil((validUntil.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
