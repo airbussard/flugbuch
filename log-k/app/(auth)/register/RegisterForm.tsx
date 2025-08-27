@@ -158,62 +158,44 @@ function RegisterFormContent() {
         return
       }
 
-      // Check if we actually got a user back
-      if (!authData.user) {
-        if (debugMode) {
-          console.log('🔍 [DEBUG] SignUp returned no user, likely needs email confirmation', {
-            data: authData,
-            session: authData.session
-          })
-        }
-        
-        // User needs to confirm email
-        setSuccess(true)
-        setError(null)
-        
-        setTimeout(() => {
-          setError('Registration successful! Please check your email to confirm your account.')
-          setSuccess(false)
-        }, 100)
-        
-        setLoading(false)
-        return
-      }
-
       if (debugMode) {
-        console.log('🔍 [DEBUG] SignUp successful:', {
+        console.log('🔍 [DEBUG] SignUp response:', {
+          hasUser: !!authData.user,
           userId: authData.user?.id,
           email: authData.user?.email,
+          hasSession: !!authData.session,
+          sessionUser: authData.session?.user?.id,
           emailConfirmed: authData.user?.email_confirmed_at,
-          identities: authData.user?.identities,
-          confirmedAt: authData.user?.confirmed_at
+          confirmedAt: authData.user?.confirmed_at,
+          identities: authData.user?.identities
         })
       }
 
-      // Check if email confirmation is required
-      const emailNotConfirmed = !authData.user.email_confirmed_at && !authData.user.confirmed_at
+      // CRITICAL CHECK: Session determines if user exists in auth.users
+      // No session = email confirmation required, user NOT in auth.users yet
+      const hasSession = !!authData.session
       
-      if (emailNotConfirmed) {
+      if (!hasSession) {
         if (debugMode) {
-          console.log('🔍 [DEBUG] Email confirmation required, skipping profile creation')
+          console.log('🔍 [DEBUG] No session - email confirmation required, user NOT in auth.users yet')
         }
         
-        // Don't try to create profile if email is not confirmed
+        // User needs email confirmation - DO NOT create profile
         setSuccess(true)
-        setError(null)
-        
-        // Show success message with email confirmation note
         setTimeout(() => {
-          setError('Registration successful! Please check your email to confirm your account.')
           setSuccess(false)
+          setError('Registrierung erfolgreich! Bitte bestätigen Sie Ihre E-Mail-Adresse um sich anzumelden.')
         }, 100)
         
         setLoading(false)
         return
       }
 
-      // Only create profile if email is confirmed or confirmation is not required
-      if (authData.user && !emailNotConfirmed) {
+      // Only create profile if we have a session (user exists in auth.users)
+      if (hasSession && authData.user) {
+        if (debugMode) {
+          console.log('🔍 [DEBUG] Session exists - user is in auth.users, creating profile')
+        }
         let profileCreated = false
         let attempts = 0
         const maxAttempts = 3
