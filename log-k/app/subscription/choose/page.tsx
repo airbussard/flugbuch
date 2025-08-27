@@ -26,7 +26,7 @@ export default async function SubscriptionChoosePage({
 
   // Redirect only if user has PAID subscription (not trial)
   // Trial users should be able to see upgrade options
-  if (subscriptionStatus.isActive && subscriptionStatus.source !== 'trial' && subscriptionStatus.tier !== 'none') {
+  if (subscriptionStatus.isActive && subscriptionStatus.tier !== 'trial' && subscriptionStatus.tier !== 'none') {
     const returnTo = params.return_to || '/dashboard'
     redirect(returnTo)
   }
