@@ -118,7 +118,7 @@ function RegisterFormContent() {
         email: formData.email,
         password: formData.password,
         options: {
-          emailRedirectTo: `${window.location.origin}/login`,
+          emailRedirectTo: `https://log-k.com/login`,
           data: {
             first_name: formData.firstName,
             last_name: formData.lastName,
