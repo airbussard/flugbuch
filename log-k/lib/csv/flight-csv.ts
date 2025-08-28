@@ -22,24 +22,44 @@ export interface CSVFlight {
   remarks?: string
 }
 
+// Convert decimal hours to HH:MM format (e.g., 2.5 -> "2:30")
+function decimalToHHMM(decimal: number | null | undefined): string {
+  if (!decimal || decimal === 0) return '0:00'
+  
+  const hours = Math.floor(decimal)
+  const minutes = Math.round((decimal - hours) * 60)
+  
+  return `${hours}:${String(minutes).padStart(2, '0')}`
+}
+
 export function exportFlightsToCSV(flights: Flight[]): string {
   const csvData = flights.map(flight => ({
     Date: flight.flight_date,
-    'Departure Airport': flight.departure_airport,
-    'Arrival Airport': flight.arrival_airport,
-    'Departure Time': flight.off_block,
-    'Arrival Time': flight.on_block,
+    'Flight Number': flight.flight_number || '',
+    'Departure': flight.departure_airport,
+    'Arrival': flight.arrival_airport,
+    'Dep Time': flight.off_block ? new Date(flight.off_block).toISOString().slice(11, 16) : '',
+    'Arr Time': flight.on_block ? new Date(flight.on_block).toISOString().slice(11, 16) : '',
+    'Takeoff Time': flight.takeoff ? new Date(flight.takeoff).toISOString().slice(11, 16) : '',
+    'Landing Time': flight.landing ? new Date(flight.landing).toISOString().slice(11, 16) : '',
     'Aircraft Registration': flight.registration,
     'Aircraft Type': flight.aircraft_type,
-    'PIC Time': flight.pic_time,
-    'SIC Time': flight.sic_time,
-    'Block Time': flight.block_time,
-    'Night Time': flight.night_time,
-    'IFR Time': flight.ifr_time,
-    'VFR Time': flight.vfr_time,
-    'Day Landings': flight.landings_day,
-    'Night Landings': flight.landings_night,
-    'Remarks': flight.remarks
+    'Position': flight.is_instructor ? 'INSTRUCTOR' : (flight.pic_time > 0 ? 'PIC' : 'SIC'),
+    'Block Time': decimalToHHMM(flight.block_time),
+    'Total Time': decimalToHHMM(flight.total_time || flight.block_time),
+    'PIC Time': decimalToHHMM(flight.pic_time),
+    'SIC Time': decimalToHHMM(flight.sic_time),
+    'Multi Pilot Time': decimalToHHMM(flight.multi_pilot_time),
+    'IFR Time': decimalToHHMM(flight.ifr_time),
+    'VFR Time': decimalToHHMM(flight.vfr_time),
+    'Night Time': decimalToHHMM(flight.night_time),
+    'Cross Country Time': decimalToHHMM(flight.cross_country_time),
+    'Dual Given': decimalToHHMM(flight.dual_given_time),
+    'Dual Received': decimalToHHMM(flight.dual_received_time),
+    'Day Landings': flight.landings_day || 0,
+    'Night Landings': flight.landings_night || 0,
+    'Pilot Flying': flight.is_pilot_flying ? 'YES' : 'NO',
+    'Notes': flight.remarks || ''
   }))
 
   return Papa.unparse(csvData)
