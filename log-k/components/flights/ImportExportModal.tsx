@@ -144,7 +144,7 @@ export default function ImportExportModal({
           {/* Template Download */}
           <div className="text-center">
             <a
-              href="/csv-template.csv"
+              href="/easa_compliant_logbook_template.csv"
               download
               className="text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400"
             >

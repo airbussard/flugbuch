@@ -324,7 +324,9 @@ export default function CSVImporter() {
                       {flight.departure_airport} → {flight.arrival_airport}
                     </td>
                     <td className="px-4 py-2 text-sm text-gray-900">{flight.registration}</td>
-                    <td className="px-4 py-2 text-sm text-gray-900">{flight.block_time.toFixed(2)}h</td>
+                    <td className="px-4 py-2 text-sm text-gray-900">
+                      {Math.floor(flight.block_time)}:{String(Math.round((flight.block_time % 1) * 60)).padStart(2, '0')}
+                    </td>
                     <td className="px-4 py-2 text-sm text-gray-900">{flight.position}</td>
                   </tr>
                 ))}
