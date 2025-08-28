@@ -124,9 +124,6 @@ export async function POST(request: NextRequest) {
         }
       }
 
-      // Calculate total time (for compatibility)
-      const total_time = flight.block_time || 0
-
       // Prepare flight record for database
       const dbFlight = {
         user_id: user.id,
@@ -135,15 +132,12 @@ export async function POST(request: NextRequest) {
         departure_airport: flight.departure_airport.toUpperCase(),
         arrival_airport: flight.arrival_airport.toUpperCase(),
         off_block: off_block_date?.toISOString() || null,
-        off_block_date: off_block_date?.toISOString() || null,
         on_block: on_block_date?.toISOString() || null,
         takeoff: takeoff_date?.toISOString() || null,
-        takeoff_date: takeoff_date?.toISOString() || null,
         landing: landing_date?.toISOString() || null,
         registration: flight.registration.toUpperCase(),  // Database column is 'registration', not 'aircraft_registration'
         aircraft_type: flight.aircraft_type || flight.registration, // Fallback to registration
         block_time: flight.block_time || 0,
-        total_time: total_time,
         pic_time: flight.pic_time || 0,
         sic_time: flight.sic_time || 0,
         multi_pilot_time: flight.multi_pilot_time || 0,
@@ -155,13 +149,8 @@ export async function POST(request: NextRequest) {
         dual_received_time: flight.dual_received_time || 0,
         landings_day: flight.landings_day || 0,
         landings_night: flight.landings_night || 0,
-        is_pilot_flying: flight.is_pilot_flying || false,
         remarks: flight.remarks || null,
-        // Set instructor based on position
-        is_instructor: flight.position === 'INSTRUCTOR' || flight.dual_given_time > 0,
         // Default fields
-        is_simulator_session: false,
-        safety_pilot: false,
         deleted: false
       }
 

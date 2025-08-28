@@ -44,9 +44,9 @@ export function exportFlightsToCSV(flights: Flight[]): string {
     'Landing Time': flight.landing ? new Date(flight.landing).toISOString().slice(11, 16) : '',
     'Aircraft Registration': flight.registration,
     'Aircraft Type': flight.aircraft_type,
-    'Position': flight.is_instructor ? 'INSTRUCTOR' : (flight.pic_time > 0 ? 'PIC' : 'SIC'),
+    'Position': flight.dual_given_time && flight.dual_given_time > 0 ? 'INSTRUCTOR' : (flight.pic_time && flight.pic_time > 0 ? 'PIC' : 'SIC'),
     'Block Time': decimalToHHMM(flight.block_time),
-    'Total Time': decimalToHHMM(flight.total_time || flight.block_time),
+    'Total Time': decimalToHHMM(flight.block_time),
     'PIC Time': decimalToHHMM(flight.pic_time),
     'SIC Time': decimalToHHMM(flight.sic_time),
     'Multi Pilot Time': decimalToHHMM(flight.multi_pilot_time),
@@ -58,7 +58,7 @@ export function exportFlightsToCSV(flights: Flight[]): string {
     'Dual Received': decimalToHHMM(flight.dual_received_time),
     'Day Landings': flight.landings_day || 0,
     'Night Landings': flight.landings_night || 0,
-    'Pilot Flying': flight.is_pilot_flying ? 'YES' : 'NO',
+    'Pilot Flying': flight.pic_time && flight.pic_time > 0 ? 'YES' : 'NO',
     'Notes': flight.remarks || ''
   }))
 
