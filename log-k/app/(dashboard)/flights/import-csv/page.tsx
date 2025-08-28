@@ -51,7 +51,8 @@ export default async function ImportCSVPage() {
             <li><strong>Flight Number:</strong> Optional flight number</li>
             <li><strong>Departure/Arrival:</strong> IATA or ICAO airport codes</li>
             <li><strong>Times:</strong> Dep Time, Arr Time, Takeoff Time, Landing Time (HH:MM format)</li>
-            <li><strong>Aircraft:</strong> Registration or type</li>
+            <li><strong>Aircraft Registration:</strong> Aircraft registration (e.g., D-ABCD)</li>
+            <li><strong>Aircraft Type:</strong> Aircraft model (e.g., A320, B737)</li>
             <li><strong>Position:</strong> PIC, SIC, or INSTRUCTOR</li>
             <li><strong>Flight Times:</strong> Block, PIC, SIC, IFR, VFR, Night, etc. (decimal hours)</li>
             <li><strong>Landings:</strong> Day and Night landings (numbers)</li>

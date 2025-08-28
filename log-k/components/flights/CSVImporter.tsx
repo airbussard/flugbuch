@@ -120,8 +120,8 @@ export default function CSVImporter() {
         on_block: onBlock,
         takeoff: takeoff,
         landing: landing,
-        registration: row['Aircraft'] || '',
-        aircraft_type: row['Aircraft'] || '', // Using aircraft as type for now
+        registration: row['Aircraft Registration'] || row['Aircraft'] || '',  // Support both old and new column names
+        aircraft_type: row['Aircraft Type'] || row['Aircraft'] || '', // Support both old and new column names
         position: row['Position'] || 'PIC',
         block_time: parseFloat(row['Block Time'] || '0'),
         pic_time: parseFloat(row['PIC Time'] || '0'),

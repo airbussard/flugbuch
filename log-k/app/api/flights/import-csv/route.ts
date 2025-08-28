@@ -140,7 +140,7 @@ export async function POST(request: NextRequest) {
         takeoff: takeoff_date?.toISOString() || null,
         takeoff_date: takeoff_date?.toISOString() || null,
         landing: landing_date?.toISOString() || null,
-        registration: flight.registration.toUpperCase(),
+        aircraft_registration: flight.registration.toUpperCase(),  // Changed from registration to aircraft_registration
         aircraft_type: flight.aircraft_type || flight.registration, // Fallback to registration
         block_time: flight.block_time || 0,
         total_time: total_time,
