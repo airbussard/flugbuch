@@ -94,6 +94,26 @@ export default function CSVImporter() {
     return rows
   }
 
+  // Convert HH:MM format to decimal hours (e.g., "2:30" -> 2.5)
+  // Also supports decimal format for backwards compatibility
+  const parseTimeToDecimal = (timeStr: string): number => {
+    if (!timeStr || timeStr === '0' || timeStr === '0:00') return 0
+    
+    // Check if it's already in decimal format
+    if (!timeStr.includes(':')) {
+      return parseFloat(timeStr) || 0
+    }
+    
+    // Parse HH:MM format
+    const parts = timeStr.split(':')
+    if (parts.length !== 2) return 0
+    
+    const hours = parseInt(parts[0]) || 0
+    const minutes = parseInt(parts[1]) || 0
+    
+    return hours + (minutes / 60)
+  }
+
   const convertToFlights = (rows: CSVRow[]): ParsedFlight[] => {
     return rows.map(row => {
       // Parse date (expecting format: YYYY-MM-DD)
@@ -123,16 +143,16 @@ export default function CSVImporter() {
         registration: row['Aircraft Registration'] || row['Aircraft'] || '',  // Support both old and new column names
         aircraft_type: row['Aircraft Type'] || row['Aircraft'] || '', // Support both old and new column names
         position: row['Position'] || 'PIC',
-        block_time: parseFloat(row['Block Time'] || '0'),
-        pic_time: parseFloat(row['PIC Time'] || '0'),
-        sic_time: parseFloat(row['SIC Time'] || '0'),
-        multi_pilot_time: parseFloat(row['Multi Pilot Time'] || '0'),
-        ifr_time: parseFloat(row['IFR Time'] || '0'),
-        vfr_time: parseFloat(row['VFR Time'] || '0'),
-        night_time: parseFloat(row['Night Time'] || '0'),
-        cross_country_time: parseFloat(row['Cross Country Time'] || '0'),
-        dual_given_time: parseFloat(row['Dual Given'] || '0'),
-        dual_received_time: parseFloat(row['Dual Received'] || '0'),
+        block_time: parseTimeToDecimal(row['Block Time'] || '0'),
+        pic_time: parseTimeToDecimal(row['PIC Time'] || '0'),
+        sic_time: parseTimeToDecimal(row['SIC Time'] || '0'),
+        multi_pilot_time: parseTimeToDecimal(row['Multi Pilot Time'] || '0'),
+        ifr_time: parseTimeToDecimal(row['IFR Time'] || '0'),
+        vfr_time: parseTimeToDecimal(row['VFR Time'] || '0'),
+        night_time: parseTimeToDecimal(row['Night Time'] || '0'),
+        cross_country_time: parseTimeToDecimal(row['Cross Country Time'] || '0'),
+        dual_given_time: parseTimeToDecimal(row['Dual Given'] || '0'),
+        dual_received_time: parseTimeToDecimal(row['Dual Received'] || '0'),
         landings_day: parseInt(row['Day Landings'] || '0'),
         landings_night: parseInt(row['Night Landings'] || '0'),
         is_pilot_flying: (row['Pilot Flying'] || '').toUpperCase() === 'YES',
@@ -304,7 +324,7 @@ export default function CSVImporter() {
                       {flight.departure_airport} → {flight.arrival_airport}
                     </td>
                     <td className="px-4 py-2 text-sm text-gray-900">{flight.registration}</td>
-                    <td className="px-4 py-2 text-sm text-gray-900">{flight.block_time}h</td>
+                    <td className="px-4 py-2 text-sm text-gray-900">{flight.block_time.toFixed(2)}h</td>
                     <td className="px-4 py-2 text-sm text-gray-900">{flight.position}</td>
                   </tr>
                 ))}
