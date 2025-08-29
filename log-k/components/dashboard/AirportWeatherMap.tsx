@@ -122,7 +122,7 @@ export default function AirportWeatherMap({ homebase }: AirportWeatherMapProps) 
     return (
       <div className="bg-white rounded-lg shadow p-6">
         <h3 className="text-lg font-semibold text-gray-900 mb-4">Airport Weather Map</h3>
-        <div className="h-96 flex items-center justify-center">
+        <div className="h-[48rem] flex items-center justify-center">
           <Loader2 className="h-8 w-8 animate-spin text-purple-600" />
         </div>
       </div>
@@ -133,7 +133,7 @@ export default function AirportWeatherMap({ homebase }: AirportWeatherMapProps) 
     return (
       <div className="bg-white rounded-lg shadow p-6">
         <h3 className="text-lg font-semibold text-gray-900 mb-4">Airport Weather Map</h3>
-        <div className="h-96 flex items-center justify-center">
+        <div className="h-[48rem] flex items-center justify-center">
           <p className="text-red-600">{error}</p>
         </div>
       </div>
@@ -193,7 +193,7 @@ export default function AirportWeatherMap({ homebase }: AirportWeatherMapProps) 
         </div>
       </div>
       
-      <div className="h-96 rounded-lg overflow-hidden">
+      <div className="h-[48rem] rounded-lg overflow-hidden">
         <MapContainer
           center={mapCenter}
           zoom={zoomLevel}
@@ -274,6 +274,16 @@ export default function AirportWeatherMap({ homebase }: AirportWeatherMapProps) 
                             <p className="text-xs font-mono text-gray-600 break-all">{weather.rawText}</p>
                           </div>
                         )}
+                        
+                        <div className="mt-3 pt-2 border-t border-gray-200">
+                          <Link 
+                            href={`/airports/${airport.icao}`}
+                            className="inline-flex items-center text-xs font-medium text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
+                          >
+                            <Info className="h-3 w-3 mr-1" />
+                            View Airport Details
+                          </Link>
+                        </div>
                       </>
                     ) : (
                       <p className="text-xs text-gray-500 mt-2">No weather data available</p>
