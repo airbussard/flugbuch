@@ -45,6 +45,30 @@ export default async function EditFlightPage({ params }: PageProps) {
     .eq('deleted', false)
     .order('name')
   
+  // Fetch existing crew assignments for this flight
+  const { data: flightRoles } = await supabase
+    .from('flight_roles')
+    .select(`
+      crew_member_id,
+      role_name,
+      crew_members!inner(
+        id,
+        name,
+        email
+      )
+    `)
+    .eq('flight_id', id)
+    .eq('user_id', user.id)
+    .eq('deleted', false)
+  
+  // Transform flight roles to crew assignments format
+  const existingCrewAssignments = flightRoles?.map(role => ({
+    crew_member_id: role.crew_member_id,
+    role_name: role.role_name,
+    name: role.crew_members?.name || '',
+    email: role.crew_members?.email || undefined
+  })) || []
+  
   return (
     <div className="space-y-6">
       <div>
@@ -56,6 +80,7 @@ export default async function EditFlightPage({ params }: PageProps) {
         flight={flight}
         aircraft={aircraft || []}
         crewMembers={crewMembers || []}
+        existingCrewAssignments={existingCrewAssignments}
       />
     </div>
   )

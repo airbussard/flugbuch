@@ -1,12 +1,14 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { extractUTCTime, extractUTCDate } from '@/lib/utils/utc-time'
 import { Button } from '@/components/ui/button'
 import { ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
+import AircraftSelector from './AircraftSelector'
+import CrewSelector, { CrewAssignment } from './CrewSelector'
 
 interface Flight {
   id: string
@@ -51,9 +53,10 @@ interface FlightEditFormProps {
   flight: Flight
   aircraft: Aircraft[]
   crewMembers: CrewMember[]
+  existingCrewAssignments?: CrewAssignment[]
 }
 
-export default function FlightEditForm({ flight, aircraft, crewMembers }: FlightEditFormProps) {
+export default function FlightEditForm({ flight, aircraft, crewMembers, existingCrewAssignments = [] }: FlightEditFormProps) {
   const router = useRouter()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -62,6 +65,20 @@ export default function FlightEditForm({ flight, aircraft, crewMembers }: Flight
     flight.pic_time && flight.pic_time > 0 ? 'PIC' : 'SIC'
   )
   const [blockTime, setBlockTime] = useState(flight.block_time || 0)
+  
+  // Aircraft selection state
+  const [selectedAircraftId, setSelectedAircraftId] = useState<string | null>(flight.aircraft_id)
+  const [registration, setRegistration] = useState(flight.registration)
+  const [aircraftType, setAircraftType] = useState(flight.aircraft_type)
+  
+  // Crew assignments state
+  const [crewAssignments, setCrewAssignments] = useState<CrewAssignment[]>(existingCrewAssignments)
+  
+  const handleAircraftChange = (aircraftId: string | null, reg: string, type: string) => {
+    setSelectedAircraftId(aircraftId)
+    setRegistration(reg)
+    setAircraftType(type)
+  }
   
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -91,8 +108,9 @@ export default function FlightEditForm({ flight, aircraft, crewMembers }: Flight
           flight_date: flightDate,
           departure_airport: formData.get('departure_airport'),
           arrival_airport: formData.get('arrival_airport'),
-          registration: formData.get('registration'),
-          aircraft_type: formData.get('aircraft_type'),
+          registration: registration,
+          aircraft_type: aircraftType,
+          aircraft_id: selectedAircraftId,
           flight_number: formData.get('flight_number') || null,
           off_block: offBlockTime ? `${flightDate}T${offBlockTime}:00Z` : null,
           on_block: onBlockTime ? `${flightDate}T${onBlockTime}:00Z` : null,
@@ -116,6 +134,38 @@ export default function FlightEditForm({ flight, aircraft, crewMembers }: Flight
         .eq('id', flight.id)
       
       if (updateError) throw updateError
+      
+      // Get current user
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error('User not authenticated')
+      
+      // Handle crew assignments
+      // First, delete all existing flight_roles for this flight
+      await supabase
+        .from('flight_roles')
+        .delete()
+        .eq('flight_id', flight.id)
+        .eq('user_id', user.id)
+      
+      // Then insert new crew assignments
+      if (crewAssignments.length > 0) {
+        const flightRoles = crewAssignments.map(assignment => ({
+          flight_id: flight.id,
+          crew_member_id: assignment.crew_member_id,
+          role_name: assignment.role_name,
+          user_id: user.id,
+          deleted: false
+        }))
+        
+        const { error: rolesError } = await supabase
+          .from('flight_roles')
+          .insert(flightRoles)
+        
+        if (rolesError) {
+          console.error('Error updating flight roles:', rolesError)
+          // Don't fail the whole operation, but log the error
+        }
+      }
       
       router.push(`/flights/${flight.id}`)
       router.refresh()
@@ -203,31 +253,12 @@ export default function FlightEditForm({ flight, aircraft, crewMembers }: Flight
             />
           </div>
           
-          {/* Registration */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Registration *
-            </label>
-            <input
-              type="text"
-              name="registration"
-              defaultValue={flight.registration}
-              required
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
-            />
-          </div>
-          
-          {/* Aircraft Type */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Aircraft Type *
-            </label>
-            <input
-              type="text"
-              name="aircraft_type"
-              defaultValue={flight.aircraft_type}
-              required
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+          {/* Aircraft Selector - replaces Registration and Type fields */}
+          <div className="md:col-span-2">
+            <AircraftSelector
+              value={selectedAircraftId}
+              onChange={handleAircraftChange}
+              disabled={isSubmitting}
             />
           </div>
         </div>
@@ -498,6 +529,16 @@ export default function FlightEditForm({ flight, aircraft, crewMembers }: Flight
             />
           </div>
         </div>
+      </div>
+      
+      {/* Crew Assignments */}
+      <div className="bg-white rounded-lg shadow p-6">
+        <h3 className="text-lg font-semibold text-gray-900 mb-4">Crew Members</h3>
+        <CrewSelector
+          assignments={crewAssignments}
+          onChange={setCrewAssignments}
+          disabled={isSubmitting}
+        />
       </div>
       
       {/* Remarks */}
