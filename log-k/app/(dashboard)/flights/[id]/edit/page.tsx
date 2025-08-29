@@ -62,7 +62,7 @@ export default async function EditFlightPage({ params }: PageProps) {
     .eq('deleted', false)
   
   // Transform flight roles to crew assignments format
-  const existingCrewAssignments = flightRoles?.map(role => ({
+  const existingCrewAssignments = flightRoles?.map((role: any) => ({
     crew_member_id: role.crew_member_id,
     role_name: role.role_name,
     name: role.crew_members?.name || '',
